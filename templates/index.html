@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专属视频下载器</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="description" content="文萍专属哔哩哔哩视频下载工具，支持高清下载，实时进度显示">
+    <meta name="keywords" content="视频下载,B站下载,哔哩哔哩下载">
+</head>
+<body>
+    <!-- 主容器 -->
+    <div class="container animate-fadeUp">
+        <!-- 背景装饰元素 -->
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        
+        <!-- 内容容器 -->
+        <div class="inner-container">
+            <!-- 头部区域 -->
+            <div class="header">
+                <h1>
+                    <i class="fas fa-video"></i>
+                    文萍专属 视频下载工具
+                </h1>
+                <p class="supporting-text">
+                    <i class="fas fa-magic"></i>
+                    输入视频链接，享受超高清下载体验
+                </p>
+            </div>
+            
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="input-container">
+                    <i class="fas fa-link input-icon"></i>
+                    <input 
+                        type="text" 
+                        id="videoUrl" 
+                        placeholder="请粘贴视频链接" 
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+            
+            <!-- 下载按钮 -->
+            <button id="downloadButton" class="download-btn">
+                <span class="btn-icon">
+                    <i class="fas fa-download"></i>
+                </span>
+                <span class="btn-text">开始下载</span>
+                <div class="btn-ripple"></div>
+            </button>
+            
+            <!-- 状态消息区域 -->
+            <div id="statusMessage" class="status-message" style="display: none;">
+                <div class="status-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="status-content">
+                    <div class="status-text">准备中...</div>
+                    <div class="status-detail"></div>
+                </div>
+            </div>
+            
+            <!-- 进度条区域 -->
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <div class="progress-header">
+                    <div class="progress-title">
+                        <i class="fas fa-download"></i>
+                        <span>下载进度</span>
+                    </div>
+                    <div class="progress-percentage">0%</div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar-wrapper">
+                        <progress id="downloadProgress" value="0" max="100" class="progress-bar"></progress>
+                        <div class="progress-glow"></div>
+                    </div>
+                </div>
+                
+                <div class="progress-details">
+                    <div class="progress-speed">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span id="downloadSpeed">等待中...</span>
+                    </div>
+                    <div class="progress-size">
+                        <i class="fas fa-database"></i>
+                        <span id="downloadSize">0 MB</span>
+                    </div>
+                </div>
+                
+                <div class="progress-status">
+                    <span id="progressStatusText">准备下载...</span>
+                </div>
+            </div>
+            
+            <!-- 下载结果区域 -->
+            <div id="downloadResult" class="download-result" style="display: none;">
+                <div class="result-success">
+                    <div class="result-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3>下载完成！</h3>
+                        <p class="result-filename">视频文件已准备就绪</p>
+                        <button id="downloadFileBtn" class="download-file-btn">
+                            <i class="fas fa-download"></i>
+                            下载到本地
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+
+            
+            <!-- 底部区域 -->
+            <div class="footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <i class="fas fa-heart"></i>
+                        一慧出品, 必出精品
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 加载遮罩 -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="loading-text">处理中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 成功动画容器 -->
+    <div id="successAnimation" class="success-animation" style="display: none;">
+        <div class="confetti-container"></div>
+    </div>
+    
+    <!-- 引入JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html
