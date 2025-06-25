@@ -24,6 +24,36 @@ class SimpleURLValidator:
         """验证并修复URL"""
         url = url.strip()
         
+        # 修复：提取URL - 处理带有中文标题的情况
+        # 常见格式：【标题】 URL 或 标题 URL
+        url_patterns = [
+            # 匹配 https://b23.tv/xxxxx 格式
+            r'https?://b23\.tv/[a-zA-Z0-9]+',
+            # 匹配 https://www.bilibili.com/video/xxxxx 格式  
+            r'https?://(?:www\.)?bilibili\.com/video/[a-zA-Z0-9]+(?:\?[^\s]*)?',
+            # 匹配 https://bilibili.com/video/xxxxx 格式
+            r'https?://bilibili\.com/video/[a-zA-Z0-9]+(?:\?[^\s]*)?',
+            # 匹配 https://youtube.com/watch?v=xxxxx 格式
+            r'https?://(?:www\.)?youtube\.com/watch\?v=[a-zA-Z0-9_-]+',
+            # 匹配 https://youtu.be/xxxxx 格式
+            r'https?://youtu\.be/[a-zA-Z0-9_-]+',
+            # 通用URL匹配
+            r'https?://[^\s]+',
+        ]
+        
+        # 尝试从文本中提取URL
+        extracted_url = None
+        for pattern in url_patterns:
+            match = re.search(pattern, url, re.IGNORECASE)
+            if match:
+                extracted_url = match.group(0)
+                logger.info(f"从文本中提取URL: {url} -> {extracted_url}")
+                break
+        
+        # 如果提取到URL，使用提取的URL，否则使用原URL
+        if extracted_url:
+            url = extracted_url
+        
         # B站URL处理
         if any(domain in url for domain in ['bilibili.com', 'b23.tv']):
             return SimpleURLValidator._validate_bilibili_url(url)
@@ -40,17 +70,25 @@ class SimpleURLValidator:
                 'platform': 'unknown',
                 'warning': None
             }
-    
+
     @staticmethod
     def _validate_bilibili_url(url: str) -> Dict[str, Any]:
         """验证B站URL"""
+        original_url = url
+        
         # 处理短链接
         if 'b23.tv' in url:
             try:
-                response = requests.get(url, allow_redirects=True, timeout=5)
+                logger.info(f"短链接解析开始: {url}")
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                }
+                response = requests.get(url, allow_redirects=True, timeout=10, headers=headers)
                 url = response.url
-                logger.info(f"短链接解析: {url}")
-            except:
+                logger.info(f"短链接解析成功: {original_url} -> {url}")
+            except Exception as e:
+                logger.warning(f"短链接解析失败: {e}")
+                # 如果短链接解析失败，尝试直接使用原URL
                 pass
         
         # 清理URL参数 - 移除可能影响下载的参数
@@ -59,7 +97,8 @@ class SimpleURLValidator:
             unwanted_params = [
                 'share_source', 'vd_source', 'share_medium', 'share_plat',
                 'timestamp', 'bbid', 'ts', 'from_source', 'from_spmid',
-                'spm_id_from', 'unique_k', 'rt', 'up_id'
+                'spm_id_from', 'unique_k', 'rt', 'up_id', 'seid', 
+                'share_from', 'share_times', 'unique_k', 'plat_id'
             ]
             
             # 解析URL
@@ -83,36 +122,83 @@ class SimpleURLValidator:
                 
                 logger.info(f"清理URL参数后: {url}")
         
-        # 提取视频ID
+        # 提取视频ID - 增强匹配模式
         patterns = [
+            # 标准BV号 (10位)
             r'BV([a-zA-Z0-9]{10})',
+            # 标准av号
             r'av(\d+)',
+            # URL路径中的BV号
+            r'/video/BV([a-zA-Z0-9]{10})',
+            # URL路径中的av号  
+            r'/video/av(\d+)',
+            # 带参数的BV号
+            r'[?&]bvid=BV([a-zA-Z0-9]{10})',
+            # 带参数的av号
+            r'[?&]aid=(\d+)',
         ]
         
+        video_id = None
+        video_type = None
+        
+        # 改进视频ID提取逻辑
         for pattern in patterns:
             match = re.search(pattern, url, re.IGNORECASE)
             if match:
-                if 'BV' in pattern:
+                if 'BV' in pattern or 'bvid' in pattern:
+                    # 处理BV号
                     video_id = f"BV{match.group(1)}"
+                    video_type = 'BV'
                 else:
+                    # 处理av号
                     video_id = f"av{match.group(1)}"
+                    video_type = 'av'
                 
-                fixed_url = f'https://www.bilibili.com/video/{video_id}'
-                logger.info(f"提取视频ID: {video_id}")
-                return {
-                    'valid': True,
-                    'fixed_url': fixed_url,
-                    'platform': 'bilibili',
-                    'warning': None
-                }
+                logger.info(f"提取视频ID: {video_id} (类型: {video_type})")
+                break
         
+        # 如果提取到视频ID，构建标准URL
+        if video_id:
+            fixed_url = f'https://www.bilibili.com/video/{video_id}'
+            logger.info(f"构建标准URL: {fixed_url}")
+            return {
+                'valid': True,
+                'fixed_url': fixed_url,
+                'platform': 'bilibili',
+                'warning': None,
+                'video_id': video_id,
+                'video_type': video_type
+            }
+        
+        # 如果没有提取到视频ID，检查是否是有效的B站URL
+        if 'bilibili.com' in url and '/video/' in url:
+            logger.info(f"保持原URL: {url}")
+            return {
+                'valid': True,
+                'fixed_url': url,
+                'platform': 'bilibili',
+                'warning': None
+            }
+        
+        # 如果是短链接但没有解析成功，尝试直接使用
+        if 'b23.tv' in original_url:
+            logger.warning(f"短链接未完全解析，直接使用: {original_url}")
+            return {
+                'valid': True,
+                'fixed_url': original_url,
+                'platform': 'bilibili',
+                'warning': '短链接可能需要手动解析，如果下载失败请尝试复制完整URL'
+            }
+        
+        # 最后兜底
+        logger.warning(f"URL格式不完全匹配，尝试直接使用: {url}")
         return {
             'valid': True,
             'fixed_url': url,
             'platform': 'bilibili',
-            'warning': None
+            'warning': 'URL格式可能不标准，如果下载失败请检查链接'
         }
-    
+
     @staticmethod
     def _validate_youtube_url(url: str) -> Dict[str, Any]:
         """验证YouTube URL"""
