@@ -3,27 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>专属视频下载器</title>
+    <title>🐻🐻视频下载器</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="description" content="文萍专属哔哩哔哩视频下载工具，支持高清下载，实时进度显示">
+    <meta name="description" content="专属哔哩哔哩视频下载工具，支持高清下载，实时进度显示">
     <meta name="keywords" content="视频下载,B站下载,哔哩哔哩下载">
 </head>
 <body>
+
+
     <!-- 主容器 -->
     <div class="container animate-fadeUp">
         <!-- 背景装饰元素 -->
         <div class="bg-blob blob-1"></div>
         <div class="bg-blob blob-2"></div>
         
+
         <!-- 内容容器 -->
         <div class="inner-container">
             <!-- 头部区域 -->
             <div class="header">
                 <h1>
                     <i class="fas fa-video"></i>
-                    文萍专属 视频下载工具
+                     🐻 视频下载工具 
+
+                    <span class="baby-img-wrapper">
+                         <img src="{{ url_for('static', filename='img/1.png') }}" class="bg-baby-image" alt="小熊宝宝" />
+                    </span>
                 </h1>
+
+                <br>
+
                 <p class="supporting-text">
                     <i class="fas fa-magic"></i>
                     输入视频链接，享受超高清下载体验
@@ -37,7 +47,7 @@
                     <input 
                         type="text" 
                         id="videoUrl" 
-                        placeholder="请粘贴视频链接" 
+                        placeholder="请粘贴视频链接, 主要支持b站,youtube" 
                         autocomplete="off"
                         spellcheck="false"
                     />
@@ -105,17 +115,60 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="result-content">
-                        <h3>下载完成！</h3>
+                        <h3>🎉 下载成功！</h3>
                         <p class="result-filename">视频文件已准备就绪</p>
+                        <div class="result-file-info">
+                            <div class="file-info-item">
+                                <i class="fas fa-file-video"></i>
+                                <span id="resultFileName">视频文件</span>
+                            </div>
+                            <div class="file-info-item">
+                                <i class="fas fa-weight-hanging"></i>
+                                <span id="resultFileSize">0 MB</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 下载说明 -->
+                        <div class="download-instructions">
+                            <div class="instruction-title">
+                                <i class="fas fa-info-circle"></i>
+                                如何获取视频文件：
+                            </div>
+                            <div class="instruction-content">
+                                <div class="instruction-step">
+                                    <span class="step-number">1</span>
+                                    <span class="step-text">点击下方【下载到本地】按钮</span>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">2</span>
+                                    <span class="step-text">浏览器会自动开始下载文件</span>
+                                </div>
+                                <div class="instruction-step">
+                                    <span class="step-number">3</span>
+                                    <span class="step-text">如果没有自动下载，请检查浏览器下载设置</span>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <button id="downloadFileBtn" class="download-file-btn">
                             <i class="fas fa-download"></i>
                             下载到本地
                         </button>
+                        
+                        <!-- 额外提示 -->
+                        <div class="download-tips">
+                            <div class="tip-item">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>提示：部分浏览器可能会弹出下载确认对话框</span>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-folder-open"></i>
+                                <span>文件将保存到您的默认下载文件夹中</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-
             
             <!-- 底部区域 -->
             <div class="footer">
@@ -128,6 +181,8 @@
             </div>
         </div>
         
+
+
         <!-- 加载遮罩 -->
         <div id="loadingOverlay" class="loading-overlay" style="display: none;">
             <div class="loading-spinner">
@@ -141,8 +196,10 @@
     <div id="successAnimation" class="success-animation" style="display: none;">
         <div class="confetti-container"></div>
     </div>
-    
+
+
+
     <!-- 引入JavaScript -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
-</html
+</html>

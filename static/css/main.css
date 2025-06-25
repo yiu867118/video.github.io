@@ -84,7 +84,7 @@ html {
 body {
   font-family: var(--font-primary);
   line-height: 1.6;
-  color: rgba(var(--text), 1);
+  color: rgba(var(--surface-alt), 1);
   background: linear-gradient(135deg, 
     rgba(var(--primary), 0.05) 0%, 
     rgba(var(--accent), 0.03) 50%, 
@@ -254,7 +254,7 @@ body.page-loaded {
   font-family: var(--font-heading);
   font-size: 2.5rem;
   font-weight: 800;
-  color: rgba(var(--surface), 1);
+  color: rgba(var(--text-alt), 1);
   margin-bottom: var(--spacing-md);
   display: flex;
   align-items: center;
@@ -263,7 +263,7 @@ body.page-loaded {
   opacity: 0;
   animation: title-reveal 0.8s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   background: linear-gradient(135deg, 
-    rgba(var(--primary), 1) 60%, 
+    rgba(var(--primary), 1) 40%, 
     rgba(var(--accent), 1) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1903,3 +1903,53 @@ progress {
     font-family: monospace;
     font-size: 0.8em;
 }
+
+
+.header h1 {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-size: 2.3rem;
+  font-weight: 800;
+  /* 下面两行可选：让 gradient 文字依然有效 */
+  background: linear-gradient(135deg, rgba(var(--primary), 1) 60%, rgba(var(--accent), 1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.baby-img-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 0.7rem;
+}
+
+.bg-baby-image {
+  width: 66px;     /* 建议 36~52px，根据实际logo、字体微调 */
+  height: auto;
+  border-radius: 8px;
+  opacity: 0.97;
+  box-shadow: 0 2px 10px rgba(80, 120, 220, 0.08);
+  filter: drop-shadow(0 1px 3px rgba(68, 116, 255, 0.10));
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1);
+}
+
+.baby-img-wrapper:hover .bg-baby-image {
+  transform: scale(1.08) rotate(-4deg);
+  /* 可选，鼠标经过轻微动效 */
+}
+
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 1.35rem;
+    gap: 0.6rem;
+  }
+  .bg-baby-image {
+    width: 28px;
+    border-radius: 6px;
+  }
+}
+
