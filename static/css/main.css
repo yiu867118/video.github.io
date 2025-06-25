@@ -417,7 +417,7 @@ body.page-loaded {
   animation: container-shine 4s infinite;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .inner-container::before {
     background: linear-gradient(
       90deg,
@@ -426,7 +426,7 @@ body.page-loaded {
       transparent
     );
   }
-}
+} */
 
 @keyframes container-shine {
   0% { left: -100%; }
