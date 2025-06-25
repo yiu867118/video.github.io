@@ -316,7 +316,7 @@ body.page-loaded {
   animation: fade-up-main 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* @keyframes fade-up-main {
+@keyframes fade-up-main {
   0% { 
     opacity: 0; 
     transform: translateY(40px) scale(0.95); 
@@ -325,7 +325,7 @@ body.page-loaded {
     opacity: 1; 
     transform: translateY(0) scale(1); 
   }
-} */
+}
 
 /* 背景装饰元素 */
 .bg-blob {
