@@ -264,7 +264,7 @@ body::before {
 }
 
 /* 微妙闪光动画 */
-@keyframes subtle-shimmer {
+/* @keyframes subtle-shimmer {
   0%, 100% { 
     opacity: 1;
   }
@@ -274,7 +274,7 @@ body::before {
   66% { 
     opacity: 0.9;
   }
-}
+} */
 
 /* ========================================
    页面加载动画
