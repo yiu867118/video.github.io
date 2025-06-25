@@ -5,7 +5,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 === 文萍专属视频下载器 - 多平台增强版 v2.2 启动 ===');
+    console.log('🚀 === 🐻🐻专属视频下载器 - 多平台增强版 v2.2 启动 ===');
     
     // 核心元素获取
     const elements = {
@@ -1435,5 +1435,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // 页面初始化设置 - 放在最后执行
     initializeApp();
 
-    console.log('✅ === 文萍专属视频下载器 - 多平台增强版 v2.2 初始化完成! ===');
+    console.log('✅ === 🐻🐻专属视频下载器 - 多平台增强版 v2.2 初始化完成! ===');
 });

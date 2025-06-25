@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 from typing import Optional, Dict, Any, Callable, List
 import requests
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -51,6 +52,36 @@ class SimpleURLValidator:
                 logger.info(f"短链接解析: {url}")
             except:
                 pass
+        
+        # 清理URL参数 - 移除可能影响下载的参数
+        if 'bilibili.com' in url:
+            # 移除常见的分享参数
+            unwanted_params = [
+                'share_source', 'vd_source', 'share_medium', 'share_plat',
+                'timestamp', 'bbid', 'ts', 'from_source', 'from_spmid',
+                'spm_id_from', 'unique_k', 'rt', 'up_id'
+            ]
+            
+            # 解析URL
+            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+            parsed = urlparse(url)
+            
+            if parsed.query:
+                # 解析查询参数
+                query_params = parse_qs(parsed.query, keep_blank_values=True)
+                
+                # 移除不需要的参数
+                cleaned_params = {k: v for k, v in query_params.items() 
+                                if k not in unwanted_params}
+                
+                # 重新构建URL
+                new_query = urlencode(cleaned_params, doseq=True) if cleaned_params else ''
+                url = urlunparse((
+                    parsed.scheme, parsed.netloc, parsed.path,
+                    parsed.params, new_query, parsed.fragment
+                ))
+                
+                logger.info(f"清理URL参数后: {url}")
         
         # 提取视频ID
         patterns = [
