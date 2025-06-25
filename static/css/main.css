@@ -264,7 +264,7 @@ body::before {
 }
 
 /* 微妙闪光动画 */
-/* @keyframes subtle-shimmer {
+@keyframes subtle-shimmer {
   0%, 100% { 
     opacity: 1;
   }
@@ -274,7 +274,7 @@ body::before {
   66% { 
     opacity: 0.9;
   }
-} */
+}
 
 /* ========================================
    页面加载动画
@@ -316,7 +316,7 @@ body.page-loaded {
   animation: fade-up-main 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-@keyframes fade-up-main {
+/* @keyframes fade-up-main {
   0% { 
     opacity: 0; 
     transform: translateY(40px) scale(0.95); 
@@ -325,7 +325,7 @@ body.page-loaded {
     opacity: 1; 
     transform: translateY(0) scale(1); 
   }
-}
+} */
 
 /* 背景装饰元素 */
 .bg-blob {
@@ -361,7 +361,7 @@ body.page-loaded {
   right: -10%;
   animation-delay: -10s;
 }
-
+/* 
 @keyframes blob-float {
   0%, 100% { 
     transform: translate(0, 0) rotate(0deg) scale(1); 
@@ -372,7 +372,7 @@ body.page-loaded {
   66% { 
     transform: translate(-10px, 10px) rotate(240deg) scale(0.9); 
   }
-}
+} */
 
 /* 内容容器 */
 .inner-container {
