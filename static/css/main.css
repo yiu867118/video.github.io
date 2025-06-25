@@ -207,7 +207,7 @@ body::before {
 
 
 /* 背景浮动动画 - 让背景有生命力 */
-@keyframes background-float {
+/* @keyframes background-float {
   0%, 100% { 
     opacity: 1;
     transform: translateY(0) rotate(0deg) scale(1);
@@ -224,7 +224,7 @@ body::before {
     opacity: 0.92;
     transform: translateY(-3px) rotate(0.2deg) scale(1.02);
   }
-}
+} */
 
 /* 暗色模式背景装饰 - 保持不变 */
 /* @media (prefers-color-scheme: dark) {
