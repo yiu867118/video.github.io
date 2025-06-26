@@ -476,6 +476,65 @@ class RockSolidVideoDownloader:
         """执行下载 - 10个保证成功策略（确保音视频完整）"""
         temp_dir = os.path.dirname(output_template)
         
+        # 定义不可恢复的错误关键词
+        unrecoverable_errors = [
+            # 付费/会员内容
+            'vip', 'premium', 'paid', 'member', 'subscription', '付费', '会员', '大会员',
+            # 地区限制
+            'geo', 'region', 'country', 'blocked', '地区', '区域限制',
+            # 私密/删除/不存在
+            'private', 'deleted', 'removed', 'not found', '404', 'unavailable', 
+            '私密', '删除', '不存在', '已删除',
+            # 版权限制
+            'copyright', 'dmca', '版权',
+            # 年龄限制
+            'age', 'restricted', '年龄',
+            # 账号限制
+            'login required', 'sign in', '需要登录',
+            # 直播内容
+            'live', 'streaming', '直播',
+            # 禁止访问
+            'forbidden', 'access denied', 'permission denied', '禁止访问'
+        ]
+        
+        def is_unrecoverable_error(error_msg: str) -> tuple[bool, str]:
+            """检查是否为不可恢复错误"""
+            error_lower = error_msg.lower()
+            
+            # 检查付费/会员内容
+            if any(keyword in error_lower for keyword in ['vip', 'premium', 'paid', 'member', '付费', '会员', '大会员']):
+                return True, '这是付费/会员专享内容，无法下载'
+            
+            # 检查地区限制
+            if any(keyword in error_lower for keyword in ['geo', 'region', 'country', 'blocked', '地区', '区域限制']):
+                return True, '该视频有地区限制，当前地区无法访问'
+            
+            # 检查私密/删除/不存在
+            if any(keyword in error_lower for keyword in ['private', 'deleted', 'removed', 'not found', '404', 'unavailable', '私密', '删除', '不存在', '已删除']):
+                return True, '视频不存在、已被删除或设为私密'
+            
+            # 检查版权限制
+            if any(keyword in error_lower for keyword in ['copyright', 'dmca', '版权']):
+                return True, '该视频因版权问题无法下载'
+            
+            # 检查年龄限制
+            if any(keyword in error_lower for keyword in ['age', 'restricted', '年龄']):
+                return True, '该视频有年龄限制，无法下载'
+            
+            # 检查登录要求
+            if any(keyword in error_lower for keyword in ['login required', 'sign in', '需要登录']):
+                return True, '该视频需要登录账号才能观看'
+            
+            # 检查直播内容
+            if any(keyword in error_lower for keyword in ['live', 'streaming', '直播']):
+                return True, '直播内容无法下载，请等待录播'
+            
+            # 检查禁止访问
+            if any(keyword in error_lower for keyword in ['forbidden', 'access denied', 'permission denied', '禁止访问']):
+                return True, '访问被拒绝，可能需要特殊权限'
+            
+            return False, ''
+        
         # 10个策略 - 优先确保音视频完整，从最佳到兜底
         strategies = [
             # 策略1: 最佳音视频合并 - 优先选择
@@ -698,22 +757,21 @@ class RockSolidVideoDownloader:
                 error_msg = str(e)
                 logger.warning(f"❌ 策略 {i} 失败: {error_msg}")
                 
-                # 如果是最后一个策略，分析错误
+                # 检查是否为不可恢复错误
+                is_unrecoverable, user_msg = is_unrecoverable_error(error_msg)
+                if is_unrecoverable:
+                    logger.error(f"🚫 检测到不可恢复错误，停止所有尝试")
+                    logger.error(f"🚫 错误原因: {user_msg}")
+                    raise Exception(user_msg)
+                
+                # 如果是最后一个策略，分析其他错误
                 if i == len(strategies):
                     logger.error("💥 所有策略都失败了！")
-                    # 详细错误分析
+                    # 详细错误分析（针对可能可恢复的错误）
                     if any(keyword in error_msg.lower() for keyword in ['json', 'expecting value', 'decode']):
                         raise Exception('B站服务器返回数据异常，可能是临时故障，请稍后重试')
                     elif any(keyword in error_msg.lower() for keyword in ['timeout', 'timed out', 'connection']):
                         raise Exception('网络连接问题，请检查网络后重试')
-                    elif any(keyword in error_msg.lower() for keyword in ['forbidden', '403', 'access denied']):
-                        raise Exception('访问被拒绝，可能需要登录B站账号或该视频有访问限制')
-                    elif any(keyword in error_msg.lower() for keyword in ['not found', '404', 'video unavailable']):
-                        raise Exception('视频不存在、已被删除或设为私密')
-                    elif any(keyword in error_msg.lower() for keyword in ['private', 'unavailable']):
-                        raise Exception('视频不可用，可能是私密视频或已下架')
-                    elif any(keyword in error_msg.lower() for keyword in ['geo', 'region', 'country']):
-                        raise Exception('地区限制，该视频在当前地区不可播放')
                     elif any(keyword in error_msg.lower() for keyword in ['ffmpeg', 'postprocess']):
                         raise Exception('视频处理失败，可能缺少FFmpeg或格式不支持')
                     elif 'format' in error_msg.lower():
@@ -721,7 +779,7 @@ class RockSolidVideoDownloader:
                     else:
                         raise Exception(f'所有10个策略都失败，最后错误: {error_msg}')
                 
-                # 策略间短暂等待
+                # 策略间短暂等待（仅在可恢复错误时）
                 if i < len(strategies):
                     time.sleep(1)
                 continue

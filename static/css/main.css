@@ -11,14 +11,17 @@
   --accent-alt: 6, 189, 158;
   --warning: 255, 177, 36;
   --error: 230, 79, 102;
-  --surface: 240, 235, 248;         /* 稍深一点的淡紫调白 */
-  --surface-alt: 225, 230, 240;     /* 稍深一点的淡蓝调灰 */
-  --text: 30, 38, 55;               /* 稍深一点主文本 */
-  --text-alt: 85, 95, 115;          /* 稍深一点辅文本 */
-
-  --container-bg: 240, 238, 248;    /* 比原container更深一点，但仍比surface深 */
-  --container-border: 215, 220, 235; /* 容器边框稍加深，增强轮廓感 */
-
+  --surface: 248, 245, 252;        /* 淡紫调白 - 呼应背景的紫色调 */
+  --surface-alt: 235, 240, 248;    /* 淡蓝调灰 - 与背景蓝色呼应 */
+  --text: 35, 43, 60;
+  --text-alt: 95, 105, 125;        /* 稍微调深文字辅色 */
+  
+  /* 新增：容器专用颜色 - 漂亮的浅湖蓝色系（加深版） */
+  --container-bg: 230, 240, 248;     /* 浅湖蓝色主背景（加深） */
+  --container-border: 205, 225, 240; /* 湖蓝色边框（加深） */
+  --lake-blue-light: 235, 245, 252;  /* 最浅湖蓝（稍加深） */
+  --lake-blue: 220, 235, 248;        /* 湖蓝色（加深） */
+  --lake-blue-deep: 200, 225, 242;   /* 深一点的湖蓝（明显加深） */
 
 
   /* 字体系统 */
@@ -299,16 +302,21 @@ body {
   }
 }
 
-/* 内容容器 */
+
+/* 内容容器 - 美丽的浅湖蓝色 */
 .inner-container {
   width: 100%;
-  background: rgba(var(--container-bg), 0.95);
+  background: linear-gradient(135deg, 
+    rgba(var(--lake-blue-light), 0.95) 0%,
+    rgba(var(--lake-blue), 0.92) 50%,
+    rgba(var(--lake-blue-deep), 0.90) 100%);
   backdrop-filter: blur(var(--blur-lg));
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
   box-shadow: 
     var(--elevation-3),
-    0 0 0 1px rgba(var(--primary), 0.08) inset;
+    0 0 0 1px rgba(var(--primary), 0.08) inset,
+    0 2px 20px rgba(135, 206, 235, 0.15);
   border: 1px solid rgba(var(--container-border), 0.8);
   position: relative;
   overflow: hidden;
@@ -317,12 +325,12 @@ body {
 /* 暗色模式容器样式 */
 @media (prefers-color-scheme: dark) {
   .inner-container {
-    background: rgba(250, 248, 253, 0.95) !important;
-    border: 1px solid rgba(225, 230, 245, 0.8) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-    backdrop-filter: none !important;
-    padding: 1.5rem !important;
-    border-radius: 12px !important;
+    background: rgba(var(--surface), 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      var(--elevation-3),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      var(--glow-primary);
   }
 }
 
