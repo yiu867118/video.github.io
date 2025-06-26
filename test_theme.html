@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题切换测试</title>
+    <style>
+        /* 基础颜色系统 - 浅色模式 */
+        :root {
+          --primary-rgb: 13, 110, 253;
+          --secondary-rgb: 108, 117, 125;
+          --success-rgb: 25, 135, 84;
+          --danger-rgb: 220, 53, 69;
+          --warning-rgb: 255, 193, 7;
+          --info-rgb: 13, 202, 240;
+          --light-rgb: 248, 249, 250;
+          --dark-rgb: 33, 37, 41;
+          
+          /* 背景和表面 */
+          --background-rgb: 255, 255, 255;
+          --surface-rgb: 248, 249, 250;
+          --surface-alt-rgb: 233, 236, 239;
+          
+          /* 文字颜色 */
+          --text-rgb: 33, 37, 41;
+          --text-muted-rgb: 108, 117, 125;
+          
+          /* 边框 */
+          --border-rgb: 222, 226, 230;
+        }
+
+        /* 深色模式变量 */
+        .theme-dark {
+          --primary-rgb: 74, 144, 226;
+          --secondary-rgb: 108, 117, 125;
+          --success-rgb: 40, 167, 69;
+          --danger-rgb: 220, 53, 69;
+          --warning-rgb: 255, 193, 7;
+          --info-rgb: 23, 162, 184;
+          --light-rgb: 248, 249, 250;
+          --dark-rgb: 52, 58, 64;
+          
+          --background-rgb: 18, 18, 18;
+          --surface-rgb: 33, 37, 41;
+          --surface-alt-rgb: 52, 58, 64;
+          
+          --text-rgb: 248, 249, 250;
+          --text-muted-rgb: 173, 181, 189;
+          
+          --border-rgb: 73, 80, 87;
+        }
+
+        /* 系统模式 */
+        .theme-system {
+          --primary-rgb: 13, 110, 253;
+          --background-rgb: 255, 255, 255;
+          --surface-rgb: 248, 249, 250;
+          --text-rgb: 33, 37, 41;
+          --border-rgb: 222, 226, 230;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          .theme-system {
+            --primary-rgb: 74, 144, 226;
+            --background-rgb: 18, 18, 18;
+            --surface-rgb: 33, 37, 41;
+            --text-rgb: 248, 249, 250;
+            --border-rgb: 73, 80, 87;
+          }
+        }
+
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: rgba(var(--background-rgb), 1);
+            color: rgba(var(--text-rgb), 1);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(var(--surface-rgb), 1);
+            border: 1px solid rgba(var(--border-rgb), 1);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(var(--surface-rgb), 0.9);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(var(--text-rgb), 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(var(--surface-alt-rgb), 0.95);
+            color: rgba(var(--text-rgb), 1);
+        }
+
+        h1 {
+            color: rgba(var(--primary-rgb), 1);
+            margin-bottom: 20px;
+        }
+
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: rgba(var(--surface-alt-rgb), 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(var(--border-rgb), 0.5);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: rgba(var(--primary-rgb), 1);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: rgba(var(--success-rgb), 1);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: rgba(var(--danger-rgb), 1);
+            color: white;
+        }
+
+        .text-muted {
+            color: rgba(var(--text-muted-rgb), 1);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(var(--border-rgb), 1);
+            border-radius: 6px;
+            background-color: rgba(var(--surface-rgb), 1);
+            color: rgba(var(--text-rgb), 1);
+            margin: 10px 0;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgba(var(--primary-rgb), 1);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+    </style>
+</head>
+<body class="theme-system">
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-icon">🌐</span>
+        <span class="theme-text">跟随系统</span>
+    </button>
+
+    <div class="container">
+        <h1>🎨 主题切换测试页面</h1>
+        
+        <div class="demo-section">
+            <h3>当前主题信息</h3>
+            <p>当前模式: <span id="current-theme">系统模式</span></p>
+            <p class="text-muted">这段文字使用了辅助文字颜色</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>按钮演示</h3>
+            <button class="btn btn-primary">主要按钮</button>
+            <button class="btn btn-success">成功按钮</button>
+            <button class="btn btn-danger">危险按钮</button>
+        </div>
+
+        <div class="demo-section">
+            <h3>输入框演示</h3>
+            <input type="text" placeholder="请输入视频链接...">
+            <input type="text" placeholder="这是另一个输入框">
+        </div>
+
+        <div class="demo-section">
+            <h3>颜色变量测试</h3>
+            <p>背景色: <span style="background-color: rgba(var(--background-rgb), 1); padding: 5px; border: 1px solid rgba(var(--border-rgb), 1);">rgba(var(--background-rgb), 1)</span></p>
+            <p>表面色: <span style="background-color: rgba(var(--surface-rgb), 1); padding: 5px; border: 1px solid rgba(var(--border-rgb), 1);">rgba(var(--surface-rgb), 1)</span></p>
+            <p>主色调: <span style="background-color: rgba(var(--primary-rgb), 1); color: white; padding: 5px;">rgba(var(--primary-rgb), 1)</span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentTheme = 'system';
+        
+        function toggleTheme() {
+            const modes = ['system', 'light', 'dark'];
+            const currentIndex = modes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % modes.length;
+            currentTheme = modes[nextIndex];
+            
+            applyTheme();
+        }
+        
+        function applyTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            const currentThemeSpan = document.getElementById('current-theme');
+            
+            // 移除现有主题类
+            body.classList.remove('theme-light', 'theme-dark', 'theme-system');
+            
+            // 应用新主题
+            body.classList.add(`theme-${currentTheme}`);
+            
+            // 更新按钮显示
+            const icons = { system: '🌐', light: '☀️', dark: '🌙' };
+            const texts = { system: '跟随系统', light: '浅色模式', dark: '深色模式' };
+            const names = { system: '系统模式', light: '浅色模式', dark: '深色模式' };
+            
+            button.querySelector('.theme-icon').textContent = icons[currentTheme];
+            button.querySelector('.theme-text').textContent = texts[currentTheme];
+            currentThemeSpan.textContent = names[currentTheme];
+            
+            console.log(`主题已切换到: ${currentTheme}`);
+        }
+        
+        // 初始化
+        applyTheme();
+    </script>
+</body>
+</html>

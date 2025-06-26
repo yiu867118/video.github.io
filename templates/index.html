@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>超高清视频下载器</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,6 +11,10 @@
 </head>
 <body>
 
+    <button id="themeToggle" class="theme-toggle" title="切换主题模式 (Ctrl+Shift+T)">
+        <span class="theme-icon">🌐</span>
+        <span class="theme-text">跟随系统</span>
+    </button>
 
     <!-- 主容器 -->
     <div class="container animate-fadeUp">
@@ -47,7 +51,7 @@
                     <input 
                         type="text" 
                         id="videoUrl" 
-                        placeholder="请粘贴视频链接（主要支持B站、YouTube，其他平台兼容性有限, 付费视频不能下载）。
+                        placeholder="请粘贴视频链接（主要支持B站、YouTube，其他平台兼容性有限）。
 " 
                         autocomplete="off"
                         spellcheck="false"

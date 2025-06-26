@@ -4,24 +4,46 @@
    ======================================== */
 
 :root {
-  /* 颜色系统 - 调整为与背景协调的稍深色调 */
-  --primary: 68, 116, 255;
+  /* 基础颜色系统 - 浅色模式 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  /* 背景和表面 */
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  /* 文字颜色 */
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  /* 边框 */
+  --border-rgb: 222, 226, 230;
+  
+  /* 旧版兼容（保持现有功能） */
+  --primary: var(--primary-rgb);
   --primary-alt: 119, 134, 255;
   --accent: 116, 214, 143;
   --accent-alt: 6, 189, 158;
-  --warning: 255, 177, 36;
-  --error: 230, 79, 102;
-  --surface: 248, 245, 252;        /* 淡紫调白 - 呼应背景的紫色调 */
-  --surface-alt: 235, 240, 248;    /* 淡蓝调灰 - 与背景蓝色呼应 */
-  --text: 35, 43, 60;
-  --text-alt: 95, 105, 125;        /* 稍微调深文字辅色 */
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
   
-  /* 新增：容器专用颜色 - 漂亮的浅湖蓝色系（加深版） */
-  --container-bg: 230, 240, 248;     /* 浅湖蓝色主背景（加深） */
-  --container-border: 205, 225, 240; /* 湖蓝色边框（加深） */
-  --lake-blue-light: 235, 245, 252;  /* 最浅湖蓝（稍加深） */
-  --lake-blue: 220, 235, 248;        /* 湖蓝色（加深） */
-  --lake-blue-deep: 200, 225, 242;   /* 深一点的湖蓝（明显加深） */
+  /* 容器专用颜色 - 浅色模式 */
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
 
 
   /* 字体系统 */
@@ -69,13 +91,142 @@
   --blur-xl: 24px;
 }
 
-/* 暗色模式变量 */
+/* 深色模式变量 */
+.theme-dark {
+  /* 基础颜色系统 - 深色模式 */
+  --primary-rgb: 74, 144, 226;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 40, 167, 69;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 23, 162, 184;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 52, 58, 64;
+  
+  /* 背景和表面 */
+  --background-rgb: 18, 18, 18;
+  --surface-rgb: 33, 37, 41;
+  --surface-alt-rgb: 52, 58, 64;
+  
+  /* 文字颜色 */
+  --text-rgb: 248, 249, 250;
+  --text-muted-rgb: 173, 181, 189;
+  
+  /* 边框 */
+  --border-rgb: 73, 80, 87;
+  
+  /* 旧版兼容更新 */
+  --primary: var(--primary-rgb);
+  --accent: 116, 214, 143;
+  --accent-alt: 6, 189, 158;
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
+  
+  /* 容器专用颜色 - 深色模式 */
+  --container-bg: 45, 52, 60;
+  --container-border: 73, 80, 87;
+  --lake-blue-light: 35, 42, 50;
+  --lake-blue: 45, 52, 60;
+  --lake-blue-deep: 55, 62, 70;
+}
+
+/* 浅色模式强制类 */
+.theme-light {
+  /* 确保浅色模式变量正确 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  --border-rgb: 222, 226, 230;
+  
+  /* 旧版兼容更新 */
+  --primary: var(--primary-rgb);
+  --accent: 116, 214, 143;
+  --accent-alt: 6, 189, 158;
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
+  
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
+}
+
+/* 系统模式 - 自动切换 */
+.theme-system {
+  /* 默认浅色模式变量 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  --border-rgb: 222, 226, 230;
+  
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
+}
+
+/* 系统深色模式 */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --surface: 15, 23, 42;
-    --surface-alt: 30, 41, 59;
-    --text: 248, 250, 252;
-    --text-alt: 203, 213, 225;
+  .theme-system {
+    --primary-rgb: 74, 144, 226;
+    --secondary-rgb: 108, 117, 125;
+    --success-rgb: 40, 167, 69;
+    --danger-rgb: 220, 53, 69;
+    --warning-rgb: 255, 193, 7;
+    --info-rgb: 23, 162, 184;
+    --light-rgb: 248, 249, 250;
+    --dark-rgb: 52, 58, 64;
+    
+    --background-rgb: 18, 18, 18;
+    --surface-rgb: 33, 37, 41;
+    --surface-alt-rgb: 52, 58, 64;
+    
+    --text-rgb: 248, 249, 250;
+    --text-muted-rgb: 173, 181, 189;
+    
+    --border-rgb: 73, 80, 87;
+    
+    --container-bg: 45, 52, 60;
+    --container-border: 73, 80, 87;
+    --lake-blue-light: 35, 42, 50;
+    --lake-blue: 45, 52, 60;
+    --lake-blue-deep: 55, 62, 70;
   }
 }
 
@@ -102,15 +253,21 @@ html {
 body {
   font-family: var(--font-primary);
   line-height: 1.6;
-  color: rgba(var(--text), 1);
+  color: rgba(var(--text-rgb), 1);
+  background-color: rgba(var(--background-rgb), 1);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-  
-  /* 白天版美化背景 */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 浅色模式美化背景 */
+.theme-light body,
+.theme-system body {
   background: 
+    rgba(var(--background-rgb), 1),
     linear-gradient(135deg,
       rgb(233, 215, 237) 0%,
       rgb(200, 209, 225) 18%,
@@ -120,27 +277,41 @@ body {
       rgb(209, 222, 234) 100%
     ),
     radial-gradient(ellipse at 25% 20%, 
-      rgba(var(--primary), 0.06) 0%, 
-      rgba(var(--primary), 0.03) 35%, 
+      rgba(var(--primary-rgb), 0.06) 0%, 
+      rgba(var(--primary-rgb), 0.03) 35%, 
       transparent 70%
     ),
     radial-gradient(ellipse at 75% 80%, 
-      rgba(var(--accent), 0.05) 0%, 
-      rgba(var(--accent), 0.02) 40%, 
+      rgba(var(--success-rgb), 0.05) 0%, 
+      rgba(var(--success-rgb), 0.02) 40%, 
       transparent 75%
     );
 }
 
-/* 暗色模式背景 */
+/* 深色模式背景 */
+.theme-dark body {
+  background: 
+    rgba(var(--background-rgb), 1),
+    linear-gradient(135deg, 
+      rgba(var(--surface-rgb), 1) 0%, 
+      rgba(var(--primary-rgb), 0.08) 25%,
+      rgba(var(--surface-rgb), 1) 50%,
+      rgba(var(--success-rgb), 0.06) 75%,
+      rgba(var(--surface-rgb), 1) 100%
+    );
+}
+
+/* 系统模式深色背景 */
 @media (prefers-color-scheme: dark) {
-  body {
+  .theme-system body {
     background: 
+      rgba(var(--background-rgb), 1),
       linear-gradient(135deg, 
-        rgba(var(--surface), 1) 0%, 
-        rgba(var(--primary), 0.08) 25%,
-        rgba(var(--surface), 1) 50%,
-        rgba(var(--accent), 0.06) 75%,
-        rgba(var(--surface), 1) 100%
+        rgba(var(--surface-rgb), 1) 0%, 
+        rgba(var(--primary-rgb), 0.08) 25%,
+        rgba(var(--surface-rgb), 1) 50%,
+        rgba(var(--success-rgb), 0.06) 75%,
+        rgba(var(--surface-rgb), 1) 100%
       );
   }
 }
@@ -303,7 +474,7 @@ body {
 }
 
 
-/* 内容容器 - 美丽的浅湖蓝色 */
+/* 内容容器 - 响应主题的湖蓝色 */
 .inner-container {
   width: 100%;
   background: linear-gradient(135deg, 
@@ -315,22 +486,39 @@ body {
   padding: var(--spacing-2xl);
   box-shadow: 
     var(--elevation-3),
-    0 0 0 1px rgba(var(--primary), 0.08) inset,
+    0 0 0 1px rgba(var(--primary-rgb), 0.08) inset,
     0 2px 20px rgba(135, 206, 235, 0.15);
   border: 1px solid rgba(var(--container-border), 0.8);
   position: relative;
   overflow: hidden;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 暗色模式容器样式 */
+/* 深色模式容器样式 */
+.theme-dark .inner-container {
+  background: linear-gradient(135deg, 
+    rgba(var(--lake-blue-light), 0.95) 0%,
+    rgba(var(--lake-blue), 0.92) 50%,
+    rgba(var(--lake-blue-deep), 0.90) 100%);
+  border: 1px solid rgba(var(--border-rgb), 0.3);
+  box-shadow: 
+    var(--elevation-3),
+    0 0 0 1px rgba(var(--primary-rgb), 0.1) inset,
+    0 2px 20px rgba(var(--primary-rgb), 0.1);
+}
+
+/* 系统模式深色容器样式 */
 @media (prefers-color-scheme: dark) {
-  .inner-container {
-    background: rgba(var(--surface), 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  .theme-system .inner-container {
+    background: linear-gradient(135deg, 
+      rgba(var(--lake-blue-light), 0.95) 0%,
+      rgba(var(--lake-blue), 0.92) 50%,
+      rgba(var(--lake-blue-deep), 0.90) 100%);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
     box-shadow: 
       var(--elevation-3),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-      var(--glow-primary);
+      0 0 0 1px rgba(var(--primary-rgb), 0.1) inset,
+      0 2px 20px rgba(var(--primary-rgb), 0.1);
   }
 }
 
@@ -663,15 +851,15 @@ body {
   font-weight: 700;
   color: white;
   background: linear-gradient(135deg, 
-    rgba(var(--primary), 1) 0%, 
-    rgba(var(--primary-alt), 1) 100%);
+    rgba(var(--primary-rgb), 1) 0%, 
+    rgba(var(--primary-rgb), 0.9) 100%);
   border: none;
   border-radius: var(--radius-xl);
   cursor: pointer;
   transition: var(--transition-smooth);
   overflow: hidden;
   box-shadow: 
-    0 20px 40px -12px rgba(var(--primary), 0.4),
+    0 20px 40px -12px rgba(var(--primary-rgb), 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   margin-bottom: var(--spacing-2xl);
   transform: translateZ(10px) scale(1);
@@ -1983,6 +2171,199 @@ body {
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.8em;
+}
+
+/* 主题切换按钮样式 - 修复版 */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(var(--surface-rgb), 0.9);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: var(--radius-full);
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(var(--text-rgb), 0.8);
+    backdrop-filter: blur(12px);
+    transition: var(--transition-1);
+    z-index: 1000;
+    user-select: none;
+    box-shadow: var(--elevation-1);
+}
+
+.theme-toggle:hover {
+    background: rgba(var(--surface-alt-rgb), 0.95);
+    border-color: rgba(var(--primary-rgb), 0.4);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-2);
+    color: rgba(var(--text-rgb), 1);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-icon {
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-text {
+    font-size: 13px;
+    white-space: nowrap;
+    color: inherit;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .theme-toggle {
+        top: 16px;
+        right: 16px;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    
+    .theme-text {
+        display: none;
+    }
+    
+    .theme-icon {
+        font-size: 18px;
+    }
+}
+
+/* 主题提示Toast样式 */
+.theme-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: rgba(var(--surface-rgb), 0.95);
+    color: rgba(var(--text-rgb), 0.9);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10000;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+}
+
+.theme-toast .toast-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.theme-toast .toast-text {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* 强制主题样式 */
+.theme-light {
+    color-scheme: light !important;
+}
+
+.theme-dark {
+    color-scheme: dark !important;
+}
+
+.theme-system {
+    color-scheme: light dark;
+}
+
+/* 全局主题切换动画 - 优化版 */
+*,
+*::before,
+*::after {
+    transition: 
+      background-color 0.3s ease, 
+      border-color 0.3s ease, 
+      color 0.3s ease,
+      box-shadow 0.3s ease,
+      backdrop-filter 0.3s ease !important;
+}
+
+/* 特殊元素不参与主题过渡 */
+.no-theme-transition,
+.no-theme-transition *,
+.confetti,
+.bg-blob,
+.success-animation *,
+.theme-toast {
+    transition: none !important;
+}
+
+/* 确保主题变量正确继承 */
+html,
+body {
+    background-color: rgba(var(--background-rgb), 1);
+    color: rgba(var(--text-rgb), 1);
+}
+
+/* 输入框主题适配 */
+input,
+textarea,
+select {
+    background-color: rgba(var(--surface-rgb), 1);
+    color: rgba(var(--text-rgb), 1);
+    border-color: rgba(var(--border-rgb), 1);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: rgba(var(--primary-rgb), 1);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* 卡片和容器主题适配 */
+.card,
+.modal,
+.dropdown,
+.tooltip {
+    background-color: rgba(var(--surface-rgb), 1);
+    border-color: rgba(var(--border-rgb), 1);
+    color: rgba(var(--text-rgb), 1);
+}
+
+/* 文本颜色主题适配 */
+.text-muted {
+    color: rgba(var(--text-muted-rgb), 1) !important;
+}
+
+.text-primary {
+    color: rgba(var(--primary-rgb), 1) !important;
+}
+
+.text-success {
+    color: rgba(var(--success-rgb), 1) !important;
+}
+
+.text-danger {
+    color: rgba(var(--danger-rgb), 1) !important;
+}
+
+.text-warning {
+    color: rgba(var(--warning-rgb), 1) !important;
+}
+
+.text-info {
+    color: rgba(var(--info-rgb), 1) !important;
 }
 
 /* ========================================

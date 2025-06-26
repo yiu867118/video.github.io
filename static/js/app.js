@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadFileBtn: document.getElementById('downloadFileBtn'),
         loadingOverlay: document.getElementById('loadingOverlay'),
         successAnimation: document.getElementById('successAnimation'),
-        platformIndicator: document.getElementById('platformIndicator') // 平台指示器
+        platformIndicator: document.getElementById('platformIndicator'), // 平台指示器
+        themeToggle: document.getElementById('themeToggle') // 主题切换按钮
     };
     
     // 元素存在性检查
@@ -35,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         progressPercentage: !!elements.progressPercentage,
         downloadSpeed: !!elements.downloadSpeed,
         downloadSize: !!elements.downloadSize,
-        progressStatusText: !!elements.progressStatusText
+        progressStatusText: !!elements.progressStatusText,
+        themeToggle: !!elements.themeToggle // 
     });
     
     if (!elements.downloadButton || !elements.videoUrl) {
@@ -63,9 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isRetrying: false, // 是否正在重试
         lastRetryTime: 0, // 最后重试时间
         retryInterval: 5000, // 重试间隔5秒
-        abortController: null // 用于取消请求
+        abortController: null, // 用于取消请求
+        themeMode: localStorage.getItem('theme-preference') || 'system' // 'system', 'light', 'dark'
     };
-
+    
     // 支持的平台配置
     const supportedPlatforms = {
         bilibili: {
@@ -269,6 +272,229 @@ document.addEventListener('DOMContentLoaded', () => {
             'live broadcast', '正在直播'
         ]
     };
+    
+    // 主题管理功能 - 修复版
+    const themeManager = {
+        init() {
+            this.applyTheme();
+            this.setupThemeToggle();
+            
+            // 监听系统主题变化
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (state.themeMode === 'system') {
+                    this.applyTheme();
+                }
+            });
+        },
+        
+        applyTheme() {
+            const root = document.documentElement;
+            const body = document.body;
+            
+            // 移除现有主题类
+            root.classList.remove('theme-light', 'theme-dark', 'theme-system');
+            body.classList.remove('theme-light', 'theme-dark', 'theme-system');
+            
+            // 应用新主题
+            let actualTheme = state.themeMode;
+            
+            // 如果是系统模式，检测系统主题
+            if (state.themeMode === 'system') {
+                actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            // 应用主题类
+            root.classList.add(`theme-${actualTheme}`);
+            body.classList.add(`theme-${actualTheme}`);
+            
+            // 设置CSS自定义属性
+            this.setCSSProperties(actualTheme);
+            
+            // 设置colorScheme
+            root.style.colorScheme = actualTheme;
+            
+            this.updateToggleButton();
+            console.log(`🎨 主题已切换到: ${state.themeMode} (实际: ${actualTheme})`);
+        },
+        
+        setCSSProperties(theme) {
+            const root = document.documentElement;
+            
+            if (theme === 'dark') {
+                // 深色模式颜色
+                root.style.setProperty('--primary-rgb', '74, 144, 226');
+                root.style.setProperty('--secondary-rgb', '108, 117, 125');
+                root.style.setProperty('--success-rgb', '40, 167, 69');
+                root.style.setProperty('--danger-rgb', '220, 53, 69');
+                root.style.setProperty('--warning-rgb', '255, 193, 7');
+                root.style.setProperty('--info-rgb', '23, 162, 184');
+                root.style.setProperty('--light-rgb', '248, 249, 250');
+                root.style.setProperty('--dark-rgb', '52, 58, 64');
+                
+                // 背景和表面
+                root.style.setProperty('--background-rgb', '18, 18, 18');
+                root.style.setProperty('--surface-rgb', '33, 37, 41');
+                root.style.setProperty('--surface-alt-rgb', '52, 58, 64');
+                
+                // 文字颜色
+                root.style.setProperty('--text-rgb', '248, 249, 250');
+                root.style.setProperty('--text-muted-rgb', '173, 181, 189');
+                
+                // 边框
+                root.style.setProperty('--border-rgb', '73, 80, 87');
+                
+            } else {
+                // 浅色模式颜色
+                root.style.setProperty('--primary-rgb', '13, 110, 253');
+                root.style.setProperty('--secondary-rgb', '108, 117, 125');
+                root.style.setProperty('--success-rgb', '25, 135, 84');
+                root.style.setProperty('--danger-rgb', '220, 53, 69');
+                root.style.setProperty('--warning-rgb', '255, 193, 7');
+                root.style.setProperty('--info-rgb', '13, 202, 240');
+                root.style.setProperty('--light-rgb', '248, 249, 250');
+                root.style.setProperty('--dark-rgb', '33, 37, 41');
+                
+                // 背景和表面
+                root.style.setProperty('--background-rgb', '255, 255, 255');
+                root.style.setProperty('--surface-rgb', '248, 249, 250');
+                root.style.setProperty('--surface-alt-rgb', '233, 236, 239');
+                
+                // 文字颜色
+                root.style.setProperty('--text-rgb', '33, 37, 41');
+                root.style.setProperty('--text-muted-rgb', '108, 117, 125');
+                
+                // 边框
+                root.style.setProperty('--border-rgb', '222, 226, 230');
+            }
+        },
+        
+        updateToggleButton() {
+            if (!elements.themeToggle) return;
+            
+            const icons = {
+                system: '🌐',
+                light: '☀️',
+                dark: '🌙'
+            };
+            
+            const texts = {
+                system: '跟随系统',
+                light: '浅色模式',
+                dark: '深色模式'
+            };
+            
+            elements.themeToggle.innerHTML = `
+                <span class="theme-icon">${icons[state.themeMode]}</span>
+                <span class="theme-text">${texts[state.themeMode]}</span>
+            `;
+            
+            elements.themeToggle.setAttribute('data-theme', state.themeMode);
+        },
+        
+        setupThemeToggle() {
+            if (!elements.themeToggle) return;
+            
+            elements.themeToggle.addEventListener('click', () => {
+                this.cycleTheme();
+            });
+            
+            // 添加键盘快捷键 Ctrl+Shift+T
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+                    e.preventDefault();
+                    this.cycleTheme();
+                }
+            });
+        },
+        
+        cycleTheme() {
+            const modes = ['system', 'light', 'dark'];
+            const currentIndex = modes.indexOf(state.themeMode);
+            const nextIndex = (currentIndex + 1) % modes.length;
+            
+            state.themeMode = modes[nextIndex];
+            localStorage.setItem('theme-preference', state.themeMode);
+            
+            this.applyTheme();
+            
+            // 显示切换提示 - 短时间显示，避免干扰
+            this.showThemeChangeToast();
+        },
+        
+        showThemeChangeToast() {
+            // 移除可能存在的旧提示
+            const existingToast = document.querySelector('.theme-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建新的提示元素
+            const toast = document.createElement('div');
+            toast.className = 'theme-toast';
+            toast.innerHTML = `
+                <span class="toast-icon">${this.getThemeIcon()}</span>
+                <span class="toast-text">${this.getThemeDisplayName()}</span>
+            `;
+            
+            // 添加样式
+            Object.assign(toast.style, {
+                position: 'fixed',
+                top: '80px',
+                right: '20px',
+                background: 'rgba(var(--surface-rgb), 0.95)',
+                color: 'rgba(var(--text-rgb), 0.9)',
+                border: '1px solid rgba(var(--border-rgb), 0.3)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                zIndex: '10000',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                transform: 'translateX(100%)',
+                transition: 'transform 0.3s ease',
+                pointerEvents: 'none'
+            });
+            
+            document.body.appendChild(toast);
+            
+            // 动画显示
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateX(0)';
+            });
+            
+            // 自动隐藏
+            setTimeout(() => {
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 2000);
+        },
+        
+        getThemeIcon() {
+            const icons = {
+                system: '🌐',
+                light: '☀️',
+                dark: '🌙'
+            };
+            return icons[state.themeMode];
+        },
+        
+        getThemeDisplayName() {
+            const names = {
+                system: '跟随系统主题',
+                light: '浅色模式',
+                dark: '深色模式'
+            };
+            return names[state.themeMode];
+        }
+    };
 
     // ========================================
     // 核心工具函数 - 首先定义
@@ -460,6 +686,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 添加页面加载动画
         document.body.classList.add('page-loaded');
+
+        // 初始化主题管理
+        themeManager.init();
         
         // 预加载关键资源
         preloadCriticalElements();
