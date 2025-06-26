@@ -4,17 +4,22 @@
    ======================================== */
 
 :root {
-  /* 颜色系统 */
+  /* 颜色系统 - 调整为与背景协调的稍深色调 */
   --primary: 68, 116, 255;
   --primary-alt: 119, 134, 255;
   --accent: 116, 214, 143;
   --accent-alt: 6, 189, 158;
   --warning: 255, 177, 36;
   --error: 230, 79, 102;
-  --surface: 255, 255, 255;
-  --surface-alt: 242, 245, 250;
-  --text: 35, 43, 60;
-  --text-alt: 105, 116, 130;
+  --surface: 240, 235, 248;         /* 稍深一点的淡紫调白 */
+  --surface-alt: 225, 230, 240;     /* 稍深一点的淡蓝调灰 */
+  --text: 30, 38, 55;               /* 稍深一点主文本 */
+  --text-alt: 85, 95, 115;          /* 稍深一点辅文本 */
+
+  --container-bg: 240, 238, 248;    /* 比原container更深一点，但仍比surface深 */
+  --container-border: 215, 220, 235; /* 容器边框稍加深，增强轮廓感 */
+
+
 
   /* 字体系统 */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -101,18 +106,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   position: relative;
   
-  /* 白天版超级美化背景 - 梦幻渐变 */
+  /* 白天版美化背景 */
   background: 
-    /* 主线性渐变：更亮更通透的蓝+粉+奶白，视觉如天边云霞 */
     linear-gradient(135deg,
-      rgba(254, 250, 255, 1) 0%,          /* 极亮柔白（更奶） */
-      rgba(238, 244, 255, 1) 18%,         /* 梦幻浅蓝白 */
-      rgba(252, 241, 255, 1) 40%,         /* 梦幻嫩粉紫白 */
-      rgba(245, 255, 252, 1) 60%,         /* 微奶薄荷白 */
-      rgba(255, 250, 246, 1) 80%,         /* 温柔奶杏白 */
-      rgba(249, 252, 255, 1) 100%         /* 回归极亮柔白 */
+      rgb(233, 215, 237) 0%,
+      rgb(200, 209, 225) 18%,
+      rgb(228, 212, 233) 40%,
+      rgb(205, 230, 222) 60%,
+      rgb(255, 231, 211) 80%,
+      rgb(209, 222, 234) 100%
     ),
-    /* 叠加层：柔和的色彩点缀 */
     radial-gradient(ellipse at 25% 20%, 
       rgba(var(--primary), 0.06) 0%, 
       rgba(var(--primary), 0.03) 35%, 
@@ -122,16 +125,10 @@ body {
       rgba(var(--accent), 0.05) 0%, 
       rgba(var(--accent), 0.02) 40%, 
       transparent 75%
-    ),
-    /* 微妙的紫色调和 */
-    radial-gradient(circle at 60% 40%, 
-      rgba(147, 197, 253, 0.08) 0%, 
-      rgba(199, 210, 254, 0.04) 30%, 
-      transparent 60%
     );
 }
 
-/* 暗色模式背景 - 保持不变 */
+/* 暗色模式背景 */
 @media (prefers-color-scheme: dark) {
   body {
     background: 
@@ -145,155 +142,87 @@ body {
   }
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* 极致梦幻高颜值装饰背景 */
-  background:
-    /* 1. 左上角主色柔光（更梦幻的奶蓝紫） */
-    radial-gradient(circle at 15% 15%,
-      rgba(153, 180, 255, 0.16) 0%,
-      rgba(182, 202, 255, 0.10) 28%,
-      rgba(206, 216, 255, 0.06) 60%,
-      transparent 80%
-    ),
-    /* 2. 右下角点缀（嫩薄荷绿+蓝） */
-    radial-gradient(circle at 87% 88%,
-      rgba(142, 242, 206, 0.14) 0%,
-      rgba(185, 252, 237, 0.07) 33%,
-      transparent 85%
-    ),
-    /* 3. 中央柔和梦幻紫光 */
-    radial-gradient(ellipse at 54% 51%,
-      rgba(200, 169, 255, 0.09) 0%,
-      rgba(222, 198, 255, 0.04) 38%,
-      transparent 78%
-    ),
-    /* 4. 左下角点缀（奶杏橙） */
-    radial-gradient(circle at 18% 86%,
-      rgba(255, 222, 176, 0.10) 0%,
-      rgba(254, 247, 212, 0.05) 42%,
-      transparent 76%
-    ),
-    /* 5. 右上角泡泡粉（高光点睛） */
-    radial-gradient(ellipse at 80% 17%,
-      rgba(255, 184, 222, 0.10) 0%,
-      rgba(254, 219, 247, 0.04) 34%,
-      transparent 72%
-    ),
-    /* 6. 梦幻云感网格纹理 */
-    linear-gradient(90deg,
-      rgba(172, 181, 255, 0.03) 0px,
-      transparent 1px,
-      transparent 100px,
-      rgba(172, 181, 255, 0.02) 101px,
-      transparent 102px
-    ),
-    linear-gradient(180deg,
-      rgba(172, 222, 255, 0.018) 0px,
-      transparent 1px,
-      transparent 100px,
-      rgba(172, 222, 255, 0.01) 101px,
-      transparent 102px
-    );
-  pointer-events: none;
-  z-index: -1;
-  animation: background-float 30s ease-in-out infinite;
-}
-
-
-/* 背景浮动动画 - 让背景有生命力 */
-/* @keyframes background-float {
-  0%, 100% { 
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  25% { 
-    opacity: 0.9;
-    transform: translateY(-2px) rotate(0.5deg) scale(1.01);
-  }
-  50% { 
-    opacity: 0.95;
-    transform: translateY(-1px) rotate(-0.3deg) scale(1.005);
-  }
-  75% { 
-    opacity: 0.92;
-    transform: translateY(-3px) rotate(0.2deg) scale(1.02);
-  }
-} */
-
-/* 暗色模式背景装饰 - 保持不变 */
-/* @media (prefers-color-scheme: dark) {
+/* 桌面端装饰背景 */
+@media screen and (min-width: 769px) {
   body::before {
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(var(--primary), 0.12) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(var(--accent), 0.10) 0%, transparent 50%);
-    animation: none;
-  }
-} */
-
-/* 添加白天版的额外视觉增强 */
-@media (prefers-color-scheme: light) {
-  body::after {
     content: '';
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
-      /* 顶部微妙光晕 */
-      linear-gradient(180deg, 
-        rgba(255, 255, 255, 0.8) 0%, 
-        rgba(255, 255, 255, 0.2) 20%,
-        transparent 40%
+    background:
+      radial-gradient(circle at 15% 15%,
+        rgba(153, 180, 255, 0.16) 0%,
+        rgba(182, 202, 255, 0.10) 28%,
+        rgba(206, 216, 255, 0.06) 60%,
+        transparent 80%
       ),
-      /* 底部柔和阴影 */
-      linear-gradient(0deg, 
-        rgba(var(--primary), 0.03) 0%, 
-        transparent 30%
+      radial-gradient(circle at 87% 88%,
+        rgba(142, 242, 206, 0.14) 0%,
+        rgba(185, 252, 237, 0.07) 33%,
+        transparent 85%
+      ),
+      radial-gradient(ellipse at 54% 51%,
+        rgba(200, 169, 255, 0.09) 0%,
+        rgba(222, 198, 255, 0.04) 38%,
+        transparent 78%
       );
     pointer-events: none;
     z-index: -1;
-    animation: subtle-shimmer 25s ease-in-out infinite;
+    animation: background-float 30s ease-in-out infinite;
+  }
+
+  @keyframes background-float {
+    0%, 100% { 
+      opacity: 1;
+      transform: translateY(0) rotate(0deg) scale(1);
+    }
+    25% { 
+      opacity: 0.9;
+      transform: translateY(-2px) rotate(0.5deg) scale(1.01);
+    }
+    50% { 
+      opacity: 0.95;
+      transform: translateY(-1px) rotate(-0.3deg) scale(1.005);
+    }
+    75% { 
+      opacity: 0.92;
+      transform: translateY(-3px) rotate(0.2deg) scale(1.02);
+    }
+  }
+
+  /* 桌面端额外视觉增强 */
+  @media (prefers-color-scheme: light) {
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(180deg, 
+          rgba(255, 255, 255, 0.8) 0%, 
+          rgba(255, 255, 255, 0.2) 20%,
+          transparent 40%
+        ),
+        linear-gradient(0deg, 
+          rgba(var(--primary), 0.03) 0%, 
+          transparent 30%
+        );
+      pointer-events: none;
+      z-index: -1;
+      animation: subtle-shimmer 25s ease-in-out infinite;
+    }
+
+    @keyframes subtle-shimmer {
+      0%, 100% { opacity: 1; }
+      33% { opacity: 0.7; }
+      66% { opacity: 0.9; }
+    }
   }
 }
-
-/* 微妙闪光动画 */
-@keyframes subtle-shimmer {
-  0%, 100% { 
-    opacity: 1;
-  }
-  33% { 
-    opacity: 0.7;
-  }
-  66% { 
-    opacity: 0.9;
-  }
-}
-
-/* ========================================
-   页面加载动画
-   ======================================== */
-
-body.page-loaded {
-  animation: page-fade-in 0.8s ease-out forwards;
-}
-
-/* @keyframes page-fade-in {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.98); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
-} */
 
 /* ========================================
    主容器和布局
@@ -327,64 +256,60 @@ body.page-loaded {
   }
 }
 
-/* 背景装饰元素 */
-.bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  pointer-events: none;
-  z-index: -1;
-  animation: blob-float 20s infinite ease-in-out;
-}
-
-/* @media (prefers-color-scheme: dark) {
+/* 桌面端背景装饰元素 */
+@media screen and (min-width: 769px) {
   .bg-blob {
-    opacity: 0.6;
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: -1;
+    animation: blob-float 20s infinite ease-in-out;
   }
-} */
 
-.blob-1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, rgba(var(--primary), 0.2), rgba(var(--primary-alt), 0.15));
-  top: -10%;
-  left: -10%;
-  animation-delay: 0s;
-}
+  .blob-1 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, rgba(var(--primary), 0.2), rgba(var(--primary-alt), 0.15));
+    top: -10%;
+    left: -10%;
+    animation-delay: 0s;
+  }
 
-.blob-2 {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(135deg, rgba(var(--accent), 0.2), rgba(var(--accent-alt), 0.15));
-  bottom: -10%;
-  right: -10%;
-  animation-delay: -10s;
+  .blob-2 {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(var(--accent), 0.2), rgba(var(--accent-alt), 0.15));
+    bottom: -10%;
+    right: -10%;
+    animation-delay: -10s;
+  }
+
+  @keyframes blob-float {
+    0%, 100% { 
+      transform: translate(0, 0) rotate(0deg) scale(1); 
+    }
+    33% { 
+      transform: translate(20px, -20px) rotate(120deg) scale(1.1); 
+    }
+    66% { 
+      transform: translate(-10px, 10px) rotate(240deg) scale(0.9); 
+    }
+  }
 }
-/* 
-@keyframes blob-float {
-  0%, 100% { 
-    transform: translate(0, 0) rotate(0deg) scale(1); 
-  }
-  33% { 
-    transform: translate(20px, -20px) rotate(120deg) scale(1.1); 
-  }
-  66% { 
-    transform: translate(-10px, 10px) rotate(240deg) scale(0.9); 
-  }
-} */
 
 /* 内容容器 */
 .inner-container {
   width: 100%;
-  background: rgba(var(--surface), 0.95);
+  background: rgba(var(--container-bg), 0.95);
   backdrop-filter: blur(var(--blur-lg));
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
   box-shadow: 
     var(--elevation-3),
-    0 0 0 1px rgba(var(--primary), 0.1) inset;
-  border: 1px solid rgba(var(--primary), 0.15);
+    0 0 0 1px rgba(var(--primary), 0.08) inset;
+  border: 1px solid rgba(var(--container-border), 0.8);
   position: relative;
   overflow: hidden;
 }
@@ -392,45 +317,37 @@ body.page-loaded {
 /* 暗色模式容器样式 */
 @media (prefers-color-scheme: dark) {
   .inner-container {
-    background: rgba(var(--surface), 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-      var(--elevation-3),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-      var(--glow-primary);
+    background: rgba(250, 248, 253, 0.95) !important;
+    border: 1px solid rgba(225, 230, 245, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    backdrop-filter: none !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
   }
 }
 
-.inner-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--primary), 0.1),
-    transparent
-  );
-  animation: container-shine 4s infinite;
-}
-
-/* @media (prefers-color-scheme: dark) {
+/* 桌面端容器闪光效果 */
+@media screen and (min-width: 769px) {
   .inner-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      rgba(var(--primary), 0.1),
       transparent
     );
+    animation: container-shine 4s infinite;
   }
-} */
 
-@keyframes container-shine {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  @keyframes container-shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
 }
 
 /* ========================================
@@ -913,17 +830,6 @@ body.page-loaded {
   position: relative;
 }
 
-.btn-ripple {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: inherit;
-}
-
 /* ========================================
    状态消息
    ======================================== */
@@ -1124,37 +1030,28 @@ body.page-loaded {
   }
 }
 
-.progress-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--primary), 0.1),
-    transparent
-  );
-  animation: progress-container-shimmer 4s infinite;
-}
-
-/* 暗色模式闪光效果 */
-@media (prefers-color-scheme: dark) {
+/* 桌面端进度容器闪光 */
+@media screen and (min-width: 769px) {
   .progress-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      rgba(var(--primary), 0.1),
       transparent
     );
+    animation: progress-container-shimmer 4s infinite;
   }
-}
 
-@keyframes progress-container-shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  @keyframes progress-container-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
 }
 
 .progress-container.visible {
@@ -1323,35 +1220,37 @@ body.page-loaded {
   }
 }
 
-/* 进度条光晕效果 */
-.progress-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 255, 255, 0) 100%);
-  border-radius: var(--radius-full);
-  transform: translateX(-100%);
-  animation: progress-glow-sweep 3s infinite ease-in-out;
-  pointer-events: none;
-  z-index: 3;
-}
+/* 桌面端进度条光晕效果 */
+@media screen and (min-width: 769px) {
+  .progress-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0) 100%);
+    border-radius: var(--radius-full);
+    transform: translateX(-100%);
+    animation: progress-glow-sweep 3s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 3;
+  }
 
-@keyframes progress-glow-sweep {
-  0% { 
-    transform: translateX(-100%); 
-    opacity: 0;
-  }
-  50% { 
-    opacity: 1;
-  }
-  100% { 
-    transform: translateX(100%); 
-    opacity: 0;
+  @keyframes progress-glow-sweep {
+    0% { 
+      transform: translateX(-100%); 
+      opacity: 0;
+    }
+    50% { 
+      opacity: 1;
+    }
+    100% { 
+      transform: translateX(100%); 
+      opacity: 0;
+    }
   }
 }
 
@@ -1484,24 +1383,6 @@ body.page-loaded {
   }
 }
 
-/* 暗色模式状态文本脉冲 */
-@media (prefers-color-scheme: dark) {
-  @keyframes status-text-pulse {
-    0%, 100% { 
-      background: linear-gradient(135deg,
-        rgba(var(--primary), 0.1) 0%,
-        rgba(var(--primary), 0.05) 100%);
-      border-left-color: rgba(var(--primary), 0.4);
-    }
-    50% { 
-      background: linear-gradient(135deg,
-        rgba(var(--primary), 0.15) 0%,
-        rgba(var(--primary), 0.1) 100%);
-      border-left-color: rgba(var(--primary), 0.6);
-    }
-  }
-}
-
 /* ========================================
    下载结果区域
    ======================================== */
@@ -1546,25 +1427,28 @@ body.page-loaded {
   }
 }
 
-.result-success::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--accent), 0.1),
-    transparent
-  );
-  animation: result-shimmer 3s infinite;
-}
+/* 桌面端结果闪光 */
+@media screen and (min-width: 769px) {
+  .result-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(var(--accent), 0.1),
+      transparent
+    );
+    animation: result-shimmer 3s infinite;
+  }
 
-@keyframes result-shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  @keyframes result-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
 }
 
 .result-icon {
@@ -1684,32 +1568,25 @@ body.page-loaded {
   }
 }
 
-.feature-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(var(--primary), 0.1), 
-    transparent);
-  transition: left 0.6s ease;
-}
-
-/* 暗色模式功能项光效 */
-@media (prefers-color-scheme: dark) {
+/* 桌面端功能项光效 */
+@media screen and (min-width: 769px) {
   .feature-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(90deg, 
       transparent, 
-      rgba(255, 255, 255, 0.1), 
+      rgba(var(--primary), 0.1), 
       transparent);
+    transition: left 0.6s ease;
   }
-}
 
-.feature-item:hover::before {
-  left: 100%;
+  .feature-item:hover::before {
+    left: 100%;
+  }
 }
 
 .feature-item:hover {
@@ -1820,7 +1697,6 @@ body.page-loaded {
     transform: scale(1); 
   }
 }
-
 
 .footer-version {
   font-size: 0.85rem;
@@ -1957,123 +1833,148 @@ body.page-loaded {
 }
 
 /* ========================================
-   响应式设计
+   拖拽支持样式
    ======================================== */
 
-@media screen and (max-width: 768px) {
-  .container {
-    padding: var(--spacing-lg);
-  }
-  
-  .inner-container {
-    padding: var(--spacing-xl);
-  }
-  
-  .header h1 {
-    font-size: 2rem;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-  
-  .download-btn {
-    padding: 1.4rem 1.6rem;
-    font-size: 1.1rem;
-  }
-  
-  .progress-container {
-    padding: var(--spacing-lg);
-  }
-  
-  .progress-header {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    align-items: flex-start;
-  }
-  
-  .progress-percentage {
-    font-size: 1.5rem;
-  }
-  
-  .progress-bar-wrapper {
-    height: 16px;
-  }
-  
-  .progress-details {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    align-items: stretch;
-  }
-  
-  .progress-speed,
-  .progress-size {
-    min-width: auto;
-  }
-  
-  .features-showcase {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-  
-  .status-message {
-    padding: var(--spacing-md);
-    font-size: 0.95rem;
-  }
-  
-  .result-success {
-    padding: var(--spacing-lg);
-  }
-  
-  .result-icon {
-    font-size: 3rem;
-  }
-  
-  .spinner-ring {
-    width: 60px;
-    height: 60px;
-    border-width: 4px;
-  }
-  
-  .spinner-ring::after {
-    width: 35px;
-    height: 35px;
-    border-width: 2px;
-  }
+.drag-over {
+  border-color: rgba(var(--accent), 0.8) !important;
+  background: linear-gradient(135deg, 
+    rgba(var(--accent), 0.1), 
+    rgba(var(--accent), 0.05)) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 
+    var(--elevation-3),
+    0 0 20px rgba(var(--accent), 0.3) !important;
 }
 
-@media screen and (max-width: 480px) {
-  .container {
-    padding: var(--spacing-md);
-  }
-  
-  .inner-container {
-    padding: var(--spacing-lg);
-  }
-  
-  .header h1 {
-    font-size: 1.8rem;
-  }
-  
-  .supporting-text {
-    font-size: 1rem;
-  }
-  
-  .download-btn {
-    padding: 1.2rem 1.4rem;
-    font-size: 1rem;
-  }
-  
-  .progress-title {
-    font-size: 1rem;
-  }
-  
-  .progress-percentage {
-    font-size: 1.3rem;
-  }
-  
-  .feature-item {
-    padding: var(--spacing-md);
-    font-size: 0.9rem;
-  }
+/* ========================================
+   付费内容/受限状态样式
+   ======================================== */
+
+.status-blocked {
+  background: linear-gradient(135deg, 
+    rgba(var(--error), 0.1), 
+    rgba(var(--error), 0.05));
+  color: rgba(var(--error), 1);
+  border-left-color: rgba(var(--error), 1);
+  box-shadow: 
+    var(--elevation-2),
+    0 0 20px rgba(var(--error), 0.3);
+}
+
+.btn-blocked {
+  background: linear-gradient(135deg, 
+    rgba(var(--error), 0.8) 0%, 
+    rgba(220, 53, 69, 0.8) 100%);
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.btn-blocked:hover {
+  transform: none !important;
+  box-shadow: 
+    0 20px 40px -12px rgba(var(--error), 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+}
+
+/* ========================================
+   进度卡住警告样式
+   ======================================== */
+
+.progress-stuck-warning {
+  position: relative;
+}
+
+.progress-stuck-warning::after {
+  content: '⚠️ 进度可能卡住';
+  position: absolute;
+  top: -30px;
+  right: 0;
+  background: rgba(var(--warning), 1);
+  color: white;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  animation: warning-pulse 1s infinite ease-in-out;
+}
+
+@keyframes warning-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ========================================
+   增强的提示样式
+   ======================================== */
+
+.enhanced-tooltip {
+  position: fixed;
+  background: rgba(var(--text), 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.enhanced-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========================================
+   键盘快捷键提示
+   ======================================== */
+
+.keyboard-shortcuts {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(var(--surface), 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--elevation-3);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.keyboard-shortcuts.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.keyboard-shortcuts h4 {
+  margin-bottom: 8px;
+  color: rgba(var(--text), 1);
+  font-weight: 600;
+}
+
+.keyboard-shortcuts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.keyboard-shortcuts li {
+  margin-bottom: 4px;
+  color: rgba(var(--text-alt), 0.8);
+}
+
+.keyboard-shortcuts kbd {
+  background: rgba(var(--primary), 0.1);
+  color: rgba(var(--primary), 1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8em;
 }
 
 /* ========================================
@@ -2150,194 +2051,10 @@ progress {
   }
 }
 
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface: 15, 23, 42;
-    --surface-alt: 30, 41, 59;
-    --text: 248, 250, 252;
-    --text-alt: 203, 213, 225;
-  }
-  
-  body {
-    background: linear-gradient(135deg, 
-      rgb(200, 236, 243) 0%, 
-      rgb(38, 51, 73) 50%, 
-      rgb(68, 83, 117) 100%);
-  }
-}
-/* 拖拽支持样式 */
-.drag-over {
-    border-color: rgba(var(--accent), 0.8) !important;
-    background: linear-gradient(135deg, 
-        rgba(var(--accent), 0.1), 
-        rgba(var(--accent), 0.05)) !important;
-    transform: translateY(-2px) scale(1.02) !important;
-    box-shadow: 
-        var(--elevation-3),
-        0 0 20px rgba(var(--accent), 0.3) !important;
-}
+/* ========================================
+   移动端性能优化 - 完全禁用复杂动画和闪屏问题修复
+   ======================================== */
 
-/* 付费内容/受限状态样式 */
-.status-blocked {
-    background: linear-gradient(135deg, 
-        rgba(var(--error), 0.1), 
-        rgba(var(--error), 0.05));
-    color: rgba(var(--error), 1);
-    border-left-color: rgba(var(--error), 1);
-    box-shadow: 
-        var(--elevation-2),
-        0 0 20px rgba(var(--error), 0.3);
-}
-
-.btn-blocked {
-    background: linear-gradient(135deg, 
-        rgba(var(--error), 0.8) 0%, 
-        rgba(220, 53, 69, 0.8) 100%);
-    cursor: not-allowed !important;
-    opacity: 0.7;
-}
-
-.btn-blocked:hover {
-    transform: none !important;
-    box-shadow: 
-        0 20px 40px -12px rgba(var(--error), 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
-}
-
-/* 进度卡住警告样式 */
-.progress-stuck-warning {
-    position: relative;
-}
-
-.progress-stuck-warning::after {
-    content: '⚠️ 进度可能卡住';
-    position: absolute;
-    top: -30px;
-    right: 0;
-    background: rgba(var(--warning), 1);
-    color: white;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    animation: warning-pulse 1s infinite ease-in-out;
-}
-
-@keyframes warning-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* 增强的提示样式 */
-.enhanced-tooltip {
-    position: fixed;
-    background: rgba(var(--text), 0.9);
-    color: white;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    z-index: 1000;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-}
-
-.enhanced-tooltip.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* 键盘快捷键提示 */
-.keyboard-shortcuts {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(var(--surface), 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    box-shadow: var(--elevation-3);
-    font-size: 0.85rem;
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease;
-    z-index: 999;
-}
-
-.keyboard-shortcuts.visible {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.keyboard-shortcuts h4 {
-    margin-bottom: 8px;
-    color: rgba(var(--text), 1);
-    font-weight: 600;
-}
-
-.keyboard-shortcuts ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.keyboard-shortcuts li {
-    margin-bottom: 4px;
-    color: rgba(var(--text-alt), 0.8);
-}
-
-.keyboard-shortcuts kbd {
-    background: rgba(var(--primary), 0.1);
-    color: rgba(var(--primary), 1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.8em;
-}
-
-
-.header h1 {
-  display: flex;
-  align-items: center;
-  gap: 1.1rem;
-  font-size: 2.3rem;
-  font-weight: 800;
-  /* 下面两行可选：让 gradient 文字依然有效 */
-  background: linear-gradient(135deg, rgba(var(--primary), 1) 60%, rgba(var(--accent), 1) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.baby-img-wrapper {
-  display: flex;
-  align-items: center;
-  margin-left: 0.7rem;
-}
-
-.bg-baby-image {
-  width: 66px;     /* 建议 36~52px，根据实际logo、字体微调 */
-  height: auto;
-  border-radius: 8px;
-  opacity: 0.97;
-  box-shadow: 0 2px 10px rgba(80, 120, 220, 0.08);
-  filter: drop-shadow(0 1px 3px rgba(68, 116, 255, 0.10));
-  pointer-events: none;
-  user-select: none;
-  display: block;
-  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1);
-}
-
-.baby-img-wrapper:hover .bg-baby-image {
-  transform: scale(1.08) rotate(-4deg);
-  /* 可选，鼠标经过轻微动效 */
-}
-
-
-
-
-/* 移动端性能优化 - 完全禁用复杂动画 */
 @media screen and (max-width: 768px) {
   /* 完全禁用所有动画和过渡效果 */
   *,
@@ -2357,14 +2074,9 @@ progress {
     display: none !important;
   }
   
-  /* 简化背景 - 纯静态 */
+  /* 简化背景 - 纯静态，避免渐变闪屏 */
   body {
-    background: 
-      linear-gradient(135deg, 
-        #fefaff 0%,
-        #f5f8ff 50%,
-        #f8fcff 100%
-      ) !important;
+    background: #fefaff !important;
   }
   
   /* 移除所有装饰动画元素 */
@@ -2482,6 +2194,7 @@ progress {
   .input-container:focus-within {
     border-color: rgba(68, 116, 255, 0.5) !important;
     box-shadow: 0 2px 12px rgba(68, 116, 255, 0.15) !important;
+    transform: none !important;
   }
   
   /* 移除输入高亮效果 */
@@ -2518,6 +2231,7 @@ progress {
       rgba(116, 214, 143, 1) 50%,
       rgba(6, 189, 158, 1) 100%) !important;
     box-shadow: none !important;
+    animation: none !important;
   }
   
   .progress-bar::-moz-progress-bar {
@@ -2526,6 +2240,7 @@ progress {
       rgba(116, 214, 143, 1) 50%,
       rgba(6, 189, 158, 1) 100%) !important;
     box-shadow: none !important;
+    animation: none !important;
   }
   
   /* 确保所有按钮状态无动画 */
@@ -2565,6 +2280,14 @@ progress {
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  
+  .header h1 i {
+    color: rgb(68, 116, 255) !important;
+    animation: none !important;
+    filter: none !important;
   }
   
   .bg-baby-image {
@@ -2572,21 +2295,35 @@ progress {
     margin-left: 0 !important;
     box-shadow: 0 1px 4px rgba(68, 116, 255, 0.1) !important;
     filter: none !important;
+    transition: none !important;
   }
   
   .baby-img-wrapper {
     margin-left: 0 !important;
   }
   
+  .baby-img-wrapper:hover .bg-baby-image {
+    transform: none !important;
+  }
+  
   .supporting-text {
     font-size: 1rem !important;
     flex-direction: column !important;
     gap: 0.3rem !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  
+  .supporting-text i {
+    animation: none !important;
+    filter: none !important;
   }
   
   /* 输入区域适配 */
   .input-section {
     margin-bottom: 1.5rem !important;
+    opacity: 1 !important;
+    animation: none !important;
   }
   
   #videoUrl {
@@ -2594,10 +2331,18 @@ progress {
     padding: 0.8rem 0.8rem 0.8rem 2.5rem !important;
   }
   
+  .input-icon {
+    color: rgba(68, 116, 255, 0.7) !important;
+    animation: none !important;
+    transform: translateY(-50%) !important;
+  }
+  
   /* 示例链接适配 */
   .example-links {
     font-size: 0.8rem !important;
     margin-top: 1rem !important;
+    opacity: 1 !important;
+    animation: none !important;
   }
   
   .example-links code {
@@ -2608,6 +2353,13 @@ progress {
     text-align: center !important;
     background: rgba(68, 116, 255, 0.1) !important;
     border: 1px solid rgba(68, 116, 255, 0.2) !important;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+  
+  .example-links code:hover {
+    transform: none !important;
+    background: rgba(68, 116, 255, 0.1) !important;
     box-shadow: none !important;
   }
   
@@ -2622,9 +2374,15 @@ progress {
     font-size: 1rem !important;
   }
   
+  .progress-title i {
+    animation: none !important;
+    filter: none !important;
+  }
+  
   .progress-percentage {
     font-size: 1.4rem !important;
     text-shadow: none !important;
+    animation: none !important;
   }
   
   .progress-bar-wrapper {
@@ -2645,6 +2403,19 @@ progress {
     background: rgba(242, 245, 250, 0.6) !important;
     border: 1px solid rgba(68, 116, 255, 0.1) !important;
     box-shadow: none !important;
+    transition: none !important;
+  }
+  
+  .progress-speed:hover,
+  .progress-size:hover {
+    background: rgba(242, 245, 250, 0.6) !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  .progress-speed i,
+  .progress-size i {
+    animation: none !important;
   }
   
   .progress-status {
@@ -2654,6 +2425,7 @@ progress {
     border-left: 3px solid rgb(68, 116, 255) !important;
     border: 1px solid rgba(68, 116, 255, 0.2) !important;
     box-shadow: none !important;
+    animation: none !important;
   }
   
   /* 功能展示适配 */
@@ -2661,12 +2433,28 @@ progress {
     grid-template-columns: 1fr !important;
     gap: 0.8rem !important;
     margin: 1.5rem 0 !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  
+  .feature-item i {
+    animation: none !important;
+    filter: none !important;
+  }
+  
+  .feature-item:hover {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(68, 116, 255, 0.12) !important;
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
   }
   
   /* 底部适配 */
   .footer {
     margin-top: 1.5rem !important;
     padding-top: 1rem !important;
+    opacity: 1 !important;
+    animation: none !important;
   }
   
   .footer-brand {
@@ -2684,6 +2472,21 @@ progress {
   .footer-brand i {
     color: rgb(230, 79, 102) !important;
     filter: none !important;
+    animation: none !important;
+  }
+  
+  /* 警告相关样式静态化 */
+  .progress-stuck-warning::after {
+    animation: none !important;
+  }
+  
+  /* 提示工具静态化 */
+  .enhanced-tooltip {
+    transition: none !important;
+  }
+  
+  .keyboard-shortcuts {
+    transition: none !important;
   }
 }
 
@@ -2781,12 +2584,7 @@ progress {
 /* 暗色模式移动端优化 */
 @media (prefers-color-scheme: dark) and (max-width: 768px) {
   body {
-    background: 
-      linear-gradient(135deg, 
-        rgb(15, 23, 42) 0%,
-        rgb(30, 41, 59) 50%,
-        rgb(15, 23, 42) 100%
-      ) !important;
+    background: rgb(15, 23, 42) !important;
   }
   
   .inner-container {
@@ -2845,7 +2643,7 @@ progress {
 /* 确保加载动画也被禁用 */
 @media screen and (max-width: 768px) {
   .loading-overlay {
-    display: none !important;
+    backdrop-filter: none !important;
   }
   
   .success-animation,
@@ -2858,9 +2656,54 @@ progress {
     border: 4px solid rgba(0, 0, 0, 0.1) !important;
     border-top: 4px solid rgb(68, 116, 255) !important;
     animation: none !important;
+    width: 60px !important;
+    height: 60px !important;
   }
   
   .spinner-ring::after {
     display: none !important;
+  }
+  
+  .loading-text {
+    animation: none !important;
+    font-size: 1.1rem !important;
+  }
+  
+  .confetti {
+    animation: none !important;
+  }
+}
+
+/* 确保桌面端正常运行 - 只在桌面端启用动画 */
+@media screen and (min-width: 769px) {
+  /* 保持桌面端的所有动画效果正常 */
+  .animate-fadeUp {
+    opacity: 0;
+    animation: fade-up-main 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  .header h1 {
+    opacity: 0;
+    animation: title-reveal 0.8s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  
+  .input-section {
+    opacity: 0;
+    animation: fade-up 0.8s 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  .download-btn {
+    opacity: 0;
+    animation: button-reveal 0.8s 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  
+  .features-showcase {
+    opacity: 0;
+    animation: fade-up 0.8s 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  .footer {
+    opacity: 0;
+    animation: fade-up 0.6s 2s ease-out forwards;
   }
 }
