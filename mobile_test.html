@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>移动端闪屏测试</title>
+    <style>
+        /* 测试用的简化样式 */
+        :root {
+          --primary-rgb: 13, 110, 253;
+          --background-rgb: 255, 255, 255;
+          --surface-rgb: 248, 249, 250;
+          --text-rgb: 33, 37, 41;
+          --border-rgb: 222, 226, 230;
+        }
+
+        .theme-dark {
+          --primary-rgb: 74, 144, 226;
+          --background-rgb: 18, 18, 18;
+          --surface-rgb: 33, 37, 41;
+          --text-rgb: 248, 249, 250;
+          --border-rgb: 73, 80, 87;
+        }
+
+        /* 移动端防闪屏优化 */
+        @media screen and (max-width: 768px) {
+          * {
+            -webkit-transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            will-change: auto;
+          }
+          
+          *,
+          *::before,
+          *::after {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+          }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: rgba(var(--background-rgb), 1);
+            color: rgba(var(--text-rgb), 1);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: rgba(var(--surface-rgb), 1);
+            border: 1px solid rgba(var(--border-rgb), 1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(var(--surface-rgb), 0.9);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(var(--text-rgb), 0.8);
+            z-index: 1000;
+        }
+
+        .test-item {
+            background-color: rgba(var(--surface-rgb), 1);
+            border: 1px solid rgba(var(--border-rgb), 1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: rgba(var(--primary-rgb), 1);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        @media screen and (max-width: 768px) {
+          body {
+            background: #fefaff !important;
+          }
+          
+          .theme-dark body {
+            background: #121212 !important;
+          }
+          
+          .container {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: 1px solid rgba(68, 116, 255, 0.15) !important;
+          }
+          
+          .theme-dark .container {
+            background: rgba(33, 37, 41, 0.95) !important;
+            border: 1px solid rgba(74, 144, 226, 0.2) !important;
+          }
+          
+          .theme-toggle {
+            top: 16px !important;
+            right: 16px !important;
+            padding: 8px 12px !important;
+          }
+        }
+    </style>
+</head>
+<body class="theme-system">
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌐</span>
+        <span id="theme-text">系统</span>
+    </button>
+
+    <div class="container">
+        <h2>📱 移动端闪屏测试</h2>
+        
+        <div class="test-item">
+            <h4>测试项目 1</h4>
+            <p>当前主题: <span id="current-theme">系统模式</span></p>
+            <button class="btn" onclick="toggleTheme()">切换主题测试</button>
+        </div>
+
+        <div class="test-item">
+            <h4>测试项目 2</h4>
+            <p>背景颜色应该平滑切换，不应该有闪屏效果</p>
+            <p>CSS变量: rgba(var(--background-rgb), 1)</p>
+        </div>
+
+        <div class="test-item">
+            <h4>测试项目 3</h4>
+            <p>容器和文字颜色也应该平滑过渡</p>
+            <button class="btn">测试按钮</button>
+        </div>
+
+        <div class="test-item">
+            <h4>性能信息</h4>
+            <p>页面加载时间: <span id="load-time">计算中...</span></p>
+            <p>用户代理: <span id="user-agent">检测中...</span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentTheme = 'system';
+        const startTime = performance.now();
+        
+        function toggleTheme() {
+            const modes = ['system', 'light', 'dark'];
+            const currentIndex = modes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % modes.length;
+            currentTheme = modes[nextIndex];
+            
+            applyTheme();
+        }
+        
+        function applyTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const currentThemeSpan = document.getElementById('current-theme');
+            
+            // 移除现有主题类
+            body.classList.remove('theme-light', 'theme-dark', 'theme-system');
+            
+            // 应用新主题
+            body.classList.add(`theme-${currentTheme}`);
+            
+            // 更新显示
+            const icons = { system: '🌐', light: '☀️', dark: '🌙' };
+            const texts = { system: '系统', light: '浅色', dark: '深色' };
+            const names = { system: '系统模式', light: '浅色模式', dark: '深色模式' };
+            
+            icon.textContent = icons[currentTheme];
+            text.textContent = texts[currentTheme];
+            currentThemeSpan.textContent = names[currentTheme];
+            
+            console.log(`主题切换到: ${currentTheme}`);
+        }
+        
+        // 页面加载完成后的性能检测
+        window.addEventListener('load', function() {
+            const loadTime = performance.now() - startTime;
+            document.getElementById('load-time').textContent = `${loadTime.toFixed(2)}ms`;
+            document.getElementById('user-agent').textContent = navigator.userAgent.substring(0, 50) + '...';
+            
+            // 检测是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.log('检测到移动设备');
+                document.querySelector('h2').textContent += ' (移动设备检测到)';
+            }
+        });
+        
+        // 初始化
+        applyTheme();
+        
+        // 主题切换性能测试
+        function performanceTest() {
+            const iterations = 10;
+            const startTime = performance.now();
+            
+            for (let i = 0; i < iterations; i++) {
+                toggleTheme();
+            }
+            
+            const endTime = performance.now();
+            const avgTime = (endTime - startTime) / iterations;
+            
+            console.log(`主题切换平均耗时: ${avgTime.toFixed(2)}ms`);
+            alert(`主题切换性能测试完成\n平均耗时: ${avgTime.toFixed(2)}ms`);
+        }
+        
+        // 双击标题进行性能测试
+        document.querySelector('h2').addEventListener('dblclick', performanceTest);
+    </script>
+</body>
+</html>

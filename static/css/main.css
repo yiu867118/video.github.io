@@ -2225,658 +2225,125 @@ body {
 /* 移动端优化 */
 @media (max-width: 768px) {
     .theme-toggle {
-        top: 16px;
-        right: 16px;
-        padding: 6px 12px;
-        font-size: 13px;
+        top: 16px !important;
+        right: 16px !important;
+        padding: 8px 12px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid rgba(68, 116, 255, 0.2) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        backdrop-filter: none !important;
+        font-size: 13px !important;
+    }
+    
+    /* 深色模式主题按钮 */
+    .theme-dark .theme-toggle {
+      background: rgba(33, 37, 41, 0.9) !important;
+      border: 1px solid rgba(74, 144, 226, 0.3) !important;
+      color: rgba(248, 249, 250, 0.9) !important;
     }
     
     .theme-text {
-        display: none;
+      display: none !important;
     }
     
     .theme-icon {
-        font-size: 18px;
+      font-size: 18px !important;
     }
-}
-
-/* 主题提示Toast样式 */
-.theme-toast {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background: rgba(var(--surface-rgb), 0.95);
-    color: rgba(var(--text-rgb), 0.9);
-    border: 1px solid rgba(var(--border-rgb), 0.3);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 10000;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    pointer-events: none;
-}
-
-.theme-toast .toast-icon {
-    font-size: 16px;
-    line-height: 1;
-}
-
-.theme-toast .toast-text {
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-/* 强制主题样式 */
-.theme-light {
-    color-scheme: light !important;
-}
-
-.theme-dark {
-    color-scheme: dark !important;
-}
-
-.theme-system {
-    color-scheme: light dark;
-}
-
-/* 全局主题切换动画 - 优化版 */
-*,
-*::before,
-*::after {
-    transition: 
-      background-color 0.3s ease, 
-      border-color 0.3s ease, 
-      color 0.3s ease,
-      box-shadow 0.3s ease,
-      backdrop-filter 0.3s ease !important;
-}
-
-/* 特殊元素不参与主题过渡 */
-.no-theme-transition,
-.no-theme-transition *,
-.confetti,
-.bg-blob,
-.success-animation *,
-.theme-toast {
-    transition: none !important;
-}
-
-/* 确保主题变量正确继承 */
-html,
-body {
-    background-color: rgba(var(--background-rgb), 1);
-    color: rgba(var(--text-rgb), 1);
-}
-
-/* 输入框主题适配 */
-input,
-textarea,
-select {
-    background-color: rgba(var(--surface-rgb), 1);
-    color: rgba(var(--text-rgb), 1);
-    border-color: rgba(var(--border-rgb), 1);
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    border-color: rgba(var(--primary-rgb), 1);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
-}
-
-/* 卡片和容器主题适配 */
-.card,
-.modal,
-.dropdown,
-.tooltip {
-    background-color: rgba(var(--surface-rgb), 1);
-    border-color: rgba(var(--border-rgb), 1);
-    color: rgba(var(--text-rgb), 1);
-}
-
-/* 文本颜色主题适配 */
-.text-muted {
-    color: rgba(var(--text-muted-rgb), 1) !important;
-}
-
-.text-primary {
-    color: rgba(var(--primary-rgb), 1) !important;
-}
-
-.text-success {
-    color: rgba(var(--success-rgb), 1) !important;
-}
-
-.text-danger {
-    color: rgba(var(--danger-rgb), 1) !important;
-}
-
-.text-warning {
-    color: rgba(var(--warning-rgb), 1) !important;
-}
-
-.text-info {
-    color: rgba(var(--info-rgb), 1) !important;
-}
-
-/* ========================================
-   兼容性和优化
-   ======================================== */
-
-/* 确保所有浏览器都能正确显示进度条 */
-progress {
-  width: 100%;
-  height: 100%;
-}
-
-/* 为不支持 backdrop-filter 的浏览器提供降级 */
-@supports not (backdrop-filter: blur(10px)) {
-  .progress-container {
-    background: rgba(var(--surface), 0.95);
-  }
-  
-  .inner-container {
-    background: rgba(var(--surface), 0.95);
-  }
-  
-  .progress-speed,
-  .progress-size {
-    background: rgba(var(--surface-alt), 0.8);
-  }
-  
-  .feature-item {
-    background: rgba(var(--surface), 0.9);
-  }
-}
-
-/* 动画性能优化 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  
-  .blob-1,
-  .blob-2 {
-    animation: none;
-  }
-}
-
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  :root {
-    --primary: 0, 0, 255;
-    --accent: 0, 128, 0;
-    --error: 255, 0, 0;
-    --warning: 255, 165, 0;
-  }
-}
-
-/* 打印样式 */
-@media print {
-  .loading-overlay,
-  .success-animation,
-  .confetti-container,
-  .bg-blob {
-    display: none !important;
-  }
-  
-  .container {
-    box-shadow: none;
-    background: white;
-  }
-  
-  .inner-container {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-}
-
-/* ========================================
-   移动端性能优化 - 完全禁用复杂动画和闪屏问题修复
-   ======================================== */
-
-@media screen and (max-width: 768px) {
-  /* 完全禁用所有动画和过渡效果 */
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-    transition: none !important;
-    transition-duration: 0s !important;
-    transform: none !important;
-  }
-  
-  /* 移除所有动态背景效果 */
-  body::before,
-  body::after {
-    display: none !important;
-  }
-  
-  /* 简化背景 - 纯静态，避免渐变闪屏 */
-  body {
-    background: #fefaff !important;
-  }
-  
-  /* 移除所有装饰动画元素 */
-  .bg-blob,
-  .blob-1,
-  .blob-2 {
-    display: none !important;
-  }
-  
-  /* 静态容器样式 */
-  .inner-container {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid rgba(68, 116, 255, 0.15) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-    backdrop-filter: none !important;
-    padding: 1.5rem !important;
-    border-radius: 12px !important;
-  }
-  
-  /* 移除容器闪光效果 */
-  .inner-container::before {
-    display: none !important;
-  }
-  
-  /* 静态按钮样式 */
-  .download-btn {
-    background: linear-gradient(135deg, 
-      rgb(68, 116, 255) 0%, 
-      rgb(119, 134, 255) 100%) !important;
-    box-shadow: 0 4px 16px rgba(68, 116, 255, 0.25) !important;
-    transform: none !important;
-    padding: 1.2rem 1.5rem !important;
-    font-size: 1.1rem !important;
-    margin-bottom: 1.5rem !important;
-    border-radius: 12px !important;
-  }
-  
-  /* 移除按钮光效 */
-  .download-btn::before {
-    display: none !important;
-  }
-  
-  /* 静态进度容器 */
-  .progress-container {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: none !important;
-    border: 1px solid rgba(68, 116, 255, 0.12) !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
-    padding: 1rem !important;
-    border-radius: 12px !important;
-  }
-  
-  /* 移除进度容器闪光 */
-  .progress-container::before {
-    display: none !important;
-  }
-  
-  /* 静态功能项 */
-  .feature-item {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border: 1px solid rgba(68, 116, 255, 0.12) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    backdrop-filter: none !important;
-    padding: 0.8rem !important;
-    font-size: 0.85rem !important;
-    border-radius: 10px !important;
-  }
-  
-  /* 移除功能项光效 */
-  .feature-item::before {
-    display: none !important;
-  }
-  
-  /* 静态状态消息 */
-  .status-message {
-    backdrop-filter: none !important;
-    border: 1px solid rgba(68, 116, 255, 0.15) !important;
-    padding: 1rem !important;
-    font-size: 0.9rem !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.5rem !important;
-  }
-  
-  /* 移除状态消息光效 */
-  .status-message::before {
-    display: none !important;
-  }
-  
-  /* 静态状态样式 */
-  .status-success {
-    background: linear-gradient(135deg, 
-      rgba(116, 214, 143, 0.1), 
-      rgba(116, 214, 143, 0.06)) !important;
-    box-shadow: 0 2px 8px rgba(116, 214, 143, 0.12) !important;
-  }
-  
-  .status-error {
-    background: linear-gradient(135deg, 
-      rgba(230, 79, 102, 0.1), 
-      rgba(230, 79, 102, 0.06)) !important;
-    box-shadow: 0 2px 8px rgba(230, 79, 102, 0.12) !important;
-  }
-  
-  /* 静态输入框 */
-  .input-container {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 2px solid rgba(68, 116, 255, 0.2) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    backdrop-filter: none !important;
-    padding: 1rem !important;
-    border-radius: 10px !important;
-  }
-  
-  .input-container:focus-within {
-    border-color: rgba(68, 116, 255, 0.5) !important;
-    box-shadow: 0 2px 12px rgba(68, 116, 255, 0.15) !important;
-    transform: none !important;
-  }
-  
-  /* 移除输入高亮效果 */
-  .input-highlight {
-    display: none !important;
-  }
-  
-  /* 静态结果区域 */
-  .result-success {
-    background: linear-gradient(135deg, 
-      rgba(116, 214, 143, 0.08), 
-      rgba(116, 214, 143, 0.04)) !important;
-    border: 2px solid rgba(116, 214, 143, 0.2) !important;
-    box-shadow: 0 4px 16px rgba(116, 214, 143, 0.12) !important;
-    backdrop-filter: none !important;
-    padding: 1rem !important;
-    border-radius: 12px !important;
-  }
-  
-  /* 移除结果闪光 */
-  .result-success::before {
-    display: none !important;
-  }
-  
-  /* 移除进度条光晕 */
-  .progress-glow {
-    display: none !important;
-  }
-  
-  /* 静态进度条 */
-  .progress-bar::-webkit-progress-value {
-    background: linear-gradient(90deg, 
-      rgba(116, 214, 143, 0.8) 0%,
-      rgba(116, 214, 143, 1) 50%,
-      rgba(6, 189, 158, 1) 100%) !important;
-    box-shadow: none !important;
-    animation: none !important;
-  }
-  
-  .progress-bar::-moz-progress-bar {
-    background: linear-gradient(90deg, 
-      rgba(116, 214, 143, 0.8) 0%,
-      rgba(116, 214, 143, 1) 50%,
-      rgba(6, 189, 158, 1) 100%) !important;
-    box-shadow: none !important;
-    animation: none !important;
-  }
-  
-  /* 确保所有按钮状态无动画 */
-  .btn-downloading,
-  .btn-completed,
-  .btn-processing {
-    animation: none !important;
-  }
-  
-  /* 移除所有状态脉冲动画 */
-  .status-downloading {
-    animation: none !important;
-  }
-  
-  /* 移动端布局优化 */
-  .container {
-    padding: 1rem !important;
-    min-height: auto !important;
-    align-items: flex-start !important;
-    padding-top: 2rem !important;
-  }
-  
-  /* 头部适配 */
-  .header {
-    margin-bottom: 1.5rem !important;
-  }
-  
-  .header h1 {
-    font-size: 1.8rem !important;
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-    margin-bottom: 0.8rem !important;
-    /* 静态文字渐变 */
-    background: linear-gradient(135deg, 
-      rgb(68, 116, 255) 60%, 
-      rgb(116, 214, 143) 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  .header h1 i {
-    color: rgb(68, 116, 255) !important;
-    animation: none !important;
-    filter: none !important;
-  }
-  
-  .bg-baby-image {
-    width: 36px !important;
-    margin-left: 0 !important;
-    box-shadow: 0 1px 4px rgba(68, 116, 255, 0.1) !important;
-    filter: none !important;
-    transition: none !important;
-  }
-  
-  .baby-img-wrapper {
-    margin-left: 0 !important;
-  }
-  
-  .baby-img-wrapper:hover .bg-baby-image {
-    transform: none !important;
-  }
-  
-  .supporting-text {
-    font-size: 1rem !important;
-    flex-direction: column !important;
-    gap: 0.3rem !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  .supporting-text i {
-    animation: none !important;
-    filter: none !important;
-  }
-  
-  /* 输入区域适配 */
-  .input-section {
-    margin-bottom: 1.5rem !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  #videoUrl {
-    font-size: 16px !important; /* 防止iOS缩放 */
-    padding: 0.8rem 0.8rem 0.8rem 2.5rem !important;
-  }
-  
-  .input-icon {
-    color: rgba(68, 116, 255, 0.7) !important;
-    animation: none !important;
-    transform: translateY(-50%) !important;
-  }
-  
-  /* 示例链接适配 */
-  .example-links {
-    font-size: 0.8rem !important;
-    margin-top: 1rem !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  .example-links code {
-    padding: 0.3rem 0.6rem !important;
-    font-size: 0.75rem !important;
-    display: block !important;
-    margin: 0.3rem 0 !important;
-    text-align: center !important;
-    background: rgba(68, 116, 255, 0.1) !important;
-    border: 1px solid rgba(68, 116, 255, 0.2) !important;
-    box-shadow: none !important;
-    transition: none !important;
-  }
-  
-  .example-links code:hover {
-    transform: none !important;
-    background: rgba(68, 116, 255, 0.1) !important;
-    box-shadow: none !important;
-  }
-  
-  /* 进度条适配 */
-  .progress-header {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-    align-items: flex-start !important;
-  }
-  
-  .progress-title {
-    font-size: 1rem !important;
-  }
-  
-  .progress-title i {
-    animation: none !important;
-    filter: none !important;
-  }
-  
-  .progress-percentage {
-    font-size: 1.4rem !important;
-    text-shadow: none !important;
-    animation: none !important;
-  }
-  
-  .progress-bar-wrapper {
-    height: 14px !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .progress-details {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-  }
-  
-  .progress-speed,
-  .progress-size {
-    min-width: auto !important;
-    justify-content: flex-start !important;
-    padding: 0.5rem 0.8rem !important;
-    background: rgba(242, 245, 250, 0.6) !important;
-    border: 1px solid rgba(68, 116, 255, 0.1) !important;
-    box-shadow: none !important;
-    transition: none !important;
-  }
-  
-  .progress-speed:hover,
-  .progress-size:hover {
-    background: rgba(242, 245, 250, 0.6) !important;
-    transform: none !important;
-    box-shadow: none !important;
-  }
-  
-  .progress-speed i,
-  .progress-size i {
-    animation: none !important;
-  }
-  
-  .progress-status {
-    font-size: 0.9rem !important;
-    padding: 0.8rem 1rem !important;
-    background: rgba(68, 116, 255, 0.1) !important;
-    border-left: 3px solid rgb(68, 116, 255) !important;
-    border: 1px solid rgba(68, 116, 255, 0.2) !important;
-    box-shadow: none !important;
-    animation: none !important;
-  }
-  
-  /* 功能展示适配 */
-  .features-showcase {
-    grid-template-columns: 1fr !important;
-    gap: 0.8rem !important;
-    margin: 1.5rem 0 !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  .feature-item i {
-    animation: none !important;
-    filter: none !important;
-  }
-  
-  .feature-item:hover {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border-color: rgba(68, 116, 255, 0.12) !important;
-    transform: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-  }
-  
-  /* 底部适配 */
-  .footer {
-    margin-top: 1.5rem !important;
-    padding-top: 1rem !important;
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  
-  .footer-brand {
-    font-size: 1rem !important;
-    /* 静态文字渐变 */
-    background: linear-gradient(135deg, 
-      rgb(68, 116, 255) 0%, 
-      rgb(116, 214, 143) 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-  }
-  
-  /* 确保心跳图标无动画 */
-  .footer-brand i {
-    color: rgb(230, 79, 102) !important;
-    filter: none !important;
-    animation: none !important;
-  }
-  
-  /* 警告相关样式静态化 */
-  .progress-stuck-warning::after {
-    animation: none !important;
-  }
-  
-  /* 提示工具静态化 */
-  .enhanced-tooltip {
-    transition: none !important;
-  }
-  
-  .keyboard-shortcuts {
-    transition: none !important;
-  }
+    
+    /* 输入框移动端优化 */
+    .input-container {
+      background: rgba(255, 255, 255, 0.9) !important;
+      border: 1px solid rgba(68, 116, 255, 0.2) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+      backdrop-filter: none !important;
+      padding: 1rem !important;
+      margin-bottom: 1.5rem !important;
+      border-radius: 12px !important;
+    }
+    
+    /* 深色模式输入框 */
+    .theme-dark .input-container {
+      background: rgba(52, 58, 64, 0.9) !important;
+      border: 1px solid rgba(74, 144, 226, 0.3) !important;
+    }
+    
+    /* 输入框内部元素 */
+    #videoUrl {
+      background: transparent !important;
+      border: none !important;
+      padding: 0.8rem !important;
+      font-size: 16px !important; /* 防止iOS缩放 */
+    }
+    
+    .theme-dark #videoUrl {
+      color: rgba(248, 249, 250, 1) !important;
+    }
+    
+    /* 平台指示器移动端优化 */
+    #platformIndicator {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border: 1px solid rgba(68, 116, 255, 0.15) !important;
+      padding: 0.8rem !important;
+      border-radius: 8px !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .theme-dark #platformIndicator {
+      background: rgba(52, 58, 64, 0.8) !important;
+      border: 1px solid rgba(74, 144, 226, 0.2) !important;
+      color: rgba(248, 249, 250, 1) !important;
+    }
+    
+    /* 深色模式进度容器 */
+    .theme-dark .progress-container {
+      background: rgba(52, 58, 64, 0.9) !important;
+      border: 1px solid rgba(74, 144, 226, 0.2) !important;
+      color: rgba(248, 249, 250, 1) !important;
+    }
+    
+    /* 深色模式状态消息 */
+    .theme-dark .status-message {
+      background: rgba(52, 58, 64, 0.9) !important;
+      border: 1px solid rgba(74, 144, 226, 0.2) !important;
+      color: rgba(248, 249, 250, 1) !important;
+    }
+    
+    /* 深色模式功能项 */
+    .theme-dark .feature-item {
+      background: rgba(52, 58, 64, 0.85) !important;
+      border: 1px solid rgba(74, 144, 226, 0.15) !important;
+      color: rgba(248, 249, 250, 1) !important;
+    }
+    
+    /* 禁用视差滚动和复杂变换 */
+    .animate-fadeUp,
+    .animate-slideIn,
+    .animate-bounce {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    
+    /* 移动端文字渲染优化 */
+    * {
+      -webkit-font-smoothing: subpixel-antialiased !important;
+      -moz-osx-font-smoothing: auto !important;
+      text-rendering: optimizeSpeed !important;
+    }
+    
+    /* 移动端滚动优化 */
+    body {
+      -webkit-overflow-scrolling: touch !important;
+      overflow-x: hidden !important;
+    }
+    
+    /* 移动端触摸优化 */
+    button,
+    .theme-toggle,
+    .download-btn {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+      touch-action: manipulation !important;
+    }
 }
 
 /* 小屏手机进一步优化 */
@@ -3094,5 +2561,133 @@ progress {
   .footer {
     opacity: 0;
     animation: fade-up 0.6s 2s ease-out forwards;
+  }
+}
+
+/* ========================================
+   移动端闪屏问题最终修复
+   ======================================== */
+
+/* 全局防闪屏优化 */
+@media screen and (max-width: 768px) {
+  /* 强制硬件加速，防止重绘 */
+  html {
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0) scale(1);
+    transform: translateZ(0) scale(1);
+  }
+  
+  /* 防止iOS Safari闪屏 */
+  body {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* 防止容器闪屏 */
+  .container {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    isolation: isolate;
+  }
+  
+  /* 防止主题切换时的闪屏 */
+  .theme-light,
+  .theme-dark,
+  .theme-system {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* 禁用所有可能引起重排的CSS属性 */
+  * {
+    contain: layout style paint;
+    will-change: auto;
+  }
+  
+  /* 特殊处理经常变化的元素 */
+  .status-message,
+  .progress-container,
+  .theme-toggle {
+    contain: layout;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* 移动端字体渲染优化 */
+  body,
+  .inner-container,
+  .download-btn,
+  .status-message {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* 完全禁用过渡效果避免闪屏 */
+  *,
+  *::before,
+  *::after {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+    
+    -webkit-animation: none !important;
+    -moz-animation: none !important;
+    -o-animation: none !important;
+    animation: none !important;
+    
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -o-transform: none !important;
+    transform: none !important;
+  }
+}
+
+/* 专门针对iOS设备的优化 */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 768px) {
+    /* iOS特定的防闪屏处理 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    input,
+    textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    
+    /* iOS Safari特殊处理 */
+    body {
+      -webkit-text-size-adjust: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+/* 低端设备专用优化 */
+@media screen and (max-width: 768px) and (max-resolution: 150dpi) {
+  /* 降低渲染复杂度 */
+  .inner-container,
+  .download-btn,
+  .progress-container {
+    box-shadow: none !important;
+    border-radius: 8px !important;
+  }
+  
+  /* 简化背景 */
+  body {
+    background: #fff !important;
+  }
+  
+  .theme-dark body {
+    background: #1a1a1a !important;
   }
 }
