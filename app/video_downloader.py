@@ -535,12 +535,103 @@ class RockSolidVideoDownloader:
             
             return False, ''
         
-        # 10个策略 - 优先确保音视频完整，从最佳到兜底
+        # 10个策略 - 移动端音频优先，确保所有设备都有声音
         strategies = [
-            # 策略1: 最佳音视频合并 - 优先选择
+            # 策略1: 移动端音频优先 - 强制音视频合并
             {
-                'name': '最佳音视频合并',
-                'format': 'best[height<=1080]+bestaudio/best',
+                'name': '移动端音频优先',
+                'format': 'bestaudio[ext=m4a]+bestvideo[height<=720]/best[acodec!=none][height<=720]/best[acodec!=none]',
+                'options': {
+                    'merge_output_format': 'mp4',
+                    'prefer_ffmpeg': True,
+                    'postprocessors': [{
+                        'key': 'FFmpegVideoConvertor',
+                        'preferedformat': 'mp4',
+                    }],
+                    # 强制音频合并
+                    'keepvideo': False,
+                    'audio_quality': 0,  # 最佳音频质量
+                }
+            },
+            
+            # 策略2: B站移动端专用 - 确保音频
+            {
+                'name': 'B站移动端专用',
+                'format': 'best[acodec=aac][height<=480]/best[acodec!=none][height<=480]/bestaudio+bestvideo[height<=480]',
+                'options': {
+                    'merge_output_format': 'mp4',
+                    'prefer_ffmpeg': True,
+                    'audio_quality': 0
+                }
+            },
+            
+            # 策略3: 强制音频检查格式
+            {
+                'name': '强制音频检查',
+                'format': 'best[acodec!=none][vcodec!=none][height<=720]/best[acodec!=none]',
+                'options': {
+                    'merge_output_format': 'mp4',
+                    # 如果没有音频，拒绝下载
+                    'extract_flat': False,
+                    'check_formats': True
+                }
+            },
+            
+            # 策略4: 低质量但完整音视频
+            {
+                'name': '低质量完整音视频',
+                'format': 'worst[acodec!=none][vcodec!=none][height>=240]/worst[acodec!=none]',
+                'options': {
+                    'merge_output_format': 'mp4'
+                }
+            },
+            
+            # 策略5: 手动合并音视频流
+            {
+                'name': '手动合并音视频',
+                'format': 'bestvideo[height<=480]+bestaudio/bestvideo+bestaudio/best',
+                'options': {
+                    'merge_output_format': 'mp4',
+                    'prefer_ffmpeg': True,
+                    'keepvideo': False,
+                    'postprocessors': [{
+                        'key': 'FFmpegVideoConvertor',
+                        'preferedformat': 'mp4',
+                    }]
+                }
+            },
+            
+            # 策略6: MP4 AAC音频优先
+            {
+                'name': 'MP4音频优先',
+                'format': 'best[ext=mp4][acodec=aac]/best[ext=mp4][acodec!=none]/mp4[acodec!=none]',
+                'options': {
+                    'prefer_ffmpeg': True
+                }
+            },
+            
+            # 策略7: FLV带音频（B站兜底）
+            {
+                'name': 'FLV带音频',
+                'format': 'best[ext=flv][acodec!=none]/flv[acodec!=none]',
+                'options': {
+                    'merge_output_format': 'mp4'
+                }
+            },
+            
+            # 策略8: 任意格式但必须有音频
+            {
+                'name': '必须有音频',
+                'format': 'best[acodec!=none]/worst[acodec!=none]',
+                'options': {
+                    'merge_output_format': 'mp4'
+                }
+            },
+            
+            # 策略9: 标准最佳（备用）
+            {
+                'name': '标准最佳备用',
+                'format': 'best[height<=720]/best',
                 'options': {
                     'merge_output_format': 'mp4',
                     'postprocessors': [{
@@ -550,77 +641,14 @@ class RockSolidVideoDownloader:
                 }
             },
             
-            # 策略2: 标准最佳格式（确保有音频）
+            # 策略10: 终极兜底（加音频检查）
             {
-                'name': '标准最佳格式',
-                'format': 'best[acodec!=none][vcodec!=none]/best',
+                'name': '终极兜底音频',
+                'format': 'best/worst',
                 'options': {
-                    'merge_output_format': 'mp4'
-                }
-            },
-            
-            # 策略3: B站专用格式（音视频分离合并）
-            {
-                'name': 'B站音视频合并',
-                'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
-                'options': {
-                    'merge_output_format': 'mp4'
-                }
-            },
-            
-            # 策略4: 简单最佳（yt-dlp自动选择）
-            {
-                'name': '简单最佳自动',
-                'format': 'best',
-                'options': {}
-            },
-            
-            # 策略5: MP4格式优先（确保兼容性）
-            {
-                'name': 'MP4格式优先',
-                'format': 'best[ext=mp4][acodec!=none]/mp4/best',
-                'options': {}
-            },
-            
-            # 策略6: 中等质量音视频合并
-            {
-                'name': '中等质量合并',
-                'format': 'best[height<=480]+bestaudio/best[height<=480]',
-                'options': {
-                    'merge_output_format': 'mp4'
-                }
-            },
-            
-            # 策略7: 低质量但完整
-            {
-                'name': '低质量完整',
-                'format': 'worst[acodec!=none][vcodec!=none]/worst',
-                'options': {}
-            },
-            
-            # 策略8: FLV格式兜底（B站常用）
-            {
-                'name': 'FLV格式兜底',
-                'format': 'best[ext=flv]/flv/best',
-                'options': {}
-            },
-            
-            # 策略9: 任意有音频的视频
-            {
-                'name': '任意音频视频',
-                'format': 'best[acodec!=none]/bestaudio+bestvideo/best',
-                'options': {
-                    'merge_output_format': 'mp4'
-                }
-            },
-            
-            # 策略10: 终极兜底（任何格式）
-            {
-                'name': '终极兜底',
-                'format': 'best/worst/first',
-                'options': {
-                    'ignoreerrors': True,
-                    'no_warnings': True
+                    'merge_output_format': 'mp4',
+                    'prefer_ffmpeg': True,
+                    'ignoreerrors': False,  # 需要知道是否有音频
                 }
             }
         ]
@@ -640,7 +668,7 @@ class RockSolidVideoDownloader:
                 # 记录下载前文件
                 files_before = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
                 
-                # 基础配置 - 确保音视频完整
+                # 基础配置 - 移动端音频优化
                 ydl_opts = {
                     'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                     'noplaylist': True,
@@ -654,9 +682,16 @@ class RockSolidVideoDownloader:
                     'writeautomaticsub': False,
                     'ignoreerrors': False,  # 策略失败时我们需要知道具体错误
                     'no_warnings': False,
-                    # 确保音视频合并
+                    # 强化音视频合并设置
                     'prefer_ffmpeg': True,
                     'keepvideo': False,  # 合并后删除临时文件
+                    'merge_output_format': 'mp4',  # 强制输出mp4
+                    # 移动端优化
+                    'audio_quality': 0,  # 最佳音频质量
+                    'embed_thumbnail': False,  # 移动端不嵌入缩略图
+                    'writeinfojson': False,  # 不写入info文件
+                    # 确保音频下载
+                    'format_sort': ['acodec:aac', 'vcodec:h264'],  # 优先选择AAC音频和H264视频
                 }
                 
                 # 添加格式（如果指定）
@@ -717,15 +752,27 @@ class RockSolidVideoDownloader:
                         file_path = os.path.join(temp_dir, largest_file)
                         file_size_mb = file_size / 1024 / 1024
                         
-                        # 验证文件是否包含音频（简单检查）
+                        # 强化音频检查
                         has_audio = self._check_audio_in_video(file_path)
                         
+                        # 如果是前几个策略且发现无音频，继续尝试下一个策略
+                        if not has_audio and i <= 7:  # 前7个策略如果无音频就继续
+                            logger.warning(f"⚠️ 策略 {i} 下载的视频无音频，继续尝试下一个策略")
+                            # 删除无音频文件
+                            try:
+                                os.remove(file_path)
+                                logger.info(f"🗑️ 删除无音频文件: {largest_file}")
+                            except:
+                                pass
+                            continue
+                        
+                        # 如果是后面的策略或确认有音频，接受结果
                         logger.info("🎉 坚如磐石下载成功！")
                         logger.info(f"✅ 成功策略: {strategy['name']}")
                         logger.info(f"📁 文件名: {largest_file}")
                         logger.info(f"📊 文件大小: {file_size_mb:.2f} MB")
                         logger.info(f"⏱️ 下载耗时: {download_time:.1f} 秒")
-                        logger.info(f"🔊 音频状态: {'有音频' if has_audio else '可能无音频'}")
+                        logger.info(f"🔊 音频状态: {'✅ 有音频' if has_audio else '⚠️ 可能无音频(已尽力)'}")
                         
                         if progress_callback:
                             progress_callback({
@@ -736,6 +783,7 @@ class RockSolidVideoDownloader:
                                 'duration': download_time,
                                 'strategy': strategy['name'],
                                 'has_audio': has_audio,
+                                'audio_warning': '视频可能无音频，这在某些移动设备上可能发生' if not has_audio else None,
                                 'final': True  # 标记为最终状态
                             })
                         
@@ -790,28 +838,81 @@ class RockSolidVideoDownloader:
 
 
     def _check_audio_in_video(self, file_path: str) -> bool:
-        """简单检查视频文件是否包含音频"""
+        """增强音频检查 - 确保移动端下载的视频有声音"""
         try:
-            # 简单的文件大小启发式检查
-            # 通常有音频的视频文件会比纯视频大一些
+            import subprocess
+            import json
+            
+            # 方法1: 使用ffprobe检查音频流（最准确）
+            try:
+                cmd = [
+                    'ffprobe', '-v', 'quiet', '-print_format', 'json', 
+                    '-show_streams', file_path
+                ]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                
+                if result.returncode == 0:
+                    data = json.loads(result.stdout)
+                    streams = data.get('streams', [])
+                    
+                    # 检查是否有音频流
+                    audio_streams = [s for s in streams if s.get('codec_type') == 'audio']
+                    has_audio = len(audio_streams) > 0
+                    
+                    if has_audio:
+                        logger.info(f"✅ 音频检查: 发现 {len(audio_streams)} 个音频流")
+                        for i, stream in enumerate(audio_streams):
+                            codec = stream.get('codec_name', 'unknown')
+                            logger.info(f"🔊 音频流 {i+1}: {codec}")
+                    else:
+                        logger.warning("⚠️ 音频检查: 未发现音频流")
+                    
+                    return has_audio
+                    
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError) as e:
+                logger.debug(f"ffprobe检查失败: {e}")
+            
+            # 方法2: 文件大小和格式启发式检查
             file_size = os.path.getsize(file_path)
             file_name = os.path.basename(file_path).lower()
+            file_ext = os.path.splitext(file_name)[1].lower()
             
-            # 如果文件名包含音频相关信息，认为有音频
-            if any(keyword in file_name for keyword in ['audio', 'sound', 'music']):
+            # 检查文件扩展名
+            audio_friendly_formats = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv'}
+            likely_no_audio_formats = {'.webm'}  # webm有时只有视频
+            
+            # 如果是音频友好格式且大小合理
+            if file_ext in audio_friendly_formats and file_size > 2 * 1024 * 1024:  # 大于2MB
+                logger.info(f"🎵 音频检查: {file_ext}格式通常包含音频，文件大小 {file_size/1024/1024:.1f}MB")
                 return True
             
-            # 如果是mp4文件且大小合理，通常包含音频
-            if file_path.lower().endswith('.mp4') and file_size > 5 * 1024 * 1024:  # 大于5MB
+            # 如果是可能无音频的格式，更严格检查
+            if file_ext in likely_no_audio_formats:
+                logger.warning(f"⚠️ 音频检查: {file_ext}格式可能无音频")
+                return False
+            
+            # 方法3: 基于比特率的粗略估算
+            # 视频比特率通常远高于音频，如果文件很小可能只有音频，很大可能有音视频
+            duration_estimate = 300  # 假设5分钟视频
+            estimated_video_bitrate = (file_size * 8) / duration_estimate / 1024  # kbps
+            
+            # 如果比特率太低，可能只有音频或质量很差
+            if estimated_video_bitrate < 100:
+                logger.warning(f"⚠️ 音频检查: 估算比特率过低 ({estimated_video_bitrate:.0f}kbps)")
+                return False
+            
+            # 如果比特率合理，可能有音视频
+            if estimated_video_bitrate > 200:
+                logger.info(f"🎵 音频检查: 估算比特率正常 ({estimated_video_bitrate:.0f}kbps)，可能有音频")
                 return True
             
-            # 这里可以添加更复杂的音频检测逻辑，比如使用ffprobe
-            # 但为了保持简单，我们假设大部分情况下都有音频
+            # 默认情况
+            logger.info("🎵 音频检查: 使用默认判断（假设有音频）")
             return True
             
         except Exception as e:
-            logger.debug(f"音频检查失败: {e}")
-            return True  # 默认认为有音频
+            logger.debug(f"音频检查异常: {e}")
+            return True  # 默认认为有音频，避免误判
     
 
 
