@@ -183,21 +183,22 @@ class SimpleVideoDownloader:
             
         except Exception as e:
             error_msg = str(e)
-            logger.error(f"💀 下载失败: {error_msg}")
+            logger.error(f"💀 所有下载策略失败: {error_msg}")
             
             # 🔥关键：只在真正所有策略都失败后才向前端报告失败
             if progress_callback:
-                error_analysis = analyze_bilibili_error(error_msg)
+                # 这里的异常已经是_execute_download经过所有策略后抛出的
+                # 错误分析已经在_execute_download中完成，这里直接传递
                 progress_callback({
                     'status': 'failed',
                     'percent': 0,
-                    'error': error_analysis.get('user_friendly', error_msg),
-                    'error_type': error_analysis.get('error_type', 'unknown_error'),
-                    'fatal': error_analysis.get('fatal', False),
+                    'error': error_msg,
+                    'error_type': 'download_failed',
+                    'fatal': True,
                     'final': True
                 })
             
-            raise Exception(error_analysis.get('user_friendly', error_msg))
+            raise
     
     def _execute_download(self, url: str, output_template: str, progress_callback: Optional[Callable], platform: str) -> str:
         """执行下载 - 多策略，不轻易报告失败"""
@@ -269,9 +270,8 @@ class SimpleVideoDownloader:
                 ydl_opts.update(strategy['options'])
                 ydl_opts['format'] = strategy['format']
                 
-                # 🔥修复：使用yt-dlp的标题模板而不是自定义模板
-                temp_dir = os.path.dirname(output_template)
-                ydl_opts['outtmpl'] = os.path.join(temp_dir, '%(title)s.%(ext)s')
+                # 🔥修复：直接使用传入的output_template
+                ydl_opts['outtmpl'] = output_template
                 
                 # 平台特定配置
                 if platform == 'youtube':

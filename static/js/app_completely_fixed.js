@@ -454,6 +454,98 @@ function detectPlatform(url) {
     return 'unknown';
 }
 
+// 🔥URL提取和清理函数
+function extractCleanUrl(input) {
+    console.log('🧹 开始提取URL:', input);
+    
+    if (!input || typeof input !== 'string') {
+        console.log('❌ 输入无效');
+        return null;
+    }
+    
+    // 去除首尾空格
+    input = input.trim();
+    
+    // 🔥常见URL正则模式
+    const urlPatterns = [
+        // YouTube 完整URL和短链接
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+        // B站完整URL
+        /(?:https?:\/\/)?(?:www\.)?bilibili\.com\/video\/([A-Za-z0-9]+)/,
+        // B站短链接
+        /(?:https?:\/\/)?b23\.tv\/([A-Za-z0-9]+)/,
+        // 抖音URL
+        /(?:https?:\/\/)?(?:www\.)?douyin\.com\/video\/(\d+)/,
+        // 抖音短链接
+        /(?:https?:\/\/)?v\.douyin\.com\/([A-Za-z0-9]+)/,
+        // 快手URL
+        /(?:https?:\/\/)?(?:www\.)?kuaishou\.com\/short-video\/(\d+)/,
+        // 微博视频
+        /(?:https?:\/\/)?(?:www\.)?weibo\.com\/tv\/show\/(\d+)/,
+        // 西瓜视频
+        /(?:https?:\/\/)?(?:www\.)?ixigua\.com\/(\d+)/,
+        // 通用URL模式（最后兜底）
+        /https?:\/\/[^\s]+/
+    ];
+    
+    // 🔥方法1：尝试直接匹配URL模式
+    for (const pattern of urlPatterns) {
+        const match = input.match(pattern);
+        if (match) {
+            let extractedUrl = match[0];
+            
+            // 确保URL有协议
+            if (!extractedUrl.startsWith('http')) {
+                extractedUrl = 'https://' + extractedUrl;
+            }
+            
+            console.log('✅ 通过正则提取到URL:', extractedUrl);
+            return extractedUrl;
+        }
+    }
+    
+    // 🔥方法2：如果输入本身看起来像URL，直接使用
+    if (input.includes('.com') || input.includes('.tv') || input.includes('.cn')) {
+        // 移除可能的前缀文字
+        const words = input.split(/\s+/);
+        for (const word of words) {
+            if (word.includes('.com') || word.includes('.tv') || word.includes('.cn')) {
+                let cleanUrl = word;
+                
+                // 移除可能的标点符号
+                cleanUrl = cleanUrl.replace(/[，。！？；：""''「」【】()（）\[\]]/g, '');
+                
+                // 确保有协议
+                if (!cleanUrl.startsWith('http')) {
+                    cleanUrl = 'https://' + cleanUrl;
+                }
+                
+                console.log('✅ 通过域名匹配提取到URL:', cleanUrl);
+                return cleanUrl;
+            }
+        }
+    }
+    
+    // 🔥方法3：检查是否输入本身就是URL
+    try {
+        let testUrl = input;
+        if (!testUrl.startsWith('http')) {
+            testUrl = 'https://' + testUrl;
+        }
+        
+        const url = new URL(testUrl);
+        if (url.hostname && (url.hostname.includes('.com') || url.hostname.includes('.tv') || url.hostname.includes('.cn'))) {
+            console.log('✅ 输入本身是有效URL:', testUrl);
+            return testUrl;
+        }
+    } catch (e) {
+        // URL构造失败，继续其他方法
+    }
+    
+    console.log('❌ 未能提取到有效URL');
+    return null;
+}
+
 // ========================================
 // UI显示和状态管理函数
 // ========================================
@@ -1432,14 +1524,32 @@ function setupDownloadButton() {
             return;
         }
         
-        const url = elements.videoUrl.value.trim();
-        if (!url) {
+        const rawInput = elements.videoUrl.value.trim();
+        if (!rawInput) {
             showMessage('请输入有效的视频URL', 'error');
             elements.videoUrl.focus();
             return;
         }
         
-        const platform = detectPlatform(url);
+        console.log('🔍 原始输入:', rawInput);
+        
+        // 🔥提取纯净URL - 处理用户可能粘贴的"标题 + URL"格式
+        const cleanUrl = extractCleanUrl(rawInput);
+        if (!cleanUrl) {
+            showMessage('未找到有效的视频链接，请检查输入', 'error');
+            elements.videoUrl.focus();
+            return;
+        }
+        
+        console.log('🔗 提取的URL:', cleanUrl);
+        
+        // 🔥如果提取的URL与原始输入不同，更新输入框
+        if (cleanUrl !== rawInput) {
+            elements.videoUrl.value = cleanUrl;
+            console.log('✨ 已自动清理输入框URL');
+        }
+        
+        const platform = detectPlatform(cleanUrl);
         if (platform === 'unknown') {
             showMessage('请输入支持的平台视频链接', 'error');
             elements.videoUrl.focus();
@@ -1449,7 +1559,7 @@ function setupDownloadButton() {
         console.log(`✅ URL验证通过，检测到${supportedPlatforms[platform].name}链接`);
         
         // 开始下载
-        await startDownloadProcess(url);
+        await startDownloadProcess(cleanUrl);
     };
     
     // PC端点击事件
