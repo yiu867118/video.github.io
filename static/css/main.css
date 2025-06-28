@@ -2657,3 +2657,36 @@ html {
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--text-rgb), 0.3) rgba(var(--surface-rgb), 0.1);
 }
+
+/* 移动设备优化动画 */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* 移动设备专用样式 */
+.mobile-device .download-button {
+  min-height: 44px; /* 移动设备推荐的最小触摸目标 */
+  font-size: 16px; /* 防止iOS自动缩放 */
+}
+
+.mobile-device .form-control {
+  font-size: 16px; /* 防止iOS自动缩放 */
+}
+
+.mobile-hint {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动设备下载优化提示 */
+@media (max-width: 768px) {
+  .mobile-hint {
+    top: 5px;
+    right: 5px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}

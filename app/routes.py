@@ -166,24 +166,81 @@ def get_progress(download_id):
 
 @bp.route('/download-file/<download_id>')
 def download_file(download_id):
-    """下载文件"""
-    if download_id in download_progress:
-        progress = download_progress[download_id]
-        if 'file_path' in progress and os.path.exists(progress['file_path']):
-            file_path = progress['file_path']
-            filename = os.path.basename(file_path)
-            
-            # 清理进度记录
-            del download_progress[download_id]
-            
-            return send_file(
-                file_path,
-                as_attachment=True,
-                download_name=filename,
-                mimetype='video/mp4'
-            )
-    
-    return jsonify({'error': '文件不存在'}), 404
+    """下载文件 - 移动设备优化版"""
+    try:
+        if download_id in download_progress:
+            progress = download_progress[download_id]
+            if 'file_path' in progress and os.path.exists(progress['file_path']):
+                file_path = progress['file_path']
+                filename = os.path.basename(file_path)
+                file_size = os.path.getsize(file_path)
+                
+                logger.info(f"移动设备请求下载文件: {filename} ({file_size / 1024 / 1024:.2f} MB)")
+                
+                # 获取用户代理，判断是否为移动设备
+                user_agent = request.headers.get('User-Agent', '').lower()
+                is_mobile = any(mobile in user_agent for mobile in ['mobile', 'android', 'iphone', 'ipad'])
+                
+                try:
+                    # 移动设备优化的文件传输
+                    response = send_file(
+                        file_path,
+                        as_attachment=True,
+                        download_name=filename,
+                        mimetype='video/mp4'
+                    )
+                    
+                    # 移动设备优化的响应头
+                    if is_mobile:
+                        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                        response.headers['Pragma'] = 'no-cache'
+                        response.headers['Expires'] = '0'
+                        response.headers['Content-Length'] = str(file_size)
+                        response.headers['Accept-Ranges'] = 'bytes'
+                        # 确保移动设备能正确识别视频文件
+                        response.headers['Content-Type'] = 'video/mp4'
+                        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                        logger.info(f"✅ 移动设备文件传输开始: {filename}")
+                    else:
+                        logger.info(f"✅ PC端文件传输开始: {filename}")
+                    
+                    # 延迟清理进度记录，给移动设备更多时间
+                    def delayed_cleanup():
+                        time.sleep(30)  # 30秒后清理
+                        if download_id in download_progress:
+                            try:
+                                # 清理临时文件
+                                if os.path.exists(file_path):
+                                    os.remove(file_path)
+                                    # 尝试清理临时目录
+                                    temp_dir = os.path.dirname(file_path)
+                                    if os.path.exists(temp_dir):
+                                        try:
+                                            os.rmdir(temp_dir)
+                                        except:
+                                            pass
+                                del download_progress[download_id]
+                                logger.info(f"🧹 延迟清理完成: {download_id}")
+                            except Exception as e:
+                                logger.warning(f"清理文件时出错: {e}")
+                    
+                    # 启动延迟清理线程
+                    cleanup_thread = threading.Thread(target=delayed_cleanup)
+                    cleanup_thread.daemon = True
+                    cleanup_thread.start()
+                    
+                    return response
+                    
+                except Exception as e:
+                    logger.error(f"文件传输出错: {e}")
+                    return jsonify({'error': f'文件传输失败: {str(e)}'}), 500
+        
+        logger.warning(f"文件不存在或下载ID无效: {download_id}")
+        return jsonify({'error': '文件不存在或已过期'}), 404
+        
+    except Exception as e:
+        logger.error(f"下载文件接口出错: {e}")
+        return jsonify({'error': f'服务器错误: {str(e)}'}), 500
 
 def get_progress_message(progress_info):
     """根据进度信息生成消息"""
