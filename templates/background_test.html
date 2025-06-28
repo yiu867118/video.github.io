@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>背景测试页面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 10000;
+        }
+        
+        .test-container {
+            padding: 2rem;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .test-card {
+            background: rgba(255,255,255,0.9);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            margin: 1rem;
+        }
+        
+        .screen-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(13,110,253,0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(13,110,253,0.2);
+        }
+        
+        .bg-test {
+            width: 100%;
+            height: 50px;
+            margin: 1rem 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, 
+                rgb(13, 110, 253) 0%, 
+                rgb(116, 214, 143) 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .test-card {
+                margin: 0.5rem;
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .test-card {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .test-card {
+                padding: 0.75rem;
+                max-width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info" id="testInfo">
+        屏幕宽度: <span id="screenWidth"></span>px | 
+        高度: <span id="screenHeight"></span>px
+    </div>
+    
+    <div class="test-container">
+        <div class="test-card">
+            <h1>📱 背景显示测试</h1>
+            <p>这个页面用来测试在不同屏幕宽度下背景的显示效果</p>
+            
+            <div class="screen-info">
+                <strong>当前断点:</strong> <span id="currentBreakpoint"></span>
+            </div>
+            
+            <div class="bg-test bg-gradient">
+                渐变背景测试
+            </div>
+            
+            <div style="margin: 1rem 0;">
+                <button onclick="toggleTheme()" style="
+                    padding: 0.5rem 1rem;
+                    background: rgb(13, 110, 253);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                ">
+                    切换深色模式
+                </button>
+            </div>
+            
+            <div style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+                调整浏览器窗口大小来测试不同屏幕宽度下的背景效果
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('screenWidth').textContent = width;
+            document.getElementById('screenHeight').textContent = height;
+            
+            let breakpoint = '';
+            if (width <= 280) {
+                breakpoint = '极窄屏 (≤280px)';
+            } else if (width <= 320) {
+                breakpoint = '超小屏 (≤320px)';
+            } else if (width <= 400) {
+                breakpoint = '窄屏 (≤400px)';
+            } else if (width <= 480) {
+                breakpoint = '小屏手机 (≤480px)';
+            } else if (width <= 768) {
+                breakpoint = '移动端 (≤768px)';
+            } else if (width <= 1024) {
+                breakpoint = '平板端 (769px-1024px)';
+            } else if (width <= 1280) {
+                breakpoint = '大平板 (1025px-1280px)';
+            } else {
+                breakpoint = '桌面端 (≥1281px)';
+            }
+            
+            document.getElementById('currentBreakpoint').textContent = breakpoint;
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('theme-dark');
+        }
+        
+        // 初始化
+        updateScreenInfo();
+        
+        // 监听窗口大小变化
+        window.addEventListener('resize', updateScreenInfo);
+        
+        // 每秒更新一次，确保信息准确
+        setInterval(updateScreenInfo, 1000);
+    </script>
+</body>
+</html>

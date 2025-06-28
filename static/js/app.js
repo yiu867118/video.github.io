@@ -562,6 +562,13 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.statusMessage.style.display = 'block';
         elements.statusMessage.classList.add('visible');
         
+        // 移动端专用处理
+        if (type === 'error') {
+            showMobileError(message);
+        } else if (type === 'success') {
+            showMobileStatus(message, 'success', 5000);
+        }
+        
         console.log(`💬 状态消息: [${type.toUpperCase()}] ${message}`);
     }
 
@@ -639,6 +646,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elements.progressStatusText) {
             elements.progressStatusText.textContent = message || '';
         }
+        
+        // 移动端专用进度显示
+        updateMobileProgress(finalPercent, message);
         
         // 只在进度真正变化时记录日志
         if (finalPercent !== currentProgress) {
@@ -1595,17 +1605,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateProgress(100, '下载完成！');
                 updateProgressDetails('已完成', filename || '');
                 
-                // 检查是否有移动设备兼容标记
-                const mobileCompatible = progressData.mobile_compatible;
-                const audioFixed = progressData.audio_fixed;
-                let successMessage = `下载完成！${filename ? ` 文件: ${filename}` : ''}`;
-                
-                if (mobileCompatible || audioFixed) {
-                    successMessage += ' 📱✅ 已优化移动设备完美兼容性';
-                    if (audioFixed) {
-                        successMessage += ' 🔊 音频已修复为AAC格式';
-                    }
-                }
+                // 简化成功消息 - 只显示"下载完成"
+                let successMessage = '下载完成！';
                 
                 showMessage(successMessage, 'success');
                 setButtonState('completed');
@@ -1946,48 +1947,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 移动设备网络检测和优化
 function initMobileOptimizations() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log('🚀 初始化移动端优化...');
     
-    if (isMobile) {
-        console.log('📱 检测到移动设备，启用优化模式');
+    // 检测移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTablet = /iPad|Android.*(?=.*Tablet)|(?=.*Mobile).*Android.*(?=.*Chrome)/i.test(navigator.userAgent);
+    
+    if (isMobile || isTablet) {
+        document.body.classList.add('is-mobile');
         
-        // 检测网络连接
-        if ('connection' in navigator) {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            if (connection) {
-                console.log('📶 网络类型:', connection.effectiveType || 'unknown');
-                console.log('📶 网络速度:', connection.downlink || 'unknown', 'Mbps');
-            }
-        }
+        // 添加触摸反馈
+        addTouchFeedback();
         
-        // 添加移动设备样式优化
-        document.body.classList.add('mobile-device');
+        // 优化虚拟键盘体验
+        optimizeVirtualKeyboard();
         
-        // 移动设备下载提示
-        const mobileHint = document.createElement('div');
-        mobileHint.className = 'mobile-hint';
-        mobileHint.innerHTML = '📱 移动设备优化已启用 - 支持手机平板完美播放';
-        mobileHint.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 150, 255, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 1000;
-            opacity: 0.8;
-            animation: fadeInOut 4s ease-in-out;
-        `;
+        // 添加移动端专用状态指示器
+        createMobileStatusIndicator();
         
-        document.body.appendChild(mobileHint);
+        // 优化滚动体验
+        optimizeScrolling();
         
-        // 4秒后自动隐藏提示
+        console.log('✅ 移动端优化完成');
+    }
+}
+
+// 添加触摸反馈
+function addTouchFeedback() {
+    const buttons = document.querySelectorAll('button, .download-btn, .theme-toggle');
+    buttons.forEach(button => {
+        button.classList.add('touch-feedback');
+        
+        button.addEventListener('touchstart', function(e) {
+            this.style.transform = 'scale(0.98)';
+        });
+        
+        button.addEventListener('touchend', function(e) {
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+}
+
+// 优化虚拟键盘体验
+function optimizeVirtualKeyboard() {
+    const videoInput = elements.videoUrl;
+    if (!videoInput) return;
+    
+    let initialViewportHeight = window.innerHeight;
+    
+    videoInput.addEventListener('focus', function() {
+        // 虚拟键盘弹出时的处理
         setTimeout(() => {
-            if (mobileHint.parentNode) {
-                mobileHint.parentNode.removeChild(mobileHint);
+            if (window.innerHeight < initialViewportHeight * 0.75) {
+                document.body.classList.add('keyboard-open');
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        }, 4000);
+        }, 300);
+    });
+    
+    videoInput.addEventListener('blur', function() {
+        // 虚拟键盘收起时的处理
+        document.body.classList.remove('keyboard-open');
+    });
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', function() {
+        if (window.innerHeight >= initialViewportHeight * 0.9) {
+            document.body.classList.remove('keyboard-open');
+        }
+    });
+}
+
+// 创建移动端状态指示器
+function createMobileStatusIndicator() {
+    const indicator = document.createElement('div');
+    indicator.className = 'mobile-status-indicator';
+    indicator.id = 'mobileStatusIndicator';
+    document.body.appendChild(indicator);
+}
+
+// 显示移动端状态
+function showMobileStatus(message, type = 'info', duration = 3000) {
+    const indicator = document.getElementById('mobileStatusIndicator');
+    if (!indicator) return;
+    
+    indicator.textContent = message;
+    indicator.className = `mobile-status-indicator ${type} show`;
+    
+    // 自动隐藏
+    setTimeout(() => {
+        indicator.classList.remove('show');
+    }, duration);
+}
+
+// 优化滚动体验
+function optimizeScrolling() {
+    // 平滑滚动
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // 防止过度滚动
+    document.body.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.progress-container, .input-container')) {
+            e.stopPropagation();
+        }
+    }, { passive: true });
+}
+
+// 移动端专用进度显示
+function updateMobileProgress(percent, message) {
+    const isMobile = document.body.classList.contains('is-mobile');
+    if (!isMobile) return;
+    
+    // 显示移动端状态指示器
+    if (percent >= 100) {
+        showMobileStatus('下载完成！', 'success', 5000);
+    } else if (percent > 0) {
+        showMobileStatus(`${message} ${Math.round(percent)}%`, 'downloading', 1000);
+    }
+}
+
+// 移动端专用错误处理
+function showMobileError(message) {
+    const isMobile = document.body.classList.contains('is-mobile');
+    if (!isMobile) return;
+    
+    showMobileStatus(message, 'error', 5000);
+    
+    // 添加震动反馈（如果支持）
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
     }
 }

@@ -19,6 +19,11 @@ download_progress = {}
 def index():
     return render_template('index.html')
 
+@bp.route('/background-test')
+def background_test():
+    """背景显示测试页面"""
+    return render_template('background_test.html')
+
 @bp.route('/video-info', methods=['POST'])
 def video_info():
     """视频信息预检测接口"""
@@ -116,7 +121,7 @@ def download():
                 download_progress[download_id]['file_path'] = file_path
                 download_progress[download_id]['status'] = 'completed'
                 download_progress[download_id]['percent'] = 100
-                download_progress[download_id]['message'] = '下载完成！'
+                download_progress[download_id]['message'] = '下载完成'
                 
             except Exception as e:
                 logger.error(f"下载线程出错: {str(e)}")
@@ -254,7 +259,7 @@ def get_progress_message(progress_info):
     elif status == 'finished':
         return '下载完成，正在处理...'
     elif status == 'completed':
-        return '下载完成！'
+        return '下载完成'
     elif status == 'failed':
         return f'下载失败: {progress_info.get("error", "未知错误")}'
     else:

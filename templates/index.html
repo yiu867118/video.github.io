@@ -7,7 +7,79 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
     <title>超高清视频下载器</title>
+    
+    <!-- 移动端关键样式内联 - 确保立即显示 -->
+    <style>
+        /* 移动端基础显示保障 */
+        @media screen and (max-width: 768px) {
+            html, body {
+                opacity: 1 !important;
+                visibility: visible !important;
+                background: #f8f9fa !important;
+                color: #212529 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+            }
+            
+            .container {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                min-height: 100vh !important;
+                padding: 1rem !important;
+                padding-top: 70px !important;
+                width: 100% !important;
+                animation: none !important;
+                transform: none !important;
+            }
+            
+            .inner-container {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+                width: 100% !important;
+                padding: 1.5rem !important;
+                background: rgba(220, 235, 248, 0.9) !important;
+                border: 1px solid rgba(205, 225, 240, 0.8) !important;
+                border-radius: 16px !important;
+                animation: none !important;
+                transform: none !important;
+            }
+            
+            .header, .header h1, .input-section, .download-btn {
+                opacity: 1 !important;
+                visibility: visible !important;
+                animation: none !important;
+                transform: none !important;
+            }
+            
+            .header h1 {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 1.8rem !important;
+                margin: 0 0 0.5rem 0 !important;
+                color: #212529 !important;
+            }
+            
+            .download-btn {
+                display: flex !important;
+                width: 100% !important;
+                padding: 1rem 2rem !important;
+                background: #0d6efd !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 12px !important;
+                margin-bottom: 1.5rem !important;
+            }
+        }
+    </style>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_enhanced.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="description" content="哔哩哔哩, youtube, 视频下载工具，支持高清下载，实时进度显示">
     <meta name="keywords" content="视频下载,B站下载,哔哩哔哩下载">
@@ -41,7 +113,7 @@
             <div class="header">
                 <h1>
                     <i class="fas fa-video"></i>
-                     🐻 视频下载
+                       视频下载
 
                     <span class="baby-img-wrapper">
                          <img src="{{ url_for('static', filename='img/1.png') }}" class="bg-baby-image" alt="小熊宝宝" />
@@ -192,7 +264,7 @@
                 <div class="footer-content">
                     <div class="footer-brand">
                         <i class="fas fa-heart"></i>
-                        一慧出品, 必出精品
+                        熊熊出品, 必出精品
                     </div>
                 </div>
             </div>
