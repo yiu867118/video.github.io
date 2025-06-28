@@ -1,0 +1,999 @@
+/* ========================================
+   文萍专属视频下载器 - 增强版样式
+   Created with ❤️ by 一慧
+   ======================================== */
+
+:root {
+  /* 基础颜色系统 - 浅色模式 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  /* 背景和表面 */
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  /* 文字颜色 */
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  /* 边框 */
+  --border-rgb: 222, 226, 230;
+  
+  /* 旧版兼容（保持现有功能） */
+  --primary: var(--primary-rgb);
+  --primary-alt: 119, 134, 255;
+  --accent: 116, 214, 143;
+  --accent-alt: 6, 189, 158;
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
+  
+  /* 容器专用颜色 - 浅色模式 */
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
+
+  /* 字体系统 */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Inter', system-ui, sans-serif;
+
+  /* 间距系统 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* 阴影系统 */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --elevation-4: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --elevation-5: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  /* 光效系统 */
+  --glow-primary: 0 0 20px rgba(var(--primary), 0.3);
+  --glow-accent: 0 0 20px rgba(var(--accent), 0.3);
+  --glow-success: 0 0 30px rgba(var(--accent), 0.4);
+  --glow-error: 0 0 20px rgba(var(--error), 0.3);
+
+  /* 过渡系统 */
+  --transition-1: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-2: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* 边框半径 */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* 模糊效果 */
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+}
+
+/* 深色模式变量 */
+.theme-dark {
+  /* 基础颜色系统 - 深色模式 */
+  --primary-rgb: 74, 144, 226;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 40, 167, 69;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 23, 162, 184;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 52, 58, 64;
+  
+  /* 背景和表面 */
+  --background-rgb: 18, 18, 18;
+  --surface-rgb: 33, 37, 41;
+  --surface-alt-rgb: 52, 58, 64;
+  
+  /* 文字颜色 */
+  --text-rgb: 248, 249, 250;
+  --text-muted-rgb: 173, 181, 189;
+  
+  /* 边框 */
+  --border-rgb: 73, 80, 87;
+  
+  /* 旧版兼容更新 */
+  --primary: var(--primary-rgb);
+  --accent: 116, 214, 143;
+  --accent-alt: 6, 189, 158;
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
+  
+  /* 容器专用颜色 - 深色模式 */
+  --container-bg: 45, 52, 60;
+  --container-border: 73, 80, 87;
+  --lake-blue-light: 35, 42, 50;
+  --lake-blue: 45, 52, 60;
+  --lake-blue-deep: 55, 62, 70;
+}
+
+/* 浅色模式强制类 */
+.theme-light {
+  /* 确保浅色模式变量正确 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  --border-rgb: 222, 226, 230;
+  
+  /* 旧版兼容更新 */
+  --primary: var(--primary-rgb);
+  --accent: 116, 214, 143;
+  --accent-alt: 6, 189, 158;
+  --warning: var(--warning-rgb);
+  --error: var(--danger-rgb);
+  --surface: var(--surface-rgb);
+  --surface-alt: var(--surface-alt-rgb);
+  --text: var(--text-rgb);
+  --text-alt: var(--text-muted-rgb);
+  
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
+}
+
+/* 系统模式默认浅色 */
+.theme-system {
+  /* 默认浅色模式变量 */
+  --primary-rgb: 13, 110, 253;
+  --secondary-rgb: 108, 117, 125;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
+  --light-rgb: 248, 249, 250;
+  --dark-rgb: 33, 37, 41;
+  
+  --background-rgb: 255, 255, 255;
+  --surface-rgb: 248, 249, 250;
+  --surface-alt-rgb: 233, 236, 239;
+  
+  --text-rgb: 33, 37, 41;
+  --text-muted-rgb: 108, 117, 125;
+  
+  --border-rgb: 222, 226, 230;
+  
+  --container-bg: 230, 240, 248;
+  --container-border: 205, 225, 240;
+  --lake-blue-light: 235, 245, 252;
+  --lake-blue: 220, 235, 248;
+  --lake-blue-deep: 200, 225, 242;
+}
+
+/* 系统深色模式变量更新 */
+@media (prefers-color-scheme: dark) {
+  .theme-system {
+    /* 深色模式变量 */
+    --primary-rgb: 74, 144, 226;
+    --secondary-rgb: 108, 117, 125;
+    --success-rgb: 40, 167, 69;
+    --danger-rgb: 220, 53, 69;
+    --warning-rgb: 255, 193, 7;
+    --info-rgb: 23, 162, 184;
+    --light-rgb: 248, 249, 250;
+    --dark-rgb: 52, 58, 64;
+    
+    --background-rgb: 18, 18, 18;
+    --surface-rgb: 33, 37, 41;
+    --surface-alt-rgb: 52, 58, 64;
+    
+    --text-rgb: 248, 249, 250;
+    --text-muted-rgb: 173, 181, 189;
+    
+    --border-rgb: 73, 80, 87;
+    
+    --container-bg: 45, 52, 60;
+    --container-border: 73, 80, 87;
+    --lake-blue-light: 35, 42, 50;
+    --lake-blue: 45, 52, 60;
+    --lake-blue-deep: 55, 62, 70;
+  }
+}
+
+/* ========================================
+   基础重置和设置
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  color: rgba(var(--text-rgb), 1);
+  background-color: rgba(var(--background-rgb), 1);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 浅色模式美化背景 */
+.theme-light body,
+.theme-system body {
+  background: 
+    rgba(var(--background-rgb), 1),
+    linear-gradient(135deg,
+      rgb(233, 215, 237) 0%,
+      rgb(200, 209, 225) 18%,
+      rgb(228, 212, 233) 40%,
+      rgb(205, 230, 222) 60%,
+      rgb(255, 231, 211) 80%,
+      rgb(209, 222, 234) 100%
+    );
+}
+
+/* 深色模式背景 */
+.theme-dark body {
+  background: 
+    rgba(var(--background-rgb), 1),
+    linear-gradient(135deg, 
+      rgba(var(--surface-rgb), 1) 0%, 
+      rgba(var(--primary-rgb), 0.08) 25%,
+      rgba(var(--surface-rgb), 1) 50%,
+      rgba(var(--success-rgb), 0.06) 75%,
+      rgba(var(--surface-rgb), 1) 100%
+    );
+}
+
+/* 系统模式深色背景 */
+@media (prefers-color-scheme: dark) {
+  .theme-system body {
+    background: 
+      rgba(var(--background-rgb), 1),
+      linear-gradient(135deg, 
+        rgba(var(--surface-rgb), 1) 0%, 
+        rgba(var(--primary-rgb), 0.08) 25%,
+        rgba(var(--surface-rgb), 1) 50%,
+        rgba(var(--success-rgb), 0.06) 75%,
+        rgba(var(--surface-rgb), 1) 100%
+      );
+  }
+}
+
+/* ========================================
+   主容器和布局
+   ======================================== */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animate-fadeUp {
+  opacity: 0;
+  animation: fade-up-main 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fade-up-main {
+  0% { 
+    opacity: 0; 
+    transform: translateY(40px) scale(0.95); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+/* 内容容器 - 响应主题的湖蓝色 */
+.inner-container {
+  width: 100%;
+  background: linear-gradient(135deg, 
+    rgba(var(--lake-blue-light), 0.95) 0%,
+    rgba(var(--lake-blue), 0.92) 50%,
+    rgba(var(--lake-blue-deep), 0.90) 100%);
+  backdrop-filter: blur(var(--blur-lg));
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: 
+    var(--elevation-3),
+    0 0 0 1px rgba(var(--primary-rgb), 0.08) inset,
+    0 2px 20px rgba(135, 206, 235, 0.15);
+  border: 1px solid rgba(var(--container-border), 0.8);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ========================================
+   主题切换按钮
+   ======================================== */
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(var(--surface-rgb), 0.95);
+  border: 1px solid rgba(var(--border-rgb), 0.3);
+  color: rgba(var(--text-rgb), 0.9);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(var(--dark-rgb), 0.1);
+}
+
+.theme-toggle:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: rgba(var(--primary-rgb), 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--dark-rgb), 0.15);
+}
+
+.theme-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.theme-text {
+  font-size: 13px;
+  white-space: nowrap;
+  color: inherit;
+}
+
+/* ========================================
+   头部区域
+   ======================================== */
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 700;
+  color: rgba(var(--text-rgb), 0.9);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  line-height: 1.2;
+}
+
+.header h1 i {
+  color: rgba(var(--primary-rgb), 1);
+  font-size: 0.9em;
+}
+
+.baby-img-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bg-baby-image {
+  width: 40px;
+  height: auto;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.bg-baby-image:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.supporting-text {
+  font-size: 1.1rem;
+  color: rgba(var(--text-muted-rgb), 0.8);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.supporting-text i {
+  color: rgba(var(--accent), 1);
+  font-size: 1rem;
+}
+
+/* ========================================
+   输入区域
+   ======================================== */
+
+.input-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.input-container {
+  position: relative;
+  background: rgba(var(--surface-rgb), 0.9);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(var(--border-rgb), 0.3);
+  box-shadow: var(--elevation-2);
+  transition: all var(--transition-2);
+  overflow: hidden;
+}
+
+.input-container:hover {
+  border-color: rgba(var(--primary-rgb), 0.4);
+  box-shadow: var(--elevation-3);
+}
+
+.input-container:focus-within {
+  border-color: rgba(var(--primary-rgb), 0.8);
+  box-shadow: 
+    var(--elevation-3),
+    0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(var(--text-muted-rgb), 0.6);
+  font-size: 1.2rem;
+  z-index: 2;
+  pointer-events: none;
+  transition: color var(--transition-1);
+}
+
+.input-container:focus-within .input-icon {
+  color: rgba(var(--primary-rgb), 0.8);
+}
+
+#videoUrl {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  font-size: 1rem;
+  border: none;
+  background: transparent;
+  color: rgba(var(--text-rgb), 0.9);
+  outline: none;
+  font-family: inherit;
+  transition: color var(--transition-1);
+}
+
+#videoUrl::placeholder {
+  color: rgba(var(--text-muted-rgb), 0.6);
+}
+
+/* ========================================
+   下载按钮
+   ======================================== */
+
+.download-btn {
+  width: 100%;
+  padding: 1.2rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-rgb), 1) 0%, 
+    rgba(var(--primary-rgb), 0.9) 100%);
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  box-shadow: 
+    var(--elevation-2),
+    0 0 20px rgba(var(--primary-rgb), 0.3);
+  margin-bottom: var(--spacing-xl);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    var(--elevation-4),
+    0 0 30px rgba(var(--primary-rgb), 0.4);
+}
+
+.download-btn:active {
+  transform: translateY(0);
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  transition: transform var(--transition-1);
+}
+
+.download-btn:hover .btn-icon {
+  transform: scale(1.1);
+}
+
+.btn-text {
+  font-weight: 600;
+}
+
+/* ========================================
+   状态和进度区域
+   ======================================== */
+
+.status-message {
+  background: rgba(var(--surface-rgb), 0.9);
+  border: 1px solid rgba(var(--border-rgb), 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  box-shadow: var(--elevation-1);
+  transition: all var(--transition-2);
+}
+
+.status-icon {
+  color: rgba(var(--info-rgb), 1);
+  font-size: 1.2rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.status-content {
+  flex: 1;
+}
+
+.status-text {
+  font-weight: 600;
+  color: rgba(var(--text-rgb), 0.9);
+  margin-bottom: 4px;
+}
+
+.status-detail {
+  font-size: 0.9rem;
+  color: rgba(var(--text-muted-rgb), 0.8);
+  line-height: 1.4;
+}
+
+.progress-container {
+  background: rgba(var(--surface-rgb), 0.9);
+  border: 1px solid rgba(var(--border-rgb), 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--elevation-1);
+  transition: all var(--transition-2);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.progress-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: rgba(var(--text-rgb), 0.9);
+  font-weight: 600;
+}
+
+.progress-title i {
+  color: rgba(var(--primary-rgb), 1);
+}
+
+.progress-percentage {
+  font-weight: 700;
+  color: rgba(var(--primary-rgb), 1);
+  font-size: 1.1rem;
+}
+
+.progress-bar-wrapper {
+  background: rgba(var(--border-rgb), 0.3);
+  border-radius: var(--radius-full);
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  position: relative;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, 
+    rgba(var(--primary-rgb), 1) 0%, 
+    rgba(var(--primary-rgb), 0.8) 100%);
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+  animation: progress-shine 2s infinite;
+}
+
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-details {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  font-size: 0.9rem;
+}
+
+.progress-speed,
+.progress-size,
+.progress-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(var(--text-muted-rgb), 0.8);
+}
+
+.progress-speed i,
+.progress-size i {
+  color: rgba(var(--accent), 1);
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   移动端优化
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* 简化背景渐变，移除复杂装饰 */
+  body {
+    background: rgba(var(--background-rgb), 1);
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .theme-light body,
+  .theme-system body {
+    background: rgba(var(--background-rgb), 1);
+  }
+  
+  .theme-dark body {
+    background: rgba(var(--background-rgb), 1);
+  }
+
+  /* 容器移动端优化 */
+  .container {
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .inner-container {
+    background: rgba(var(--surface-rgb), 0.95);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
+    box-shadow: 0 4px 20px rgba(var(--dark-rgb), 0.1);
+    backdrop-filter: none;
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: none;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* 主题切换按钮移动端 */
+  .theme-toggle {
+    top: 16px;
+    right: 16px;
+    padding: 10px 14px;
+    background: rgba(var(--surface-rgb), 0.95);
+    border: 1px solid rgba(var(--border-rgb), 0.4);
+    color: rgba(var(--text-rgb), 0.9);
+    box-shadow: 0 2px 12px rgba(var(--dark-rgb), 0.15);
+    backdrop-filter: none;
+    font-size: 13px;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+  }
+  
+  .theme-toggle:hover,
+  .theme-toggle:active {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: rgba(var(--primary-rgb), 0.3);
+    transform: scale(0.98);
+  }
+  
+  .theme-text {
+    display: none;
+  }
+  
+  .theme-icon {
+    font-size: 18px;
+  }
+  
+  /* 头部移动端优化 */
+  .header h1 {
+    font-size: 1.8rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .bg-baby-image {
+    width: 32px;
+  }
+  
+  .supporting-text {
+    font-size: 1rem;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  /* 输入容器移动端优化 */
+  .input-container {
+    background: rgba(var(--surface-rgb), 0.9);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
+    box-shadow: 0 2px 8px rgba(var(--dark-rgb), 0.08);
+    backdrop-filter: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* 输入框 */
+  #videoUrl {
+    background: transparent;
+    border: none;
+    padding: 0.8rem;
+    font-size: 16px; /* 防止iOS缩放 */
+    color: rgba(var(--text-rgb), 1);
+    transition: color 0.3s ease;
+  }
+  
+  #videoUrl::placeholder {
+    color: rgba(var(--text-muted-rgb), 0.7);
+  }
+  
+  /* 下载按钮 */
+  .download-btn {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 1), rgba(var(--primary-rgb), 0.9));
+    border: none;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+  }
+  
+  .download-btn:hover,
+  .download-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+  }
+  
+  /* 状态和进度容器 */
+  .status-message,
+  .progress-container {
+    background: rgba(var(--surface-rgb), 0.9);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
+    color: rgba(var(--text-rgb), 1);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  /* 禁用复杂动画，保留基础过渡 */
+  .animate-fadeUp {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  /* 移动端触摸优化 */
+  button,
+  .theme-toggle,
+  .download-btn {
+    -webkit-tap-highlight-color: rgba(var(--primary-rgb), 0.2);
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  
+  /* 文本渲染优化 */
+  body,
+  .inner-container {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* 小屏手机进一步优化 */
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 0.8rem;
+    padding-top: 1.5rem;
+  }
+  
+  .inner-container {
+    padding: 1.2rem;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .bg-baby-image {
+    width: 28px;
+  }
+  
+  .supporting-text {
+    font-size: 0.9rem;
+  }
+  
+  .input-container {
+    margin-bottom: 1rem;
+  }
+  
+  #videoUrl {
+    font-size: 16px;
+    padding: 0.7rem 0.7rem 0.7rem 2.2rem;
+  }
+  
+  .input-icon {
+    font-size: 1.1rem;
+    left: 0.8rem;
+  }
+  
+  .download-btn {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+  }
+}
+
+/* 触摸设备优化 - 移除悬停效果但保持基础过渡 */
+@media (hover: none) and (pointer: coarse) {
+  .input-container:hover,
+  .download-btn:hover {
+    transform: none;
+  }
+  
+  /* 增大触摸目标 */
+  .download-btn {
+    min-height: 48px;
+  }
+  
+  #videoUrl {
+    min-height: 44px;
+  }
+}
+
+/* 系统深色模式移动端优化 */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .theme-system body {
+    background: rgba(var(--background-rgb), 1);
+  }
+  
+  .theme-system .inner-container {
+    background: rgba(var(--surface-rgb), 0.95);
+    border: 1px solid rgba(var(--border-rgb), 0.3);
+    box-shadow: 0 4px 20px rgba(var(--dark-rgb), 0.2);
+  }
+}
+
+/* 移动端基础性能优化 */
+@media screen and (max-width: 768px) {
+  /* 硬件加速关键元素 */
+  .theme-toggle,
+  .download-btn,
+  .progress-bar {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* 移动端字体渲染优化 */
+  body,
+  .inner-container,
+  .download-btn,
+  .status-message {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* iOS设备特殊优化 */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 768px) {
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+    
+    input,
+    textarea,
+    button {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    
+    body {
+      -webkit-text-size-adjust: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

@@ -47,7 +47,10 @@ def download():
                 'message': get_progress_message(progress_info),
                 'filename': progress_info.get('filename', ''),
                 'speed': progress_info.get('speed', ''),
-                'downloaded_mb': progress_info.get('downloaded_mb', 0)
+                'downloaded_mb': progress_info.get('downloaded_mb', 0),
+                'error': progress_info.get('error', ''),
+                'error_type': progress_info.get('error_type', ''),
+                'fatal': progress_info.get('fatal', False)
             }
         
         # 在后台线程中执行下载
@@ -74,9 +77,16 @@ def download():
                 
             except Exception as e:
                 logger.error(f"下载线程出错: {str(e)}")
+                
+                # 导入错误分析函数
+                from .video_downloader import analyze_bilibili_error
+                error_analysis = analyze_bilibili_error(str(e))
+                
                 download_progress[download_id]['status'] = 'failed'
-                download_progress[download_id]['error'] = str(e)
-                download_progress[download_id]['message'] = f'下载失败: {str(e)}'
+                download_progress[download_id]['error'] = error_analysis.get('user_friendly', str(e))
+                download_progress[download_id]['error_type'] = error_analysis.get('error_type', 'unknown_error')
+                download_progress[download_id]['fatal'] = error_analysis.get('fatal', False)
+                download_progress[download_id]['message'] = f'下载失败: {error_analysis.get("user_friendly", str(e))}'
         
         # 启动下载线程
         thread = threading.Thread(target=download_thread)

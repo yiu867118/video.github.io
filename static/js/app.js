@@ -600,24 +600,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 更新进度条
+     * 更新进度条 - 防回退增强版
      */
-    function updateProgress(percent, message) {
+    function updateProgress(percent, message, allowReset = false) {
         const safePercent = Math.max(0, Math.min(100, percent));
         
+        // 获取当前进度，防止回退
+        const currentProgress = elements.downloadProgress ? elements.downloadProgress.value : 0;
+        
+        // 只有在明确允许重置（如致命错误）或进度增加时才更新
+        let finalPercent;
+        if (allowReset) {
+            finalPercent = safePercent;
+        } else {
+            finalPercent = Math.max(currentProgress, safePercent); // 确保进度只增不减
+        }
+        
         if (elements.downloadProgress) {
-            elements.downloadProgress.value = safePercent;
+            elements.downloadProgress.value = finalPercent;
         }
         
         if (elements.progressPercentage) {
-            elements.progressPercentage.textContent = `${Math.round(safePercent)}%`;
+            elements.progressPercentage.textContent = `${Math.round(finalPercent)}%`;
         }
         
         if (elements.progressStatusText) {
             elements.progressStatusText.textContent = message || '';
         }
         
-        console.log(`📊 进度更新: ${safePercent.toFixed(1)}% - ${message}`);
+        // 只在进度真正变化时记录日志
+        if (finalPercent !== currentProgress) {
+            console.log(`📊 进度更新: ${currentProgress.toFixed(1)}% → ${finalPercent.toFixed(1)}% - ${message}`);
+        }
     }
 
     /**
@@ -1136,12 +1150,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 处理特定错误类型 - 修复版
+     * 处理特定错误类型 - 修复版（不回退进度条）
      */
     function handleSpecificError(errorType, errorMessage, backendErrorType = null, isFatal = null) {
-        console.log(`🔍 错误类型: ${errorType}, 后端类型: ${backendErrorType}, 消息: ${errorMessage}`);
+        console.log(`🔍 错误类型: ${errorType}, 后端类型: ${backendErrorType}, 致命: ${isFatal}, 消息: ${errorMessage}`);
         
-        // 停止所有轮询
+        // 立即停止所有轮询
         stopProgressPolling();
         
         // 使用后端提供的错误类型（如果有）
@@ -1150,13 +1164,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (finalIsFatal) {
             state.fatalErrorOccurred = true;
+            console.log('💀 检测到致命错误，标记为不可恢复');
         }
         
         switch (finalErrorType) {
             case 'payment_required':
                 setButtonState('blocked', '付费内容');
                 showMessage('该视频为付费内容，需要购买后才能下载', 'blocked');
-                updateProgress(0, '付费内容无法下载');
+                // 致命错误：不回退进度条，保持当前进度并显示错误信息
+                updateProgress(elements.downloadProgress?.value || 0, '付费内容无法下载');
                 updateProgressDetails('付费限制', '需要购买');
                 
                 // 显示详细说明
@@ -1175,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setButtonState('error', '需要登录');
                 const platformName = supportedPlatforms[state.currentPlatform]?.name || '相应平台';
                 showMessage(`需要登录${platformName}账号才能下载该视频`, 'error');
-                updateProgress(0, '需要登录认证');
+                updateProgress(elements.downloadProgress?.value || 0, '需要登录认证');
                 
                 setTimeout(() => {
                     showMessage(`💡 请在浏览器中登录${platformName}账号后重试`, 'info');
@@ -1189,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'region_blocked':
                 setButtonState('blocked', '地区限制');
                 showMessage('该视频在当前地区不可观看', 'blocked');
-                updateProgress(0, '地区限制');
+                updateProgress(elements.downloadProgress?.value || 0, '地区限制');
                 
                 setTimeout(() => {
                     completeReset();
@@ -1199,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'access_denied':
                 setButtonState('error', '无法访问');
                 showMessage('视频无法访问，可能已被删除或设为私有', 'error');
-                updateProgress(0, '访问被拒绝');
+                updateProgress(elements.downloadProgress?.value || 0, '访问被拒绝');
                 
                 setTimeout(() => {
                     completeReset();
@@ -1209,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'age_restricted':
                 setButtonState('blocked', '年龄限制');
                 showMessage('该视频有年龄限制，需要验证身份', 'blocked');
-                updateProgress(0, '年龄限制');
+                updateProgress(elements.downloadProgress?.value || 0, '年龄限制');
                 
                 setTimeout(() => {
                     showMessage('💡 请在原平台完成年龄验证后重试', 'info');
@@ -1223,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'live_content':
                 setButtonState('blocked', '直播内容');
                 showMessage('检测到直播内容，暂不支持直播下载', 'blocked');
-                updateProgress(0, '直播内容');
+                updateProgress(elements.downloadProgress?.value || 0, '直播内容');
                 
                 setTimeout(() => {
                     showMessage('💡 请等待直播结束后尝试下载回放', 'info');
@@ -1293,15 +1309,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const progressData = await response.json();
                 console.log('📈 进度数据:', progressData);
                 
-                // 检查是否是致命错误（如付费内容）
+                // 检查是否是致命错误（如付费内容）- 增强版
                 if (progressData.error) {
                     const errorType = identifyErrorType(progressData.error);
                     const fatalErrors = ['payment_required', 'auth_required', 'region_blocked', 'access_denied', 'age_restricted', 'live_content'];
                     
-                    if (fatalErrors.includes(errorType) || fatalErrors.includes(progressData.error_type) || progressData.fatal) {
+                    // 检查是否为致命错误
+                    const isFatalError = fatalErrors.includes(errorType) || 
+                                       fatalErrors.includes(progressData.error_type) || 
+                                       progressData.fatal === true;
+                    
+                    if (isFatalError) {
+                        console.log('💀 检测到致命错误，立即停止轮询:', {
+                            errorType,
+                            backendErrorType: progressData.error_type,
+                            fatal: progressData.fatal,
+                            error: progressData.error
+                        });
+                        
                         stopProgressPolling();
                         handleSpecificError(errorType, progressData.error, progressData.error_type, progressData.fatal);
-                        return;
+                        return; // 立即退出，不再处理任何进度更新
                     }
                 }
                 
@@ -1421,10 +1449,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // 根据错误类型决定处理方式
                 const fatalErrors = ['payment_required', 'auth_required', 'region_blocked', 'access_denied', 'age_restricted', 'live_content'];
-                if (fatalErrors.includes(errorType) || fatalErrors.includes(progressData.error_type) || progressData.fatal) {
+                const isFatalError = fatalErrors.includes(errorType) || 
+                                   fatalErrors.includes(progressData.error_type) || 
+                                   progressData.fatal === true;
+                
+                if (isFatalError) {
+                    console.log('💀 失败状态下检测到致命错误，不回退进度条');
                     handleSpecificError(errorType, errorMsg, progressData.error_type, progressData.fatal);
                 } else {
-                    updateProgress(0, '下载失败');
+                    // 非致命错误才允许重置进度条
+                    updateProgress(0, '下载失败', true); // 允许重置
                     updateProgressDetails('失败', '');
                     showMessage(`下载失败: ${errorMsg}`, 'error');
                     handleDownloadError(new Error(errorMsg));
