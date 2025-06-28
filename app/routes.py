@@ -19,6 +19,49 @@ download_progress = {}
 def index():
     return render_template('index.html')
 
+@bp.route('/video-info', methods=['POST'])
+def video_info():
+    """视频信息预检测接口"""
+    try:
+        data = request.get_json()
+        if not data or 'url' not in data:
+            return jsonify({'error': '缺少视频URL'}), 400
+        
+        url = data['url']
+        logger.info(f"收到视频信息请求: {url}")
+        
+        # 调用视频信息获取函数
+        try:
+            info = get_video_info(url)
+            return jsonify({
+                'title': info.get('title', ''),
+                'duration': info.get('duration', ''),
+                'platform': info.get('platform', ''),
+                'available': True
+            })
+        except Exception as e:
+            logger.error(f"获取视频信息失败: {str(e)}")
+            
+            # 分析错误类型
+            from .video_downloader import analyze_bilibili_error
+            error_analysis = analyze_bilibili_error(str(e))
+            
+            return jsonify({
+                'error': error_analysis.get('user_friendly', str(e)),
+                'error_type': error_analysis.get('error_type', 'unknown_error'),
+                'fatal': error_analysis.get('fatal', False),
+                'available': False
+            }), 400
+            
+    except Exception as e:
+        logger.error(f"视频信息接口出错: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'error_type': 'unknown_error',
+            'fatal': False,
+            'available': False
+        }), 500
+
 @bp.route('/download', methods=['POST'])
 def download():
     try:
