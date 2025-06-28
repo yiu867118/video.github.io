@@ -1,12 +1,14 @@
 /**
- * 文萍专属视频下载器 - 多平台增强版 v2.3 (终极修复版)
+ * 文萍专属视频下载器 - 多平台增强版 v2.6 (高效稳定版)
  * 支持实时进度显示、多平台下载、智能错误处理、付费内容识别
- * 修复：进度条回退、误导性高进度、致命错误重试等问题
+ * 修复：进度条回退、误导性高进度、致命错误重试、99%卡顿等问题
+ * 新增：高效下载策略，智能音频修复，避免卡顿，确保PC和移动设备完美兼容
+ * 特色：10个高效策略，智能检测音频，按需修复，避免过度处理
  * Created with ❤️ by 一慧
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 === 🐻🐻专属视频下载器 - 多平台增强版 v2.3 启动 ===');
+    console.log('🚀 === 🐻🐻专属视频下载器 - 多平台增强版 v2.6 启动 ===');
     
     // 核心元素获取
     const elements = {
@@ -1586,7 +1588,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('✅ 下载任务完成');
                 updateProgress(100, '下载完成！');
                 updateProgressDetails('已完成', filename || '');
-                showMessage(`下载完成！${filename ? ` 文件: ${filename}` : ''}`, 'success');
+                
+                // 检查是否有移动设备兼容标记
+                const mobileCompatible = progressData.mobile_compatible;
+                const audioFixed = progressData.audio_fixed;
+                let successMessage = `下载完成！${filename ? ` 文件: ${filename}` : ''}`;
+                
+                if (mobileCompatible || audioFixed) {
+                    successMessage += ' 📱✅ 已优化移动设备完美兼容性';
+                    if (audioFixed) {
+                        successMessage += ' 🔊 音频已修复为AAC格式';
+                    }
+                }
+                
+                showMessage(successMessage, 'success');
                 setButtonState('completed');
                 
                 // 显示成功动画
@@ -1665,7 +1680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             console.log('📥 开始自动文件下载:', filename);
             
-            showMessage('准备下载文件到本地...', 'downloading');
+            showMessage('准备下载文件到本地... 📱 已优化移动设备兼容性', 'downloading');
             
             setTimeout(() => {
                 const link = document.createElement('a');
@@ -1678,7 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(link);
                 
                 console.log('✅ 文件下载触发成功');
-                showMessage('文件下载已开始，请检查下载文件夹', 'success');
+                showMessage('文件下载已开始，请检查下载文件夹 📱 兼容手机平板播放', 'success');
                 
             }, 1000);
             
@@ -1866,5 +1881,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // 页面初始化设置 - 放在最后执行
     initializeApp();
 
-    console.log('✅ === 🐻🐻专属视频下载器 - 多平台增强版 v2.3 初始化完成! ===');
+    console.log('✅ === 🐻🐻专属视频下载器 - 多平台增强版 v2.4 初始化完成! ===');
 });

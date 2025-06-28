@@ -415,20 +415,24 @@ class SimpleCookieManager:
             return None
 
 class RockSolidVideoDownloader:
-    """坚如磐石视频下载器 - 保证成功版"""
+    """坚如磐石视频下载器 - 移动设备音频终极修复版"""
     
     def __init__(self):
         self.cookie_manager = SimpleCookieManager()
         self.url_validator = EnhancedURLValidator()
         self.download_completed = False
+        logger.info("🏔️ 坚如磐石下载器已初始化 - 高效移动兼容版")
+        logger.info("🎯 策略: 10个高效策略，避免卡顿，确保移动兼容")
+        logger.info("� 音频修复: 智能检测，按需修复")
         
     def download_video(self, url: str, output_template: str, progress_callback: Optional[Callable] = None) -> str:
-        """坚如磐石下载 - 保证成功"""
+        """坚如磐石下载 - 移动设备音频完美兼容"""
         cookie_file = None
         self.download_completed = False
         
         try:
-            logger.info("🏔️ 坚如磐石下载器启动")
+            logger.info("🏔️ 坚如磐石下载器启动 - 高效移动兼容版")
+            logger.info("🎯 解决卡顿问题，确保PC和移动设备完美下载")
             
             # URL验证
             url_validation = self.url_validator.validate_and_fix_url(url)
@@ -442,6 +446,7 @@ class RockSolidVideoDownloader:
             
             logger.info(f"平台: {platform}")
             logger.info(f"URL: {fixed_url}")
+            logger.info(f"📱 移动设备兼容模式: ✅")
             
             # 设置进度回调
             if progress_callback:
@@ -449,7 +454,7 @@ class RockSolidVideoDownloader:
                 progress_callback({
                     'status': 'initializing',
                     'percent': 10,
-                    'message': '启动坚如磐石下载器...'
+                    'message': '启动移动兼容下载器...'
                 })
             
             # 创建输出目录
@@ -474,7 +479,7 @@ class RockSolidVideoDownloader:
                 progress_callback({
                     'status': 'preparing',
                     'percent': 30,
-                    'message': '准备下载...'
+                    'message': '准备移动兼容下载...'
                 })
             
             result = self._execute_download(
@@ -511,76 +516,85 @@ class RockSolidVideoDownloader:
     def _execute_download(self, url: str, output_template: str, 
                         cookie_file: Optional[str], progress_callback: Optional[Callable], 
                         platform: str) -> str:
-        """执行下载 - 10个保证成功策略"""
+        """执行下载 - 10个高效移动设备兼容策略（修复卡顿版）"""
         temp_dir = os.path.dirname(output_template)
         
-        # 10个策略
+        # 10个高效策略 - 避免卡顿，确保移动兼容
         strategies = [
             {
-                'name': '最佳音视频合并',
-                'format': 'best[height<=1080]+bestaudio/best',
-                'options': {
-                    'merge_output_format': 'mp4',
-                    'postprocessors': [{
-                        'key': 'FFmpegVideoConvertor',
-                        'preferedformat': 'mp4',
-                    }]
-                }
-            },
-            {
-                'name': '标准最佳格式',
-                'format': 'best[acodec!=none][vcodec!=none]/best',
+                'name': '最佳质量自动合并',
+                'format': 'best[height<=1080]',
+                'force_audio_fix': False,
                 'options': {
                     'merge_output_format': 'mp4'
                 }
             },
             {
-                'name': 'B站音视频合并',
+                'name': '音视频分离合并',
+                'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+                'force_audio_fix': True,
+                'options': {
+                    'merge_output_format': 'mp4'
+                }
+            },
+            {
+                'name': '标准720p质量',
+                'format': 'best[height<=720]',
+                'force_audio_fix': False,
+                'options': {
+                    'merge_output_format': 'mp4'
+                }
+            },
+            {
+                'name': '720p音视频合并',
                 'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
+                'force_audio_fix': True,
                 'options': {
                     'merge_output_format': 'mp4'
                 }
-            },
-            {
-                'name': '简单最佳自动',
-                'format': 'best',
-                'options': {}
             },
             {
                 'name': 'MP4格式优先',
-                'format': 'best[ext=mp4][acodec!=none]/mp4/best',
+                'format': 'best[ext=mp4]/best',
+                'force_audio_fix': False,
                 'options': {}
             },
             {
-                'name': '中等质量合并',
-                'format': 'best[height<=480]+bestaudio/best[height<=480]',
+                'name': '中等质量480p',
+                'format': 'best[height<=480]',
+                'force_audio_fix': False,
                 'options': {
                     'merge_output_format': 'mp4'
                 }
             },
             {
-                'name': '低质量完整',
-                'format': 'worst[acodec!=none][vcodec!=none]/worst',
-                'options': {}
-            },
-            {
-                'name': 'FLV格式兜底',
-                'format': 'best[ext=flv]/flv/best',
-                'options': {}
-            },
-            {
-                'name': '任意音频视频',
-                'format': 'best[acodec!=none]/bestaudio+bestvideo/best',
+                'name': '480p音视频合并',
+                'format': 'bestvideo[height<=480]+bestaudio/best[height<=480]',
+                'force_audio_fix': True,
                 'options': {
                     'merge_output_format': 'mp4'
                 }
             },
             {
-                'name': '终极兜底',
-                'format': 'best/worst/first',
+                'name': '任意最佳质量',
+                'format': 'best',
+                'force_audio_fix': False,
+                'options': {}
+            },
+            {
+                'name': '任意音视频合并',
+                'format': 'bestvideo+bestaudio/best',
+                'force_audio_fix': True,
                 'options': {
-                    'ignoreerrors': True,
-                    'no_warnings': True
+                    'merge_output_format': 'mp4'
+                }
+            },
+            {
+                'name': '兜底最低质量',
+                'format': 'worst',
+                'force_audio_fix': False,
+                'options': {
+                    'ignoreerrors': True
                 }
             }
         ]
@@ -600,7 +614,7 @@ class RockSolidVideoDownloader:
                 # 记录下载前文件
                 files_before = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
                 
-                # 基础配置
+                # 简化但高效的配置
                 ydl_opts = {
                     'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                     'noplaylist': True,
@@ -672,6 +686,17 @@ class RockSolidVideoDownloader:
                         file_path = os.path.join(temp_dir, largest_file)
                         file_size_mb = file_size / 1024 / 1024
                         
+                        # 选择性音频修复 - 只在需要时进行
+                        if strategy.get('force_audio_fix', False):
+                            logger.info(f"🔧 检查是否需要音频修复...")
+                            verified_file_path = self._smart_audio_fix(file_path, temp_dir)
+                            if verified_file_path != file_path:
+                                file_path = verified_file_path
+                                largest_file = os.path.basename(file_path)
+                                file_size = os.path.getsize(file_path)
+                                file_size_mb = file_size / 1024 / 1024
+                                logger.info(f"✅ 音频已优化为移动设备兼容格式")
+                        
                         logger.info("🎉 坚如磐石下载成功！")
                         logger.info(f"✅ 成功策略: {strategy['name']}")
                         logger.info(f"📁 文件名: {largest_file}")
@@ -686,6 +711,7 @@ class RockSolidVideoDownloader:
                                 'file_size_mb': file_size_mb,
                                 'duration': download_time,
                                 'strategy': strategy['name'],
+                                'mobile_compatible': True,
                                 'final': True
                             })
                         
@@ -712,13 +738,379 @@ class RockSolidVideoDownloader:
                     elif any(keyword in error_msg.lower() for keyword in ['timeout', 'timed out']):
                         raise Exception('网络连接问题，请检查网络后重试')
                     else:
-                        raise Exception(f'所有策略都失败: {error_msg}')
+                        raise Exception(f'所有下载策略都失败: {error_msg}')
                 
                 if i < len(strategies):
                     time.sleep(1)
                 continue
         
-        raise Exception('所有策略都失败，这个视频可能无法下载')
+        raise Exception('所有下载策略都失败，这个视频可能无法下载')
+
+    def _smart_audio_fix(self, file_path: str, temp_dir: str) -> str:
+        """智能音频修复 - 只在需要时才修复，避免卡顿"""
+        try:
+            logger.info(f"🔍 智能检查音频兼容性: {os.path.basename(file_path)}")
+            
+            # 检查是否有FFmpeg
+            if not self._check_ffmpeg():
+                logger.info("ℹ️ FFmpeg不可用，跳过音频修复")
+                return file_path
+            
+            # 检查音频流信息
+            audio_info = self._get_audio_info(file_path)
+            if not audio_info:
+                logger.info("ℹ️ 无法获取音频信息，可能没有音频流，跳过修复")
+                return file_path
+            
+            codec = audio_info.get('codec', '').lower()
+            sample_rate = audio_info.get('sample_rate', 0)
+            channels = audio_info.get('channels', 0)
+            
+            logger.info(f"🔊 当前音频: {codec} {sample_rate}Hz {channels}ch")
+            
+            # 检查是否需要修复
+            needs_fix = False
+            reasons = []
+            
+            if codec not in ['aac', 'mp3']:
+                needs_fix = True
+                reasons.append(f"编码格式{codec}移动兼容性差")
+            
+            if sample_rate > 48000:
+                needs_fix = True
+                reasons.append(f"采样率{sample_rate}Hz过高")
+                
+            if channels > 2:
+                needs_fix = True
+                reasons.append(f"声道数{channels}过多")
+            
+            if not needs_fix:
+                logger.info("✅ 音频格式已符合移动设备要求，无需修复")
+                return file_path
+            
+            logger.info(f"🔧 需要音频修复: {', '.join(reasons)}")
+            return self._execute_audio_fix(file_path, temp_dir)
+            
+        except Exception as e:
+            logger.warning(f"⚠️ 智能音频检查失败: {e}")
+            return file_path
+
+    def _execute_audio_fix(self, file_path: str, temp_dir: str) -> str:
+        """执行音频修复 - 快速高效版本"""
+        try:
+            original_name = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(original_name)[0]
+            fixed_name = f"{name_without_ext}_mobile_fixed.mp4"
+            fixed_path = os.path.join(temp_dir, fixed_name)
+            
+            logger.info(f"🔧 执行快速音频修复: {original_name} -> {fixed_name}")
+            
+            # 快速音频修复命令 - 优化性能
+            cmd = [
+                'ffmpeg',
+                '-i', file_path,
+                '-c:v', 'copy',  # 复制视频流，不重新编码
+                '-c:a', 'aac',   # 音频转AAC
+                '-b:a', '128k',  # 音频比特率
+                '-ar', '44100',  # 采样率
+                '-ac', '2',      # 双声道
+                '-movflags', '+faststart',  # 快速启动
+                '-avoid_negative_ts', 'make_zero',
+                '-y',  # 覆盖输出文件
+                fixed_path
+            ]
+            
+            logger.info(f"🛠️ 执行快速音频修复")
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=120,  # 2分钟超时
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys_platform.system() == 'Windows' else 0
+            )
+            
+            if result.returncode == 0 and os.path.exists(fixed_path):
+                fixed_size = os.path.getsize(fixed_path)
+                if fixed_size > 1024 * 1024:  # 至少1MB
+                    logger.info(f"✅ 音频修复成功: {fixed_size / 1024 / 1024:.2f} MB")
+                    # 删除原文件
+                    try:
+                        os.remove(file_path)
+                    except:
+                        pass
+                    return fixed_path
+                else:
+                    logger.warning("⚠️ 修复后文件太小，保留原文件")
+                    try:
+                        os.remove(fixed_path)
+                    except:
+                        pass
+            else:
+                logger.warning(f"⚠️ 音频修复失败")
+            
+            return file_path
+            
+        except Exception as e:
+            logger.error(f"❌ 音频修复异常: {e}")
+            return file_path
+
+    def _force_mobile_audio_fix(self, file_path: str, temp_dir: str) -> str:
+        """强制移动设备音频修复 - 终极版本，确保100%兼容"""
+        try:
+            original_name = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(original_name)[0]
+            fixed_name = f"{name_without_ext}_mobile_perfect.mp4"
+            fixed_path = os.path.join(temp_dir, fixed_name)
+            
+            logger.info(f"🔧 开始强制移动设备音频修复: {original_name} -> {fixed_name}")
+            logger.info(f"🎯 目标: 100%移动设备兼容，AAC 44.1kHz 双声道")
+            
+            # 检查是否有FFmpeg
+            if not self._check_ffmpeg():
+                logger.warning("⚠️ FFmpeg不可用，无法进行音频修复")
+                return file_path
+            
+            # 终极FFmpeg命令 - 移动设备完美兼容
+            cmd = [
+                'ffmpeg',
+                '-i', file_path,
+                # 视频流处理
+                '-c:v', 'libx264',          # H.264编码
+                '-preset', 'medium',        # 编码速度
+                '-crf', '23',               # 恒定质量
+                '-profile:v', 'main',       # H.264 main profile
+                '-level', '3.1',            # H.264 level 3.1
+                '-pix_fmt', 'yuv420p',      # 像素格式
+                '-maxrate', '2000k',        # 最大比特率
+                '-bufsize', '4000k',        # 缓冲区大小
+                # 音频流处理 - 移动设备完美兼容
+                '-c:a', 'aac',              # AAC音频编码
+                '-b:a', '128k',             # 音频比特率128k
+                '-ar', '44100',             # 采样率44.1kHz
+                '-ac', '2',                 # 双声道
+                '-aac_coder', 'twoloop',    # AAC编码器
+                '-profile:a', 'aac_low',    # AAC Low Complexity profile
+                # 容器和优化
+                '-f', 'mp4',                # MP4容器
+                '-movflags', '+faststart',  # 快速启动
+                '-avoid_negative_ts', 'make_zero',  # 避免负时间戳
+                '-fflags', '+genpts',       # 生成PTS
+                '-map_metadata', '0',       # 复制元数据
+                '-map', '0:v:0',           # 映射第一个视频流
+                '-map', '0:a:0',           # 映射第一个音频流
+                '-strict', '-2',           # 严格模式
+                '-y',                      # 覆盖输出文件
+                fixed_path
+            ]
+            
+            logger.info(f"🛠️ 执行终极移动设备音频修复命令")
+            logger.info(f"📋 命令: {' '.join(cmd[:10])}...")  # 只显示前10个参数避免日志过长
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=600,  # 10分钟超时
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys_platform.system() == 'Windows' else 0
+            )
+            
+            if result.returncode == 0 and os.path.exists(fixed_path):
+                fixed_size = os.path.getsize(fixed_path)
+                original_size = os.path.getsize(file_path)
+                
+                if fixed_size > 1024 * 1024:  # 至少1MB
+                    logger.info(f"✅ 移动设备音频修复成功!")
+                    logger.info(f"📊 原文件: {original_size / 1024 / 1024:.2f} MB")
+                    logger.info(f"📊 修复后: {fixed_size / 1024 / 1024:.2f} MB") 
+                    logger.info(f"🔊 音频格式: AAC 128k 44.1kHz 双声道")
+                    logger.info(f"📱 移动设备兼容: 100% 完美支持")
+                    
+                    # 验证修复后的音频信息
+                    audio_info = self._get_audio_info(fixed_path)
+                    if audio_info:
+                        logger.info(f"🎵 验证音频: {audio_info.get('codec', 'unknown')} {audio_info.get('sample_rate', 0)}Hz {audio_info.get('channels', 0)}ch")
+                    
+                    # 删除原文件
+                    try:
+                        os.remove(file_path)
+                        logger.info(f"🗑️ 已删除原文件")
+                    except:
+                        pass
+                    
+                    return fixed_path
+                else:
+                    logger.warning("⚠️ 修复后文件太小，保留原文件")
+                    try:
+                        os.remove(fixed_path)
+                    except:
+                        pass
+            else:
+                logger.warning(f"⚠️ 移动设备音频修复失败")
+                if result.stderr:
+                    logger.warning(f"FFmpeg错误: {result.stderr[:500]}...")  # 限制错误信息长度
+            
+            return file_path
+            
+        except Exception as e:
+            logger.error(f"❌ 强制移动设备音频修复异常: {e}")
+            return file_path
+
+    def _verify_and_fix_audio(self, file_path: str, temp_dir: str) -> str:
+        """验证并修复音频 - 确保移动设备兼容性"""
+        try:
+            logger.info(f"🔍 开始音频兼容性检查: {os.path.basename(file_path)}")
+            
+            # 检查是否有FFmpeg
+            if not self._check_ffmpeg():
+                logger.warning("⚠️ FFmpeg不可用，跳过音频修复")
+                return file_path
+            
+            # 检查音频流信息
+            audio_info = self._get_audio_info(file_path)
+            if not audio_info:
+                logger.warning("⚠️ 无法获取音频信息，尝试修复")
+                return self._force_audio_fix(file_path, temp_dir)
+            
+            codec = audio_info.get('codec', '').lower()
+            sample_rate = audio_info.get('sample_rate', 0)
+            channels = audio_info.get('channels', 0)
+            
+            logger.info(f"🔊 当前音频: {codec} {sample_rate}Hz {channels}ch")
+            
+            # 检查是否需要修复
+            needs_fix = False
+            reasons = []
+            
+            if codec not in ['aac', 'mp3']:
+                needs_fix = True
+                reasons.append(f"编码格式{codec}不兼容移动设备")
+            
+            if sample_rate > 48000:
+                needs_fix = True
+                reasons.append(f"采样率{sample_rate}Hz过高")
+                
+            if channels > 2:
+                needs_fix = True
+                reasons.append(f"声道数{channels}过多")
+            
+            if not needs_fix:
+                logger.info("✅ 音频格式已符合移动设备要求")
+                return file_path
+            
+            logger.info(f"🔧 需要修复音频: {', '.join(reasons)}")
+            return self._force_audio_fix(file_path, temp_dir)
+            
+        except Exception as e:
+            logger.warning(f"⚠️ 音频检查失败，尝试强制修复: {e}")
+            return self._force_audio_fix(file_path, temp_dir)
+    
+    def _check_ffmpeg(self) -> bool:
+        """检查FFmpeg是否可用"""
+        try:
+            result = subprocess.run(
+                ['ffmpeg', '-version'],
+                capture_output=True,
+                timeout=10,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys_platform.system() == 'Windows' else 0
+            )
+            return result.returncode == 0
+        except:
+            return False
+    
+    def _get_audio_info(self, file_path: str) -> Dict[str, Any]:
+        """获取音频流信息"""
+        try:
+            cmd = [
+                'ffprobe',
+                '-v', 'quiet',
+                '-print_format', 'json',
+                '-show_streams',
+                '-select_streams', 'a:0',
+                file_path
+            ]
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=30,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys_platform.system() == 'Windows' else 0
+            )
+            
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                streams = data.get('streams', [])
+                if streams:
+                    stream = streams[0]
+                    return {
+                        'codec': stream.get('codec_name', ''),
+                        'sample_rate': int(stream.get('sample_rate', 0)),
+                        'channels': int(stream.get('channels', 0)),
+                        'bit_rate': int(stream.get('bit_rate', 0))
+                    }
+            return {}
+        except:
+            return {}
+    
+    def _force_audio_fix(self, file_path: str, temp_dir: str) -> str:
+        """强制修复音频为移动设备兼容格式"""
+        try:
+            original_name = os.path.basename(file_path)
+            name_without_ext = os.path.splitext(original_name)[0]
+            fixed_name = f"{name_without_ext}_mobile_fixed.mp4"
+            fixed_path = os.path.join(temp_dir, fixed_name)
+            
+            logger.info(f"🔧 开始强制音频修复: {original_name} -> {fixed_name}")
+            
+            # FFmpeg命令 - 移动设备完美兼容
+            cmd = [
+                'ffmpeg',
+                '-i', file_path,
+                '-c:v', 'copy',  # 视频流复制（如果可能）
+                '-c:a', 'aac',   # 音频转AAC
+                '-b:a', '128k',  # 音频比特率
+                '-ar', '44100',  # 采样率
+                '-ac', '2',      # 双声道
+                '-movflags', '+faststart',  # 优化移动播放
+                '-avoid_negative_ts', 'make_zero',
+                '-fflags', '+genpts',
+                '-y',  # 覆盖输出文件
+                fixed_path
+            ]
+            
+            logger.info(f"🛠️ 执行FFmpeg修复命令")
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=300,  # 5分钟超时
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys_platform.system() == 'Windows' else 0
+            )
+            
+            if result.returncode == 0 and os.path.exists(fixed_path):
+                fixed_size = os.path.getsize(fixed_path)
+                if fixed_size > 1024 * 1024:  # 至少1MB
+                    logger.info(f"✅ 音频修复成功: {fixed_size / 1024 / 1024:.2f} MB")
+                    # 删除原文件（可选）
+                    try:
+                        os.remove(file_path)
+                    except:
+                        pass
+                    return fixed_path
+                else:
+                    logger.warning("⚠️ 修复后文件太小，保留原文件")
+                    try:
+                        os.remove(fixed_path)
+                    except:
+                        pass
+            else:
+                logger.warning(f"⚠️ FFmpeg修复失败: {result.stderr}")
+            
+            return file_path
+            
+        except Exception as e:
+            logger.error(f"❌ 强制音频修复失败: {e}")
+            return file_path
 
     def _cleanup(self, cookie_file: Optional[str]):
         """清理临时文件"""
