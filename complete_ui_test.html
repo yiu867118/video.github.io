@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频解析器UI完整测试</title>
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            font-family: var(--font-primary);
+        }
+        
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .test-section {
+            margin-bottom: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .demo-button {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+        
+        .status-demo {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle btn-theme" onclick="toggleTheme()">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <div class="test-container">
+        <!-- 页面标题 -->
+        <div class="test-section">
+            <h1 style="text-align: center; font-size: 28px; margin: 0; color: #333;">
+                🎬 视频解析器UI完整测试
+            </h1>
+            <p style="text-align: center; color: #666; margin: 15px 0 0 0;">
+                测试所有UI状态：解析进度、解析成功、主题切换等
+            </p>
+        </div>
+
+        <!-- 解析进度测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-spinner"></i>
+                解析进度UI测试
+            </div>
+            
+            <div class="status-demo">
+                <button class="demo-button" onclick="showProgress(30, '正在分析视频格式...')">
+                    显示分析进度
+                </button>
+                <button class="demo-button" onclick="showProgress(60, '解析中... (1.5MB/s)')">
+                    显示解析进度
+                </button>
+                <button class="demo-button" onclick="showProgress(95, '解析完成，正在处理文件...')">
+                    显示处理进度
+                </button>
+                <button class="demo-button" onclick="hideProgress()">
+                    隐藏进度条
+                </button>
+            </div>
+            
+            <!-- 进度条容器 -->
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-header">
+                    <div class="progress-info">
+                        <span class="progress-text" id="progressText">解析进度</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-details">
+                    <span class="progress-speed" id="progressSpeed">准备中...</span>
+                    <span class="progress-size" id="progressSize">0 MB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态消息测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-comment-dots"></i>
+                状态消息UI测试
+            </div>
+            
+            <div class="status-demo">
+                <button class="demo-button" onclick="showStatus('正在分析视频信息和可用格式...', 'downloading')">
+                    分析状态
+                </button>
+                <button class="demo-button" onclick="showStatus('正在解析 - 1.5MB/s - 已完成 8.2MB', 'downloading')">
+                    解析状态
+                </button>
+                <button class="demo-button" onclick="showStatus('视频解析完成，正在进行后处理...', 'downloading')">
+                    处理状态
+                </button>
+                <button class="demo-button" onclick="hideStatus()">
+                    隐藏状态
+                </button>
+            </div>
+            
+            <!-- 状态消息容器 -->
+            <div class="status-message" id="statusMessage" style="display: none;">
+                <div class="status-content">
+                    <i class="status-icon fas fa-spinner fa-spin"></i>
+                    <span class="status-text" id="statusText">状态消息</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 解析成功结果测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-check-circle"></i>
+                解析成功UI测试
+            </div>
+            
+            <div class="status-demo">
+                <button class="demo-button" onclick="showSuccessResult()">
+                    显示解析成功
+                </button>
+                <button class="demo-button" onclick="hideSuccessResult()">
+                    隐藏成功结果
+                </button>
+            </div>
+            
+            <!-- 成功结果容器 -->
+            <div class="download-result" id="downloadResult">
+                <div class="result-success">
+                    <!-- 成功图标 -->
+                    <div class="result-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    
+                    <!-- 结果内容 -->
+                    <div class="result-content">
+                        <h3>解析成功！</h3>
+                        <div class="result-filename">
+                            视频文件已准备就绪
+                        </div>
+                        
+                        <!-- 文件信息 -->
+                        <div class="result-file-info">
+                            <div class="file-info-item">
+                                <i class="fas fa-file-video"></i>
+                                <span>如今的我漫步在了深程？涨知识了.mp4</span>
+                            </div>
+                            <div class="file-info-item">
+                                <i class="fas fa-hdd"></i>
+                                <span>完成</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 下载说明 -->
+                        <div class="download-instructions">
+                            <div class="instruction-title">
+                                <i class="fas fa-info-circle"></i>
+                                如何获取视频文件：
+                            </div>
+                            <div class="instruction-content">
+                                <div class="instruction-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-text">点击下方【下载到本地】按钮</div>
+                                </div>
+                                <div class="instruction-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-text">浏览器会自动开始下载文件</div>
+                                </div>
+                                <div class="instruction-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-text">如果没有自动下载，请检查浏览器下载设置</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 下载按钮 -->
+                        <button class="download-file-btn" onclick="simulateDownload()">
+                            <i class="fas fa-download"></i>
+                            下载到本地
+                        </button>
+                        
+                        <!-- 提示区域 -->
+                        <div class="download-tips">
+                            <div class="tip-item">
+                                <i class="fas fa-lightbulb"></i>
+                                提示：部分浏览器可能会弹出下载确认对话框
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-folder"></i>
+                                文件将保存到您的默认下载文件夹
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主题测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-palette"></i>
+                主题切换测试
+            </div>
+            <p style="text-align: center; color: #666; margin: 0;">
+                点击右上角主题按钮，循环切换：浅色 → 深色 → 海洋主题
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能
+        let currentTheme = 0;
+        const themes = ['', 'theme-dark', 'theme-ocean'];
+        const themeNames = ['浅色主题', '深色主题', '海洋主题'];
+        
+        function toggleTheme() {
+            currentTheme = (currentTheme + 1) % themes.length;
+            document.body.className = themes[currentTheme];
+            
+            // 更新主题按钮图标
+            const btn = document.querySelector('.theme-toggle i');
+            const icons = ['fas fa-palette', 'fas fa-moon', 'fas fa-water'];
+            btn.className = icons[currentTheme];
+            
+            console.log(`切换到: ${themeNames[currentTheme]}`);
+        }
+        
+        // 进度条测试功能
+        function showProgress(percent, text) {
+            const container = document.getElementById('progressContainer');
+            const bar = document.getElementById('progressBar');
+            const percentageSpan = document.getElementById('progressPercentage');
+            const textSpan = document.getElementById('progressText');
+            const speedSpan = document.getElementById('progressSpeed');
+            const sizeSpan = document.getElementById('progressSize');
+            
+            container.style.display = 'block';
+            bar.style.width = percent + '%';
+            percentageSpan.textContent = percent + '%';
+            textSpan.textContent = text;
+            speedSpan.textContent = percent > 50 ? '1.5MB/s' : '准备中...';
+            sizeSpan.textContent = ((percent / 100) * 15.3).toFixed(1) + ' MB';
+            
+            // 添加动画效果
+            setTimeout(() => {
+                container.classList.add('visible');
+            }, 100);
+        }
+        
+        function hideProgress() {
+            const container = document.getElementById('progressContainer');
+            container.style.display = 'none';
+            container.classList.remove('visible');
+        }
+        
+        // 状态消息测试功能
+        function showStatus(text, type) {
+            const message = document.getElementById('statusMessage');
+            const textSpan = document.getElementById('statusText');
+            const icon = message.querySelector('.status-icon');
+            
+            textSpan.textContent = text;
+            message.style.display = 'block';
+            
+            // 根据类型设置图标
+            if (type === 'downloading') {
+                icon.className = 'status-icon fas fa-spinner fa-spin';
+            }
+            
+            setTimeout(() => {
+                message.classList.add('visible');
+            }, 100);
+        }
+        
+        function hideStatus() {
+            const message = document.getElementById('statusMessage');
+            message.style.display = 'none';
+            message.classList.remove('visible');
+        }
+        
+        // 成功结果测试功能
+        function showSuccessResult() {
+            const result = document.getElementById('downloadResult');
+            result.classList.add('visible');
+        }
+        
+        function hideSuccessResult() {
+            const result = document.getElementById('downloadResult');
+            result.classList.remove('visible');
+        }
+        
+        // 模拟下载功能
+        function simulateDownload() {
+            const btn = document.querySelector('.download-file-btn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 准备下载...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> 下载完成！';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎬 视频解析器UI完整测试页面加载完成');
+            // 默认显示成功结果
+            setTimeout(() => {
+                showSuccessResult();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

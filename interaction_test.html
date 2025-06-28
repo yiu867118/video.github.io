@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>交互修复测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+        
+        .test-description {
+            margin-bottom: 20px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .test-button {
+            width: 100%;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-button.success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+        }
+        
+        .test-button.theme-btn {
+            background: linear-gradient(135deg, #845ec2, #b39bc8);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+        }
+        
+        .input-test {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            margin: 10px 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .input-test::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .input-test:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+        }
+        
+        .status-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #FFD700;
+            font-family: monospace;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .device-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .test-button {
+                min-height: 48px;
+                touch-action: manipulation;
+            }
+            
+            .test-button.theme-btn {
+                width: 50px;
+                height: 50px;
+                top: 15px;
+                right: 15px;
+                font-size: 20px;
+            }
+        }
+        
+        /* 深色主题 */
+        [data-theme="dark"] {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+        
+        [data-theme="dark"] .container {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] .test-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 浅色主题 */
+        [data-theme="light"] {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: #2d3436;
+        }
+        
+        [data-theme="light"] .container {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3436;
+        }
+        
+        [data-theme="light"] .test-section {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="light"] .input-test {
+            background: rgba(255, 255, 255, 0.7);
+            color: #2d3436;
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        [data-theme="light"] .input-test::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="light"] .status-display {
+            background: rgba(0, 0, 0, 0.1);
+            color: #2d3436;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- 主题切换按钮 -->
+    <button id="themeToggle" class="test-button theme-btn" title="切换主题">🌙</button>
+    
+    <div class="container">
+        <h1>🔧 交互修复测试 v3.0</h1>
+        
+        <!-- 设备信息 -->
+        <div class="device-info" id="deviceInfo">
+            <strong>设备信息:</strong><br>
+            用户代理: <span id="userAgent"></span><br>
+            屏幕尺寸: <span id="screenSize"></span><br>
+            是否移动设备: <span id="isMobile"></span><br>
+            触摸支持: <span id="touchSupport"></span>
+        </div>
+        
+        <!-- 基础按钮测试 -->
+        <div class="test-section">
+            <div class="test-title">1. 基础按钮点击测试</div>
+            <div class="test-description">测试PC端和移动端按钮是否可以正常点击</div>
+            <button class="test-button" id="basicBtn">点击测试按钮</button>
+            <button class="test-button" id="downloadTestBtn">模拟下载按钮</button>
+            <div class="status-display" id="basicStatus">等待点击...</div>
+        </div>
+        
+        <!-- 主题切换测试 -->
+        <div class="test-section">
+            <div class="test-title">2. 主题切换测试</div>
+            <div class="test-description">测试主题切换功能在所有设备上的响应</div>
+            <button class="test-button" id="themeTestBtn">手动切换主题</button>
+            <div class="status-display" id="themeStatus">当前主题: dark</div>
+        </div>
+        
+        <!-- 输入框测试 -->
+        <div class="test-section">
+            <div class="test-title">3. 输入框交互测试</div>
+            <div class="test-description">测试移动端虚拟键盘和输入框焦点</div>
+            <input type="url" class="input-test" id="urlInput" placeholder="输入视频URL测试...">
+            <input type="text" class="input-test" id="textInput" placeholder="输入文本测试...">
+            <div class="status-display" id="inputStatus">输入框状态: 等待输入</div>
+        </div>
+        
+        <!-- 触摸事件测试 -->
+        <div class="test-section">
+            <div class="test-title">4. 触摸事件测试</div>
+            <div class="test-description">测试移动端触摸开始、结束和点击事件</div>
+            <button class="test-button" id="touchBtn">触摸测试按钮</button>
+            <div class="status-display" id="touchStatus">触摸状态: 等待触摸</div>
+        </div>
+        
+        <!-- 模拟下载流程测试 -->
+        <div class="test-section">
+            <div class="test-title">5. 模拟下载流程测试</div>
+            <div class="test-description">模拟完整的下载流程，测试状态切换</div>
+            <button class="test-button" id="simulateDownloadBtn">开始模拟下载</button>
+            <div class="status-display" id="downloadStatus">下载状态: 就绪</div>
+        </div>
+        
+        <!-- 事件冒泡测试 -->
+        <div class="test-section">
+            <div class="test-title">6. 事件冒泡测试</div>
+            <div class="test-description">测试事件是否被正确处理，无意外冒泡</div>
+            <div style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;" id="parentDiv">
+                父级元素 (点击我)
+                <button class="test-button" id="childBtn" style="margin: 10px 0;">子级按钮 (点击我)</button>
+            </div>
+            <div class="status-display" id="bubbleStatus">事件状态: 等待测试</div>
+        </div>
+    </div>
+
+    <script>
+        // 设备检测
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isTablet = /iPad|Android.*Tablet/i.test(navigator.userAgent);
+        const touchSupport = 'ontouchstart' in window;
+        
+        // 显示设备信息
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 50) + '...';
+        document.getElementById('screenSize').textContent = `${screen.width}x${screen.height}`;
+        document.getElementById('isMobile').textContent = isMobile ? '是' : '否';
+        document.getElementById('touchSupport').textContent = touchSupport ? '支持' : '不支持';
+        
+        // 主题管理
+        let currentTheme = 'dark';
+        
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', currentTheme);
+            document.getElementById('themeToggle').textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+            document.getElementById('themeStatus').textContent = `当前主题: ${currentTheme}`;
+            console.log('主题已切换为:', currentTheme);
+        }
+        
+        // 设置主题切换按钮
+        function setupThemeToggle() {
+            const themeBtn = document.getElementById('themeToggle');
+            
+            // 确保按钮可点击
+            themeBtn.style.pointerEvents = 'auto';
+            themeBtn.style.cursor = 'pointer';
+            themeBtn.style.touchAction = 'manipulation';
+            
+            // PC端点击
+            themeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('主题按钮PC点击');
+                toggleTheme();
+            });
+            
+            // 移动端触摸
+            themeBtn.addEventListener('touchstart', (e) => {
+                themeBtn.style.transform = 'scale(0.95)';
+            });
+            
+            themeBtn.addEventListener('touchend', (e) => {
+                themeBtn.style.transform = '';
+                e.preventDefault();
+                console.log('主题按钮触摸结束');
+                toggleTheme();
+            });
+        }
+        
+        // 基础按钮测试
+        function setupBasicButtons() {
+            const basicBtn = document.getElementById('basicBtn');
+            const downloadTestBtn = document.getElementById('downloadTestBtn');
+            const themeTestBtn = document.getElementById('themeTestBtn');
+            
+            let clickCount = 0;
+            
+            basicBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                clickCount++;
+                document.getElementById('basicStatus').textContent = `基础按钮点击次数: ${clickCount}`;
+                basicBtn.textContent = `已点击 ${clickCount} 次`;
+                if (clickCount >= 3) {
+                    basicBtn.classList.add('success');
+                    basicBtn.textContent = '✅ 基础测试通过';
+                }
+            });
+            
+            let downloadClicks = 0;
+            downloadTestBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                downloadClicks++;
+                document.getElementById('basicStatus').textContent = `下载按钮点击次数: ${downloadClicks}`;
+                downloadTestBtn.textContent = `下载测试 ${downloadClicks}`;
+                if (downloadClicks >= 3) {
+                    downloadTestBtn.classList.add('success');
+                    downloadTestBtn.textContent = '✅ 下载测试通过';
+                }
+            });
+            
+            themeTestBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleTheme();
+                themeTestBtn.classList.add('success');
+                themeTestBtn.textContent = '✅ 主题切换成功';
+            });
+        }
+        
+        // 输入框测试
+        function setupInputTests() {
+            const urlInput = document.getElementById('urlInput');
+            const textInput = document.getElementById('textInput');
+            
+            urlInput.addEventListener('focus', () => {
+                document.getElementById('inputStatus').textContent = 'URL输入框获得焦点';
+            });
+            
+            urlInput.addEventListener('input', (e) => {
+                document.getElementById('inputStatus').textContent = `URL输入: ${e.target.value.length} 字符`;
+            });
+            
+            textInput.addEventListener('focus', () => {
+                document.getElementById('inputStatus').textContent = '文本输入框获得焦点';
+            });
+            
+            textInput.addEventListener('input', (e) => {
+                document.getElementById('inputStatus').textContent = `文本输入: ${e.target.value.length} 字符`;
+            });
+        }
+        
+        // 触摸事件测试
+        function setupTouchTests() {
+            const touchBtn = document.getElementById('touchBtn');
+            let touchEvents = [];
+            
+            touchBtn.addEventListener('touchstart', (e) => {
+                touchEvents.push('touchstart');
+                document.getElementById('touchStatus').textContent = `触摸事件: ${touchEvents.join(' → ')}`;
+            });
+            
+            touchBtn.addEventListener('touchend', (e) => {
+                touchEvents.push('touchend');
+                document.getElementById('touchStatus').textContent = `触摸事件: ${touchEvents.join(' → ')}`;
+            });
+            
+            touchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                touchEvents.push('click');
+                document.getElementById('touchStatus').textContent = `触摸事件: ${touchEvents.join(' → ')}`;
+                
+                if (touchEvents.length >= 6) {
+                    touchBtn.classList.add('success');
+                    touchBtn.textContent = '✅ 触摸测试通过';
+                }
+            });
+        }
+        
+        // 模拟下载流程
+        function setupDownloadSimulation() {
+            const simulateBtn = document.getElementById('simulateDownloadBtn');
+            let isDownloading = false;
+            
+            simulateBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                if (isDownloading) {
+                    document.getElementById('downloadStatus').textContent = '下载正在进行中，请勿重复点击';
+                    return;
+                }
+                
+                isDownloading = true;
+                
+                // 模拟下载流程
+                const stages = [
+                    { text: '正在验证链接...', duration: 1000 },
+                    { text: '正在连接服务器...', duration: 1500 },
+                    { text: '正在下载文件...', duration: 2000 },
+                    { text: '下载完成！', duration: 1000 }
+                ];
+                
+                simulateBtn.textContent = '下载中...';
+                simulateBtn.style.background = 'linear-gradient(135deg, #fdcb6e, #e17055)';
+                
+                for (let i = 0; i < stages.length; i++) {
+                    document.getElementById('downloadStatus').textContent = stages[i].text;
+                    await new Promise(resolve => setTimeout(resolve, stages[i].duration));
+                }
+                
+                simulateBtn.classList.add('success');
+                simulateBtn.textContent = '✅ 下载完成';
+                isDownloading = false;
+                
+                setTimeout(() => {
+                    simulateBtn.textContent = '重新开始下载测试';
+                    simulateBtn.classList.remove('success');
+                    simulateBtn.style.background = '';
+                }, 3000);
+            });
+        }
+        
+        // 事件冒泡测试
+        function setupBubbleTests() {
+            const parentDiv = document.getElementById('parentDiv');
+            const childBtn = document.getElementById('childBtn');
+            
+            parentDiv.addEventListener('click', (e) => {
+                if (e.target === parentDiv) {
+                    document.getElementById('bubbleStatus').textContent = '父级元素被点击';
+                }
+            });
+            
+            childBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.getElementById('bubbleStatus').textContent = '子级按钮被点击 (已阻止冒泡)';
+                childBtn.classList.add('success');
+                childBtn.textContent = '✅ 冒泡测试通过';
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('测试页面初始化开始...');
+            
+            setupThemeToggle();
+            setupBasicButtons();
+            setupInputTests();
+            setupTouchTests();
+            setupDownloadSimulation();
+            setupBubbleTests();
+            
+            // 移动端优化
+            if (isMobile) {
+                document.body.classList.add('mobile-device');
+                console.log('移动端优化已启用');
+            }
+            
+            console.log('测试页面初始化完成');
+        });
+        
+        // 全局错误捕获
+        window.addEventListener('error', (e) => {
+            console.error('页面错误:', e.error);
+        });
+        
+        // 阻止默认的触摸行为
+        document.addEventListener('touchstart', (e) => {
+            // 允许输入框正常工作
+            if (e.target.tagName === 'INPUT') {
+                return;
+            }
+        }, { passive: true });
+        
+        console.log('🔧 交互修复测试页面 v3.0 已加载');
+        console.log('设备类型:', isMobile ? '移动设备' : 'PC设备');
+        console.log('触摸支持:', touchSupport ? '是' : '否');
+    </script>
+</body>
+</html>

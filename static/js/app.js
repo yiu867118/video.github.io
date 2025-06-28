@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化移动设备优化
     initMobileOptimizations();
     
+    // 立即初始化主题管理器
+    if (typeof themeManager !== 'undefined') {
+        themeManager.init();
+        console.log('🎨 主题管理器已初始化');
+    }
+    
     // 核心元素获取
     const elements = {
         downloadButton: document.getElementById('downloadButton'),
@@ -398,19 +404,56 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         
         setupThemeToggle() {
-            if (!elements.themeToggle) return;
+            if (!elements.themeToggle) {
+                console.warn('主题切换按钮未找到');
+                return;
+            }
             
-            elements.themeToggle.addEventListener('click', () => {
+            // 移除所有现有事件监听器
+            const newToggle = elements.themeToggle.cloneNode(true);
+            elements.themeToggle.parentNode.replaceChild(newToggle, elements.themeToggle);
+            elements.themeToggle = newToggle;
+            
+            // 确保按钮可点击
+            elements.themeToggle.style.pointerEvents = 'auto';
+            elements.themeToggle.style.cursor = 'pointer';
+            elements.themeToggle.style.userSelect = 'none';
+            elements.themeToggle.style.zIndex = '10000';
+            
+            // 添加点击事件 - 多重保障
+            const handleThemeClick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎨 主题切换按钮被点击');
                 this.cycleTheme();
-            });
+            };
             
-            // 添加键盘快捷键 Ctrl+Shift+T
+            // PC端点击
+            elements.themeToggle.addEventListener('click', handleThemeClick, { passive: false });
+            
+            // 移动端触摸支持
+            elements.themeToggle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                elements.themeToggle.style.transform = 'scale(0.95)';
+            }, { passive: false });
+            
+            elements.themeToggle.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                elements.themeToggle.style.transform = 'scale(1)';
+                console.log('🎨 移动端主题切换按钮被触摸');
+                this.cycleTheme();
+            }, { passive: false });
+            
+            // 键盘快捷键
             document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.shiftKey && e.key === 'T') {
                     e.preventDefault();
                     this.cycleTheme();
                 }
             });
+            
+            console.log('✅ 主题切换按钮事件已设置');
         },
         
         cycleTheme() {
@@ -1697,6 +1740,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage('💻 PC端下载中，请稍候...', 'downloading');
             }
             
+            // 显示下载结果界面
+            showDownloadResult(downloadUrl, filename);
+            
             // 移动设备优化的下载处理
             const downloadWithRetry = (retryCount = 0) => {
                 const maxRetries = 3;
@@ -1762,6 +1808,117 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('❌ 文件下载初始化失败:', error);
             showMessage('下载初始化失败，请刷新页面重试', 'error');
         }
+    }
+
+    // 显示下载结果 - 移动端优化版
+    function showDownloadResult(downloadUrl, filename) {
+        if (!elements.downloadResult) {
+            console.warn('下载结果容器未找到');
+            return;
+        }
+
+        try {
+            // 隐藏进度容器
+            if (elements.progressContainer) {
+                elements.progressContainer.style.display = 'none';
+            }
+
+            // 更新文件信息
+            const resultFileName = document.getElementById('resultFileName');
+            const resultFileSize = document.getElementById('resultFileSize');
+            
+            if (resultFileName) {
+                resultFileName.textContent = filename || '下载文件';
+            }
+            
+            if (resultFileSize && state.lastProgressData?.file_size_mb) {
+                resultFileSize.textContent = `${state.lastProgressData.file_size_mb.toFixed(2)} MB`;
+            }
+
+            // 显示下载结果
+            elements.downloadResult.style.display = 'block';
+
+            // 设置下载按钮事件 - 移动端优化
+            setupDownloadFileButton(downloadUrl, filename);
+
+            console.log('✅ 下载结果界面已显示');
+
+        } catch (error) {
+            console.error('❌ 显示下载结果失败:', error);
+        }
+    }
+
+    // 设置文件下载按钮 - 移动端完美支持
+    function setupDownloadFileButton(downloadUrl, filename) {
+        const downloadFileBtn = document.getElementById('downloadFileBtn');
+        if (!downloadFileBtn) {
+            console.warn('下载文件按钮未找到');
+            return;
+        }
+
+        // 移除所有现有事件监听器
+        const newBtn = downloadFileBtn.cloneNode(true);
+        downloadFileBtn.parentNode.replaceChild(newBtn, downloadFileBtn);
+
+        // 确保按钮可点击
+        newBtn.style.pointerEvents = 'auto';
+        newBtn.style.cursor = 'pointer';
+        newBtn.style.touchAction = 'manipulation';
+        newBtn.style.webkitTapHighlightColor = 'transparent';
+        newBtn.style.webkitTouchCallout = 'none';
+        newBtn.style.userSelect = 'none';
+        newBtn.style.webkitUserSelect = 'none';
+
+        const handleFileDownload = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('📥 文件下载按钮被点击');
+
+            try {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = filename || 'video.mp4';
+                link.style.display = 'none';
+                
+                // 移动设备优化
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                }
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // 反馈消息
+                if (isMobile) {
+                    showMessage('📱 移动设备下载启动！请检查下载文件夹', 'success');
+                } else {
+                    showMessage('💻 文件下载已启动！', 'success');
+                }
+
+            } catch (error) {
+                console.error('❌ 文件下载失败:', error);
+                showMessage('下载失败，请重试', 'error');
+            }
+        };
+
+        // PC端点击事件
+        newBtn.addEventListener('click', handleFileDownload, { passive: false });
+
+        // 移动端触摸事件
+        newBtn.addEventListener('touchstart', (e) => {
+            newBtn.style.transform = 'scale(0.98)';
+            newBtn.style.opacity = '0.9';
+        }, { passive: true });
+
+        newBtn.addEventListener('touchend', (e) => {
+            newBtn.style.transform = '';
+            newBtn.style.opacity = '';
+        }, { passive: true });
+
+        console.log('✅ 文件下载按钮事件已设置');
     }
 
     // 处理下载错误（通用错误处理）- 终极修复版
@@ -1865,43 +2022,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ========================================
-    // 主下载按钮事件监听 - 修复版
+    // 移动端优化事件监听器设置 - 修复版
     // ========================================
 
-    // 主下载按钮事件
-    elements.downloadButton.addEventListener('click', async () => {
-        console.log('🎯 === 下载按钮被点击 ===');
-        
-        // 防重复点击和状态检查
-        if (state.isDownloading || state.isRetrying) {
-            console.log('⚠️ 下载任务进行中或正在重试，忽略重复点击');
-            showMessage('下载任务正在进行中，请勿重复点击', 'warning');
+    // 确保下载按钮可点击
+    function setupDownloadButton() {
+        if (!elements.downloadButton) {
+            console.error('❌ 下载按钮未找到');
             return;
         }
+
+        // 确保按钮样式正确
+        elements.downloadButton.style.pointerEvents = 'auto';
+        elements.downloadButton.style.cursor = 'pointer';
+        elements.downloadButton.style.userSelect = 'none';
+        elements.downloadButton.style.touchAction = 'manipulation';
         
-        const url = elements.videoUrl.value.trim();
-        if (!url) {
-            showMessage('请输入有效的视频URL', 'error');
-            elements.videoUrl.focus();
-            return;
-        }
+        const handleDownloadClick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎯 === 下载按钮被点击 ===');
+            
+            // 防重复点击和状态检查
+            if (state.isDownloading || state.isRetrying) {
+                console.log('⚠️ 下载任务进行中或正在重试，忽略重复点击');
+                showMessage('下载任务正在进行中，请勿重复点击', 'warning');
+                return;
+            }
+            
+            const url = elements.videoUrl.value.trim();
+            if (!url) {
+                showMessage('请输入有效的视频URL', 'error');
+                elements.videoUrl.focus();
+                return;
+            }
+            
+            // URL验证 - 支持多平台
+            const platform = detectPlatform(url);
+            if (platform === 'unknown') {
+                showMessage('请输入支持的平台视频链接', 'error');
+                elements.videoUrl.focus();
+                return;
+            }
+            
+            console.log(`✅ URL验证通过，检测到${supportedPlatforms[platform].name}链接:`, url);
+            
+            // 重置状态
+            resetStateForNewDownload();
+            
+            // 开始下载
+            await startDownloadProcess(url);
+        };
+
+        // PC端点击事件
+        elements.downloadButton.addEventListener('click', handleDownloadClick, { passive: false });
         
-        // URL验证 - 支持多平台
-        const platform = detectPlatform(url);
-        if (platform === 'unknown') {
-            showMessage('请输入支持的平台视频链接', 'error');
-            elements.videoUrl.focus();
-            return;
-        }
+        // 移动端触摸事件支持
+        elements.downloadButton.addEventListener('touchstart', (e) => {
+            if (!state.isDownloading && !state.isRetrying) {
+                elements.downloadButton.style.transform = 'translateY(1px)';
+                elements.downloadButton.style.opacity = '0.9';
+            }
+        }, { passive: true });
         
-        console.log(`✅ URL验证通过，检测到${supportedPlatforms[platform].name}链接:`, url);
+        elements.downloadButton.addEventListener('touchend', (e) => {
+            elements.downloadButton.style.transform = '';
+            elements.downloadButton.style.opacity = '';
+        }, { passive: true });
         
-        // 重置状态
-        resetStateForNewDownload();
-        
-        // 开始下载
-        await startDownloadProcess(url);
-    });
+        console.log('✅ 下载按钮事件监听器已设置');
+    }
+
+    // 主下载按钮事件 - 替换为新的处理方式
+    setupDownloadButton();
 
     // ========================================
     // 事件监听器设置
@@ -2080,3 +2273,52 @@ function showMobileError(message) {
         navigator.vibrate([200, 100, 200]);
     }
 }
+
+    // ========================================
+    // 最终初始化代码 - 确保所有功能正常
+    // ========================================
+    
+    // 初始化主题管理器
+    try {
+        themeManager.init();
+        console.log('✅ 主题管理器初始化成功');
+    } catch (error) {
+        console.error('❌ 主题管理器初始化失败:', error);
+    }
+    
+    // 修复移动端点击问题的最终保障
+    function ensureMobileInteraction() {
+        // 确保所有关键元素都可点击
+        const criticalElements = [
+            elements.downloadButton,
+            elements.themeToggle,
+            elements.videoUrl
+        ];
+        
+        criticalElements.forEach(element => {
+            if (element) {
+                element.style.pointerEvents = 'auto';
+                element.style.touchAction = 'manipulation';
+                element.style.webkitTapHighlightColor = 'transparent';
+                element.style.webkitTouchCallout = 'none';
+            }
+        });
+        
+        console.log('✅ 移动端交互优化已应用');
+    }
+    
+    // 应用移动端交互优化
+    ensureMobileInteraction();
+    
+    // 页面完全加载后的最终检查
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            ensureMobileInteraction();
+            console.log('🎯 页面加载完成，移动端优化已确认');
+        }, 100);
+    });
+    
+    console.log('🎉 === 视频下载器初始化完成 ===');
+    console.log('🔧 移动端和PC端完美兼容');
+    console.log('🎨 主题切换功能已启用');
+    console.log('📱 触摸交互已优化');

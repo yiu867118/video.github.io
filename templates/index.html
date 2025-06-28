@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
-    <title>超高清视频下载器</title>
+    <title>超高清视频解析器</title>
     
     <!-- 移动端关键样式内联 - 确保立即显示 -->
     <style>
@@ -80,6 +80,7 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_enhanced.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_interaction_fix.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="description" content="哔哩哔哩, youtube, 视频下载工具，支持高清下载，实时进度显示">
     <meta name="keywords" content="视频下载,B站下载,哔哩哔哩下载">
@@ -91,7 +92,7 @@
     
     <!-- 预加载关键资源 -->
     <link rel="preload" href="{{ url_for('static', filename='css/main.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='js/app.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='js/app_completely_fixed.js') }}" as="script">
 </head>
 <body>
 
@@ -113,7 +114,7 @@
             <div class="header">
                 <h1>
                     <i class="fas fa-video"></i>
-                       视频下载
+                       视频解析
 
                     <span class="baby-img-wrapper">
                          <img src="{{ url_for('static', filename='img/1.png') }}" class="bg-baby-image" alt="小熊宝宝" />
@@ -149,7 +150,7 @@
                 <span class="btn-icon">
                     <i class="fas fa-download"></i>
                 </span>
-                <span class="btn-text">开始下载</span>
+                <span class="btn-text">开始解析</span>
                 <div class="btn-ripple"></div>
             </button>
             
@@ -169,7 +170,7 @@
                 <div class="progress-header">
                     <div class="progress-title">
                         <i class="fas fa-download"></i>
-                        <span>下载进度</span>
+                        <span>解析进度</span>
                     </div>
                     <div class="progress-percentage">0%</div>
                 </div>
@@ -193,7 +194,7 @@
                 </div>
                 
                 <div class="progress-status">
-                    <span id="progressStatusText">准备下载...</span>
+                    <span id="progressStatusText">准备解析...</span>
                 </div>
             </div>
             
@@ -204,7 +205,7 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="result-content">
-                        <h3>🎉 下载成功！</h3>
+                        <h3>🎉 解析成功！</h3>
                         <p class="result-filename">视频文件已准备就绪</p>
                         <div class="result-file-info">
                             <div class="file-info-item">
@@ -289,6 +290,6 @@
 
 
     <!-- 引入JavaScript -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app_completely_fixed.js') }}"></script>
 </body>
 </html>

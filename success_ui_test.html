@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载成功UI测试</title>
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            font-family: var(--font-primary);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .test-section {
+            margin-bottom: 60px;
+        }
+        
+        .test-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle btn-theme" onclick="toggleTheme()">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <div class="container">
+        <div class="test-section">
+            <h1 class="test-title">🎉 下载成功页面UI测试</h1>
+            
+            <!-- 模拟下载成功结果 -->
+            <div class="download-result visible">
+                <div class="result-success">
+                    <!-- 成功图标 -->
+                    <div class="result-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    
+                    <!-- 结果内容 -->
+                    <div class="result-content">
+                        <h3>解析成功！</h3>
+                        <div class="result-filename">
+                            视频文件已准备就绪
+                        </div>
+                        
+                        <!-- 文件信息 -->
+                        <div class="result-file-info">
+                            <div class="file-info-item">
+                                <i class="fas fa-file-video"></i>
+                                <span>如今的我漫步在了深程？涨知识了.mp4</span>
+                            </div>
+                            <div class="file-info-item">
+                                <i class="fas fa-hdd"></i>
+                                <span>完成</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 下载说明 -->
+                        <div class="download-instructions">
+                            <div class="instruction-title">
+                                <i class="fas fa-info-circle"></i>
+                                如何获取视频文件：
+                            </div>
+                            <div class="instruction-content">
+                                <div class="instruction-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-text">点击下方【下载到本地】按钮</div>
+                                </div>
+                                <div class="instruction-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-text">浏览器会自动开始下载文件</div>
+                                </div>
+                                <div class="instruction-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-text">如果没有自动下载，请检查浏览器下载设置</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 下载按钮 -->
+                        <button class="download-file-btn" onclick="simulateDownload()">
+                            <i class="fas fa-download"></i>
+                            下载到本地
+                        </button>
+                        
+                        <!-- 提示区域 -->
+                        <div class="download-tips">
+                            <div class="tip-item">
+                                <i class="fas fa-lightbulb"></i>
+                                提示：部分浏览器可能会弹出下载确认对话框
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-folder"></i>
+                                文件将保存到您的默认下载文件夹
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 不同主题测试区域 -->
+        <div class="test-section">
+            <div class="test-title">🎨 主题测试</div>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                点击右上角主题按钮测试不同主题下的UI效果
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能
+        let currentTheme = 0;
+        const themes = ['', 'theme-dark', 'theme-ocean'];
+        
+        function toggleTheme() {
+            currentTheme = (currentTheme + 1) % themes.length;
+            document.body.className = themes[currentTheme];
+            
+            // 更新主题按钮图标
+            const btn = document.querySelector('.theme-toggle i');
+            const icons = ['fas fa-palette', 'fas fa-moon', 'fas fa-water'];
+            btn.className = icons[currentTheme];
+        }
+        
+        // 模拟下载功能
+        function simulateDownload() {
+            const btn = document.querySelector('.download-file-btn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 准备下载...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> 下载完成！';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+        
+        // 页面加载完成后的动画
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎉 下载成功UI测试页面加载完成');
+        });
+    </script>
+</body>
+</html>

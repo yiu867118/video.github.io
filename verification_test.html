@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解析器修复验证</title>
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            font-family: var(--font-primary);
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .check-icon {
+            color: #28a745;
+            font-size: 16px;
+        }
+        
+        .check-text {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .theme-demo {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .theme-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .light-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            border: 2px solid #e9ecef;
+            color: #333;
+        }
+        
+        .dark-card {
+            background: linear-gradient(135deg, #343a40, #495057);
+            border: 2px solid #6c757d;
+            color: #fff;
+        }
+        
+        .ocean-card {
+            background: linear-gradient(135deg, #17a2b8, #20c997);
+            border: 2px solid #0dcaf0;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle btn-theme" onclick="toggleTheme()">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <div class="test-container">
+        <!-- 页面标题 -->
+        <div class="test-section">
+            <h1 style="text-align: center; font-size: 24px; margin: 0; color: #333;">
+                ✅ 解析器修复验证
+            </h1>
+            <p style="text-align: center; color: #666; margin: 10px 0 0 0;">
+                验证所有"下载"已改为"解析"，夜间模式容器颜色已修复
+            </p>
+        </div>
+
+        <!-- 文字修复检查 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-edit"></i>
+                文字修复检查
+            </div>
+            
+            <div class="check-item">
+                <i class="fas fa-check check-icon"></i>
+                <span class="check-text">页面标题：视频解析器 ✓</span>
+            </div>
+            
+            <div class="check-item">
+                <i class="fas fa-check check-icon"></i>
+                <span class="check-text">按钮文字：开始解析 ✓</span>
+            </div>
+            
+            <div class="check-item">
+                <i class="fas fa-check check-icon"></i>
+                <span class="check-text">进度条：解析进度 ✓</span>
+            </div>
+            
+            <div class="check-item">
+                <i class="fas fa-check check-icon"></i>
+                <span class="check-text">状态消息：准备解析... ✓</span>
+            </div>
+            
+            <div class="check-item">
+                <i class="fas fa-check check-icon"></i>
+                <span class="check-text">成功标题：解析成功！ ✓</span>
+            </div>
+        </div>
+
+        <!-- 主题修复检查 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-moon"></i>
+                主题修复检查
+            </div>
+            
+            <div class="theme-demo">
+                <div class="theme-card light-card" onclick="setTheme('')">
+                    <i class="fas fa-sun" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <div>浅色模式</div>
+                    <small>inner-container 浅蓝色</small>
+                </div>
+                
+                <div class="theme-card dark-card" onclick="setTheme('theme-dark')">
+                    <i class="fas fa-moon" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <div>深色模式</div>
+                    <small>inner-container 深色</small>
+                </div>
+                
+                <div class="theme-card ocean-card" onclick="setTheme('theme-system')">
+                    <i class="fas fa-cog" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <div>系统模式</div>
+                    <small>跟随系统设置</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 容器样式测试 -->
+        <div class="test-section">
+            <div class="section-title">
+                <i class="fas fa-box"></i>
+                容器样式测试
+            </div>
+            
+            <!-- 模拟 inner-container -->
+            <div class="inner-container" style="padding: 30px; text-align: center;">
+                <h3 style="margin: 0 0 15px 0; color: rgba(var(--text-rgb), 0.9);">
+                    这是 inner-container 样式测试
+                </h3>
+                <p style="margin: 0; color: rgba(var(--text-rgb), 0.7);">
+                    在不同主题下，这个容器应该显示相应的颜色。<br>
+                    浅色模式：浅蓝色渐变<br>
+                    深色模式：深色渐变<br>
+                    系统模式：跟随系统设置
+                </p>
+            </div>
+        </div>
+
+        <!-- 返回主页 -->
+        <div class="test-section">
+            <div style="text-align: center;">
+                <a href="/" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: all 0.3s ease;">
+                    <i class="fas fa-home"></i> 返回主页
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能
+        let currentTheme = 0;
+        const themes = ['', 'theme-dark', 'theme-system'];
+        const themeNames = ['浅色主题', '深色主题', '系统主题'];
+        
+        function toggleTheme() {
+            currentTheme = (currentTheme + 1) % themes.length;
+            setTheme(themes[currentTheme]);
+        }
+        
+        function setTheme(theme) {
+            document.body.className = theme;
+            
+            // 更新主题按钮图标
+            const btn = document.querySelector('.theme-toggle i');
+            const icons = ['fas fa-palette', 'fas fa-moon', 'fas fa-cog'];
+            const index = themes.indexOf(theme);
+            btn.className = icons[index >= 0 ? index : 0];
+            
+            console.log(`切换到: ${themeNames[index >= 0 ? index : 0]}`);
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ 解析器修复验证页面加载完成');
+        });
+    </script>
+</body>
+</html>

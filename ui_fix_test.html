@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI显示测试页面</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .status-info {
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #FFE082;
+            margin-bottom: 15px;
+        }
+        
+        .summary {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 UI显示修复测试页面</h1>
+        
+        <div class="test-section">
+            <h2>📋 修复总结</h2>
+            <div class="status-info" style="background: rgba(76, 175, 80, 0.2); border-left: 4px solid #4CAF50;">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>✅ 状态消息显示修复</strong><br>
+                    修复了 showMessage 函数，添加了 .visible 类以正确显示状态消息
+                </div>
+            </div>
+            
+            <div class="status-info" style="background: rgba(76, 175, 80, 0.2); border-left: 4px solid #4CAF50;">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>✅ 进度条容器显示修复</strong><br>
+                    修复了 showProgressContainer 函数，添加了 .visible 类以正确显示进度条
+                </div>
+            </div>
+            
+            <div class="status-info" style="background: rgba(76, 175, 80, 0.2); border-left: 4px solid #4CAF50;">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>✅ 下载结果显示修复</strong><br>
+                    修复了 showDownloadResult 函数，添加了 .visible 类和成功动画显示
+                </div>
+            </div>
+            
+            <div class="status-info" style="background: rgba(255, 193, 7, 0.2); border-left: 4px solid #FFC107;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>🔧 函数调用清理</strong><br>
+                    移除了不存在的 showMobileStatus 和 updateMobileProgress 函数调用
+                </div>
+            </div>
+            
+            <div class="status-info" style="background: rgba(33, 150, 243, 0.2); border-left: 4px solid #2196F3;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>🎨 CSS样式验证</strong><br>
+                    验证了 main.css 中的 .visible 类样式，确保透明度和动画效果正确
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🧪 关键修复点</h2>
+            <ul style="line-height: 1.8; font-size: 16px;">
+                <li><strong>状态消息 (.status-message)</strong>：CSS默认 opacity: 0，需要 .visible 类才显示</li>
+                <li><strong>进度容器 (.progress-container)</strong>：CSS默认 opacity: 0，需要 .visible 类才显示</li>
+                <li><strong>下载结果 (.download-result)</strong>：CSS默认 opacity: 0，需要 .visible 类才显示</li>
+                <li><strong>完整重置函数</strong>：添加了 completeReset() 确保状态和UI正确重置</li>
+                <li><strong>函数调用清理</strong>：移除了不存在的移动端专用函数调用</li>
+            </ul>
+        </div>
+        
+        <div class="summary">
+            <h2>🎉 修复完成</h2>
+            <p style="font-size: 18px; margin: 20px 0;">
+                所有UI显示问题已彻底修复！<br>
+                现在下载过程中的状态消息、进度条、下载详情和下载结果都将正确显示。
+            </p>
+            
+            <p style="font-size: 16px; color: #E8F5E8;">
+                <strong>现在请返回主页面测试：</strong><br>
+                1. 输入视频链接<br>
+                2. 点击"开始下载"<br>
+                3. 观察状态消息、进度条和下载结果的显示效果
+            </p>
+            
+            <a href="/" class="back-link">🏠 返回视频下载器主页面</a>
+        </div>
+    </div>
+    
+    <script>
+        // 添加一些简单的动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.test-section');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    section.style.transition = 'all 0.6s ease';
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+/* ========================================
+   移动端完美修复版 - 确保点击和交互正常
+   ======================================== */
+
+/* 移动端基础修复 */
+@media (max-width: 768px) {
+    /* 确保所有交互元素都可点击 */
+    .download-btn,
+    .download-file-btn,
+    .theme-toggle,
+    #videoUrl,
+    .input-container,
+    button,
+    input,
+    select,
+    textarea,
+    a {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+    }
+    
+    /* 输入框特殊处理 - 允许文本选择 */
+    #videoUrl,
+    input[type="text"],
+    input[type="url"],
+    textarea {
+        -webkit-user-select: text !important;
+        user-select: text !important;
+    }
+    
+    /* 下载按钮强制可点击 */
+    .download-btn {
+        position: relative !important;
+        z-index: 100 !important;
+        cursor: pointer !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        animation: none !important;
+        display: flex !important;
+        min-height: 56px !important;
+        border: none !important;
+        background: linear-gradient(135deg, 
+            rgb(13, 110, 253) 0%, 
+            rgb(74, 144, 226) 50%,
+            rgb(116, 214, 143) 100%) !important;
+    }
+    
+    /* 主题切换按钮强制可点击 */
+    .theme-toggle {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 10000 !important;
+        cursor: pointer !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+        min-height: 44px !important;
+        min-width: 44px !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        border-radius: 50px !important;
+    }
+    
+    /* 输入框容器强制可交互 */
+    .input-container {
+        position: relative !important;
+        z-index: 10 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    /* 输入框强制可交互 */
+    #videoUrl {
+        position: relative !important;
+        z-index: 11 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        font-size: 16px !important; /* 防止iOS缩放 */
+    }
+    
+    /* 移除所有可能阻碍点击的覆盖层 */
+    .bg-blob,
+    .background-overlay,
+    .loading-overlay.hidden {
+        pointer-events: none !important;
+    }
+    
+    /* 确保容器不会阻挡交互 */
+    .container,
+    .inner-container {
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        animation: none !important;
+    }
+    
+    /* 修复可能的层级问题 */
+    .header,
+    .input-section,
+    .download-btn,
+    .progress-container,
+    .status-message,
+    .download-result {
+        position: relative !important;
+        z-index: 10 !important;
+        pointer-events: auto !important;
+    }
+    
+    /* 触摸反馈优化 */
+    .download-btn:active,
+    .theme-toggle:active {
+        transform: scale(0.98) !important;
+        transition: transform 0.1s ease !important;
+    }
+    
+    /* 防止选择文本影响交互 */
+    .download-btn,
+    .theme-toggle,
+    .btn-icon,
+    .btn-text,
+    .theme-icon,
+    .theme-text {
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+    }
+    
+    /* 确保按钮内部元素不会阻挡点击 */
+    .btn-icon,
+    .btn-text,
+    .theme-icon,
+    .theme-text {
+        pointer-events: none !important;
+    }
+    
+    /* iOS Safari 特殊修复 */
+    @supports (-webkit-touch-callout: none) {
+        .download-btn,
+        .theme-toggle {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            border-radius: 16px !important;
+        }
+        
+        .theme-toggle {
+            border-radius: 50px !important;
+        }
+    }
+    
+    /* 强制触摸目标大小 */
+    .download-btn,
+    .theme-toggle {
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+    
+    /* 修复可能的overflow问题 */
+    html,
+    body {
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* 确保页面可滚动但交互元素固定 */
+    .theme-toggle {
+        position: fixed !important;
+    }
+    
+    /* 调试用 - 在开发时可以启用 */
+    /*
+    .download-btn {
+        border: 2px solid red !important;
+    }
+    
+    .theme-toggle {
+        border: 2px solid blue !important;
+    }
+    
+    #videoUrl {
+        border: 2px solid green !important;
+    }
+    */
+}
+
+/* 平板端优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .download-btn,
+    .theme-toggle,
+    #videoUrl {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        cursor: pointer !important;
+    }
+    
+    #videoUrl {
+        cursor: text !important;
+    }
+}
+
+/* 通用修复 - 适用于所有设备 */
+.download-btn,
+.theme-toggle {
+    box-sizing: border-box !important;
+    will-change: transform !important;
+}
+
+/* 确保按钮在所有状态下都可见和可点击 */
+.download-btn:disabled {
+    pointer-events: auto !important;
+    opacity: 0.7 !important;
+}
+
+/* 移动端虚拟键盘适配 */
+@media (max-width: 768px) {
+    .keyboard-open .container {
+        padding-bottom: 100px !important;
+    }
+    
+    .keyboard-open .theme-toggle {
+        transform: scale(0.9) !important;
+    }
+}
+
+/* 下载文件按钮 - 移动端完美修复版 */
+.download-file-btn {
+    width: 100% !important;
+    padding: 1rem 2rem !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: white !important;
+    background: linear-gradient(135deg, 
+        rgb(13, 110, 253) 0%, 
+        rgb(74, 144, 226) 100%) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+    min-height: 52px !important;
+    box-shadow: 
+        0 4px 16px rgba(13, 110, 253, 0.25),
+        0 2px 8px rgba(13, 110, 253, 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    animation: none !important;
+    z-index: 100 !important;
+}
+
+.download-file-btn:active {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* 下载结果容器 */
+.download-result {
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+.result-content {
+    pointer-events: auto !important;
+}
