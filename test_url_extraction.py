@@ -75,7 +75,7 @@ def test_simple_download():
     # 导入下载器
     from app.video_downloader import get_downloader
     
-    # 测试YouTube短视频
+    # 测试YouTube短视频 - 改为用测试成功的视频
     test_url = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
     
     def progress_callback(data):

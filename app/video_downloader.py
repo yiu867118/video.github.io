@@ -204,6 +204,16 @@ class SimpleVideoDownloader:
         """执行下载 - 多策略，不轻易报告失败"""
         temp_dir = os.path.dirname(output_template)
         
+        # 🔥创建专用的下载子目录，避免与现有文件冲突
+        download_subdir = os.path.join(temp_dir, f"video_download_{int(time.time())}")
+        os.makedirs(download_subdir, exist_ok=True)
+        
+        logger.info(f"📁 使用专用下载目录: {download_subdir}")
+        
+        # 修改output_template到子目录
+        original_template = output_template
+        output_template = os.path.join(download_subdir, "%(title)s.%(ext)s")
+        
         # 简化而强健的下载策略
         strategies = [
             {
@@ -289,43 +299,85 @@ class SimpleVideoDownloader:
                     ydl_opts['progress_hooks'] = [progress_tracker.update]
                 
                 # 执行下载
-                files_before = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
+                files_before = set(os.listdir(download_subdir)) if os.path.exists(download_subdir) else set()
+                download_start_time = time.time()
                 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     ydl.download([url])
                 
-                # 检查下载的文件
-                files_after = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
-                new_files = files_after - files_before
+                # 🔥简化的文件检测逻辑：检查下载目录中的所有文件
+                files_after = set(os.listdir(download_subdir)) if os.path.exists(download_subdir) else set()
+                all_files = list(files_after)
                 
-                if new_files:
-                    # 找到最大的文件
-                    largest_file = None
-                    largest_size = 0
-                    
-                    for filename in new_files:
-                        file_path = os.path.join(temp_dir, filename)
+                logger.info(f"📁 下载目录文件数: {len(all_files)}")
+                
+                if all_files:
+                    # 找到最大的视频文件
+                    video_files = []
+                    for filename in all_files:
+                        file_path = os.path.join(download_subdir, filename)
                         if os.path.isfile(file_path):
                             size = os.path.getsize(file_path)
-                            if size > largest_size:
-                                largest_size = size
-                                largest_file = filename
+                            # 检查是否是视频文件
+                            if filename.lower().endswith(('.mp4', '.webm', '.mkv', '.avi', '.mov', '.flv', '.m4v')):
+                                logger.info(f"📦 发现视频文件: {filename} ({size/1024:.1f} KB)")
+                                video_files.append((filename, size, file_path))
+                            else:
+                                logger.info(f"� 发现其他文件: {filename} ({size/1024:.1f} KB)")
                     
-                    if largest_file and largest_size > 1024 * 1024:  # 至少1MB
-                        file_path = os.path.join(temp_dir, largest_file)
-                        logger.info(f"🎉 下载成功！文件: {largest_file} ({largest_size/1024/1024:.2f} MB)")
+                    if video_files:
+                        # 按文件大小排序，选择最大的
+                        video_files.sort(key=lambda x: x[1], reverse=True)
+                        largest_file, largest_size, file_path = video_files[0]
                         
-                        if progress_callback:
-                            progress_callback({
-                                'status': 'completed',
-                                'percent': 100,
-                                'filename': largest_file,
-                                'file_size_mb': largest_size / 1024 / 1024,
-                                'strategy': strategy['name'],
-                                'final': True
-                            })
-                        
-                        return file_path
+                        # 🔥支持各种大小的视频文件
+                        if largest_size > 10 * 1024:  # 至少10KB
+                            # 🔥将文件移动到原始目标目录
+                            final_path = os.path.join(temp_dir, largest_file)
+                            try:
+                                # 如果目标文件已存在，删除它
+                                if os.path.exists(final_path):
+                                    os.remove(final_path)
+                                # 移动文件
+                                import shutil
+                                shutil.move(file_path, final_path)
+                                
+                                logger.info(f"🎉 下载成功！文件: {largest_file} ({largest_size/1024/1024:.2f} MB)")
+                                logger.info(f"📁 文件位置: {final_path}")
+                                
+                                if progress_callback:
+                                    progress_callback({
+                                        'status': 'completed',
+                                        'percent': 100,
+                                        'filename': largest_file,
+                                        'file_size_mb': largest_size / 1024 / 1024,
+                                        'strategy': strategy['name'],
+                                        'final': True
+                                    })
+                                
+                                # 清理下载目录
+                                try:
+                                    shutil.rmtree(download_subdir)
+                                except:
+                                    pass
+                                
+                                return final_path
+                            except Exception as e:
+                                logger.error(f"移动文件失败: {e}")
+                        else:
+                            logger.warning(f"⚠️ 文件太小: {largest_file} ({largest_size} bytes)")
+                    else:
+                        logger.warning(f"⚠️ 未发现视频文件，只有: {[f for f in all_files]}")
+                else:
+                    logger.warning(f"⚠️ 下载目录为空: {download_subdir}")
+                
+                # 清理空的下载目录
+                try:
+                    if os.path.exists(download_subdir):
+                        import shutil
+                        shutil.rmtree(download_subdir)
+                except:
+                    pass
                 
                 logger.info(f"⚠️ 策略 {i} 未获得有效文件，继续尝试下一个")
                 
