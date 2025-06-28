@@ -78,7 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lastRetryTime: 0, // 最后重试时间
         retryInterval: 5000, // 重试间隔5秒
         abortController: null, // 用于取消请求
-        themeMode: localStorage.getItem('theme-preference') || 'system' // 'system', 'light', 'dark'
+        themeMode: localStorage.getItem('theme-preference') || 'system', // 'system', 'light', 'dark'
+        // 新增：下载状态跟踪
+        hasDownloaded: false, // 用户是否已点击过下载
+        parseSuccessful: false, // 解析是否成功
+        currentVideoUrl: '', // 当前解析的视频URL
+        currentFilename: '' // 当前文件名
     };
     
     // 支持的平台配置
@@ -1056,18 +1061,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 带超时的fetch请求 - 修复版
+     * 带超时的fetch请求 - 移动端优化版
      */
     async function fetchWithTimeout(url, options, timeout = 15000) {
         // 使用全局AbortController
         const controller = state.abortController || new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
         
+        // 检测移动设备并添加适合的请求头
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 移动端优化的请求头
+        const mobileHeaders = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        };
+        
+        // 合并请求头
+        const enhancedOptions = {
+            ...options,
+            headers: {
+                ...mobileHeaders,
+                ...options.headers
+            },
+            signal: controller.signal
+        };
+        
         try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
+            const response = await fetch(url, enhancedOptions);
             clearTimeout(timeoutId);
             return response;
         } catch (error) {
@@ -1840,6 +1864,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 设置下载按钮事件 - 移动端优化
             setupDownloadFileButton(downloadUrl, filename);
+            
+            // 设置返回解析界面按钮
+            setupBackToParseButton();
+            
+            // 标记解析成功
+            state.parseSuccessful = true;
+            state.currentFilename = filename || '下载文件';
 
             console.log('✅ 下载结果界面已显示');
 
@@ -1873,6 +1904,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             e.stopPropagation();
             console.log('📥 文件下载按钮被点击');
+
+            // 标记用户已下载
+            state.hasDownloaded = true;
+            console.log('✅ 用户已点击下载，状态已更新');
 
             try {
                 const link = document.createElement('a');
@@ -1921,221 +1956,104 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('✅ 文件下载按钮事件已设置');
     }
 
-    // 处理下载错误（通用错误处理）- 终极修复版
-    function handleDownloadError(error) {
-        console.error('❌ 处理下载错误:', error);
-        
-        stopProgressPolling();
-        
-        const errorMessage = error.message || '未知错误';
-        const errorType = identifyErrorType(errorMessage);
-        
-        // 致命错误完全禁用重试
-        const fatalErrors = ['payment_required', 'auth_required', 'region_blocked', 'access_denied', 'age_restricted', 'live_content'];
-        if (fatalErrors.includes(errorType) || state.fatalErrorOccurred) {
-            console.log('💀 致命错误不进行重试，直接终止');
-            state.fatalErrorOccurred = true;
-            state.isDownloading = false;
-            handleSpecificError(errorType, errorMessage);
-            return;
-        }
-        
-        // 非致命错误的处理
-        updateProgress(0, '下载失败', true); // 允许重置进度条
-        updateProgressDetails('失败', '');
-        showMessage(`下载失败: ${errorMessage}`, 'error');
-        setButtonState('error');
-        
-        // 重试逻辑（仅对可恢复错误）
-        const currentTime = Date.now();
-        const timeSinceLastRetry = currentTime - state.lastRetryTime;
-        
-        if (state.retryCount < state.maxRetries && timeSinceLastRetry >= state.retryInterval && !state.isRetrying) {
-            state.isRetrying = true; // 防止重复重试
-            
-            setTimeout(() => {
-                state.retryCount++;
-                state.lastRetryTime = Date.now();
-                console.log(`🔄 自动重试 (${state.retryCount}/${state.maxRetries})`);
-                showMessage(`正在重试... (${state.retryCount}/${state.maxRetries})`, 'warning');
-                
-                // 重新开始下载
-                const url = elements.videoUrl.value.trim();
-                if (url && state.retryCount <= state.maxRetries && !state.fatalErrorOccurred) {
-                    // 重置重试状态
-                    state.isRetrying = false;
-                    state.isDownloading = false; // 允许重新下载
-                    startDownloadProcess(url);
-                } else {
-                    state.isRetrying = false;
-                    completeReset();
-                }
-            }, state.retryInterval);
-        } else {
-            // 重置状态
-            setTimeout(() => {
-                completeReset();
-            }, 5000);
-        }
-    }
-
-    // 显示成功动画
-    function showSuccessAnimation() {
-        if (elements.successAnimation) {
-            elements.successAnimation.style.display = 'block';
-            
-            // 创建彩带效果
-            createConfetti();
-            
-            setTimeout(() => {
-                if (elements.successAnimation) {
-                    elements.successAnimation.style.display = 'none';
-                }
-            }, 3000);
-        }
-    }
-
-    // 创建彩带效果
-    function createConfetti() {
-        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
-        const confettiContainer = document.querySelector('.confetti-container');
-        
-        if (!confettiContainer) return;
-        
-        for (let i = 0; i < 50; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.left = Math.random() * 100 + '%';
-            confetti.style.animationDelay = Math.random() * 3 + 's';
-            confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
-            
-            confettiContainer.appendChild(confetti);
-            
-            // 清理
-            setTimeout(() => {
-                if (confetti.parentNode) {
-                    confetti.remove();
-                }
-            }, 5000);
-        }
-    }
-
-    // ========================================
-    // 移动端优化事件监听器设置 - 修复版
-    // ========================================
-
-    // 确保下载按钮可点击
-    function setupDownloadButton() {
-        if (!elements.downloadButton) {
-            console.error('❌ 下载按钮未找到');
+    // 设置返回解析界面按钮
+    function setupBackToParseButton() {
+        const backBtn = document.getElementById('backToParseBtn');
+        if (!backBtn) {
+            console.warn('返回解析界面按钮未找到');
             return;
         }
 
-        // 确保按钮样式正确
-        elements.downloadButton.style.pointerEvents = 'auto';
-        elements.downloadButton.style.cursor = 'pointer';
-        elements.downloadButton.style.userSelect = 'none';
-        elements.downloadButton.style.touchAction = 'manipulation';
-        
-        const handleDownloadClick = async (e) => {
+        // 移除所有现有事件监听器
+        const newBackBtn = backBtn.cloneNode(true);
+        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+
+        // 确保按钮可点击
+        newBackBtn.style.pointerEvents = 'auto';
+        newBackBtn.style.cursor = 'pointer';
+        newBackBtn.style.touchAction = 'manipulation';
+
+        const handleBackToParseClick = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🎯 === 下载按钮被点击 ===');
-            
-            // 防重复点击和状态检查
-            if (state.isDownloading || state.isRetrying) {
-                console.log('⚠️ 下载任务进行中或正在重试，忽略重复点击');
-                showMessage('下载任务正在进行中，请勿重复点击', 'warning');
-                return;
+            console.log('🔙 返回解析界面按钮被点击');
+
+            // 检查用户是否已下载
+            if (!state.hasDownloaded) {
+                // 用户还没下载，弹出确认对话框
+                const confirmReturn = confirm('您还没有下载视频文件，确定要返回解析界面吗？');
+                if (!confirmReturn) {
+                    console.log('❌ 用户取消返回');
+                    return;
+                }
             }
-            
-            const url = elements.videoUrl.value.trim();
-            if (!url) {
-                showMessage('请输入有效的视频URL', 'error');
-                elements.videoUrl.focus();
-                return;
-            }
-            
-            // URL验证 - 支持多平台
-            const platform = detectPlatform(url);
-            if (platform === 'unknown') {
-                showMessage('请输入支持的平台视频链接', 'error');
-                elements.videoUrl.focus();
-                return;
-            }
-            
-            console.log(`✅ URL验证通过，检测到${supportedPlatforms[platform].name}链接:`, url);
-            
-            // 重置状态
-            resetStateForNewDownload();
-            
-            // 开始下载
-            await startDownloadProcess(url);
+
+            // 执行返回操作
+            console.log('✅ 执行返回解析界面');
+            returnToParseInterface();
         };
 
         // PC端点击事件
-        elements.downloadButton.addEventListener('click', handleDownloadClick, { passive: false });
-        
-        // 移动端触摸事件支持
-        elements.downloadButton.addEventListener('touchstart', (e) => {
-            if (!state.isDownloading && !state.isRetrying) {
-                elements.downloadButton.style.transform = 'translateY(1px)';
-                elements.downloadButton.style.opacity = '0.9';
-            }
+        newBackBtn.addEventListener('click', handleBackToParseClick, { passive: false });
+
+        // 移动端触摸事件
+        newBackBtn.addEventListener('touchstart', (e) => {
+            newBackBtn.style.transform = 'scale(0.98)';
+            newBackBtn.style.opacity = '0.9';
         }, { passive: true });
-        
-        elements.downloadButton.addEventListener('touchend', (e) => {
-            elements.downloadButton.style.transform = '';
-            elements.downloadButton.style.opacity = '';
+
+        newBackBtn.addEventListener('touchend', (e) => {
+            newBackBtn.style.transform = '';
+            newBackBtn.style.opacity = '';
         }, { passive: true });
-        
-        console.log('✅ 下载按钮事件监听器已设置');
+
+        console.log('✅ 返回解析界面按钮事件已设置');
     }
 
-    // 主下载按钮事件 - 替换为新的处理方式
-    setupDownloadButton();
-
-    // ========================================
-    // 事件监听器设置
-    // ========================================
-
-    // 页面可见性变化处理
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            console.log('👁️ 页面隐藏');
-        } else if (state.currentDownloadId && !state.progressInterval && state.isDownloading) {
-            console.log('👁️ 页面显示，恢复轮询');
-            startProgressPolling();
-        }
-    });
-
-    // 页面卸载前清理
-    window.addEventListener('beforeunload', (e) => {
-        if (state.isDownloading) {
-            e.preventDefault();
-            e.returnValue = '下载正在进行中，确定要离开吗？';
+    // 返回解析界面函数
+    function returnToParseInterface() {
+        console.log('🔄 开始返回解析界面');
+        
+        // 重置状态
+        state.hasDownloaded = false;
+        state.parseSuccessful = false;
+        state.currentVideoUrl = '';
+        state.currentFilename = '';
+        state.isDownloading = false;
+        state.currentDownloadId = null;
+        state.fatalErrorOccurred = false;
+        
+        // 隐藏下载结果
+        if (elements.downloadResult) {
+            elements.downloadResult.style.display = 'none';
         }
         
-        console.log('🚪 页面卸载，清理资源');
-        completeReset();
-    });
+        // 隐藏进度容器
+        if (elements.progressContainer) {
+            elements.progressContainer.style.display = 'none';
+        }
+        
+        // 隐藏状态消息
+        if (elements.statusMessage) {
+            elements.statusMessage.style.display = 'none';
+        }
+        
+        // 重置按钮状态
+        setButtonState('initial');
+        
+        // 清空输入框（可选，根据用户体验决定）
+        // elements.videoUrl.value = '';
+        
+        // 聚焦到输入框
+        if (elements.videoUrl) {
+            elements.videoUrl.focus();
+        }
+        
+        console.log('✅ 已返回解析界面');
+        showMessage('已返回解析界面，可以解析新的视频', 'info');
+    }
 
-    // 全局错误处理
-    window.addEventListener('error', (event) => {
-        console.error('❌ 全局错误:', event.error);
-    });
-
-    // 未捕获的Promise错误处理
-    window.addEventListener('unhandledrejection', (event) => {
-        console.error('❌ 未捕获的Promise错误:', event.reason);
-        event.preventDefault();
-    });
-
-    // 页面初始化设置 - 放在最后执行
-    initializeApp();
-
-    console.log('✅ === 🐻🐻专属视频下载器 - 多平台增强版 v2.4 初始化完成! ===');
+    // ...existing code...
 });
 
 // 移动设备网络检测和优化
@@ -2241,6 +2159,7 @@ function optimizeScrolling() {
     document.documentElement.style.scrollBehavior = 'smooth';
     
     // 防止过度滚动
+   
     document.body.addEventListener('touchmove', function(e) {
         if (e.target.closest('.progress-container, .input-container')) {
             e.stopPropagation();
@@ -2273,52 +2192,3 @@ function showMobileError(message) {
         navigator.vibrate([200, 100, 200]);
     }
 }
-
-    // ========================================
-    // 最终初始化代码 - 确保所有功能正常
-    // ========================================
-    
-    // 初始化主题管理器
-    try {
-        themeManager.init();
-        console.log('✅ 主题管理器初始化成功');
-    } catch (error) {
-        console.error('❌ 主题管理器初始化失败:', error);
-    }
-    
-    // 修复移动端点击问题的最终保障
-    function ensureMobileInteraction() {
-        // 确保所有关键元素都可点击
-        const criticalElements = [
-            elements.downloadButton,
-            elements.themeToggle,
-            elements.videoUrl
-        ];
-        
-        criticalElements.forEach(element => {
-            if (element) {
-                element.style.pointerEvents = 'auto';
-                element.style.touchAction = 'manipulation';
-                element.style.webkitTapHighlightColor = 'transparent';
-                element.style.webkitTouchCallout = 'none';
-            }
-        });
-        
-        console.log('✅ 移动端交互优化已应用');
-    }
-    
-    // 应用移动端交互优化
-    ensureMobileInteraction();
-    
-    // 页面完全加载后的最终检查
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            ensureMobileInteraction();
-            console.log('🎯 页面加载完成，移动端优化已确认');
-        }, 100);
-    });
-    
-    console.log('🎉 === 视频下载器初始化完成 ===');
-    console.log('🔧 移动端和PC端完美兼容');
-    console.log('🎨 主题切换功能已启用');
-    console.log('📱 触摸交互已优化');

@@ -75,7 +75,12 @@ def download():
             return jsonify({'error': '缺少视频URL'}), 400
         
         url = data['url']
-        logger.info(f"收到下载请求: {url}")
+        
+        # 检测移动端请求
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = any(mobile in user_agent for mobile in ['mobile', 'android', 'iphone', 'ipad', 'ipod'])
+        
+        logger.info(f"收到下载请求: {url} (移动端: {is_mobile})")
         
         # 生成下载ID
         download_id = str(int(time.time() * 1000))
@@ -106,13 +111,9 @@ def download():
             try:
                 # 创建临时目录
                 temp_dir = tempfile.mkdtemp()
-                from datetime import datetime
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 
-                if 'bilibili.com' in url:
-                    output_template = os.path.join(temp_dir, f"bilibili_{timestamp}.%(ext)s")
-                else:
-                    output_template = os.path.join(temp_dir, f"video_{timestamp}.%(ext)s")
+                # 🔥简化输出模板 - 让下载器自己处理文件名
+                output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
                 
                 # 调用下载函数
                 file_path = download_video(url, output_template, progress_callback)

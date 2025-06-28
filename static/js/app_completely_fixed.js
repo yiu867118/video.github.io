@@ -21,7 +21,12 @@ const state = {
     lastProgressTime: null,
     progressStuckThreshold: 30000,
     isProgressStuck: false,
-    themeMode: localStorage.getItem('theme-preference') || 'system'
+    themeMode: localStorage.getItem('theme-preference') || 'system',
+    // 新增：下载状态跟踪
+    hasDownloaded: false, // 用户是否已点击过下载
+    parseSuccessful: false, // 解析是否成功
+    currentVideoUrl: '', // 当前解析的视频URL
+    currentFilename: '' // 当前文件名
 };
 
 // DOM元素映射
@@ -496,6 +501,12 @@ const buttonStates = {
         text: '重试',
         class: 'btn-error',
         disabled: false
+    },
+    fatal: {
+        icon: 'fas fa-exclamation-triangle',
+        text: '无法下载',
+        class: 'btn-fatal',
+        disabled: true
     }
 };
 
@@ -666,6 +677,13 @@ function showDownloadResult(downloadUrl, filename) {
         // 设置下载按钮事件
         setupDownloadFileButton(downloadUrl, filename);
         
+        // 设置返回解析界面按钮
+        setupBackToParseButton();
+        
+        // 标记解析成功
+        state.parseSuccessful = true;
+        state.currentFilename = filename || '下载文件';
+        
         console.log('✅ 解析结果界面已显示');
         
     } catch (error) {
@@ -694,6 +712,10 @@ function setupDownloadFileButton(downloadUrl, filename) {
     const handleFileDownload = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        
+        // 标记用户已下载
+        state.hasDownloaded = true;
+        console.log('✅ 用户已点击下载，状态已更新');
         
         try {
             const link = document.createElement('a');
@@ -734,6 +756,100 @@ function setupDownloadFileButton(downloadUrl, filename) {
     }, { passive: true });
     
     console.log('✅ 文件下载按钮事件已设置');
+}
+
+// 设置返回解析界面按钮
+function setupBackToParseButton() {
+    const backBtn = document.getElementById('backToParseBtn');
+    if (!backBtn) {
+        console.warn('返回解析界面按钮未找到');
+        return;
+    }
+
+    // 移除所有现有事件监听器
+    const newBackBtn = backBtn.cloneNode(true);
+    backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+
+    // 确保按钮可点击
+    newBackBtn.style.pointerEvents = 'auto';
+    newBackBtn.style.cursor = 'pointer';
+    newBackBtn.style.touchAction = 'manipulation';
+
+    const handleBackToParseClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🔙 返回解析界面按钮被点击');
+
+        // 检查用户是否已下载
+        if (!state.hasDownloaded) {
+            // 用户还没下载，弹出确认对话框
+            const confirmReturn = confirm('您还没有下载视频文件，确定要返回解析界面吗？');
+            if (!confirmReturn) {
+                console.log('❌ 用户取消返回');
+                return;
+            }
+        }
+
+        // 执行返回操作
+        console.log('✅ 执行返回解析界面');
+        returnToParseInterface();
+    };
+
+    // PC端点击事件
+    newBackBtn.addEventListener('click', handleBackToParseClick, { passive: false });
+
+    // 移动端触摸事件
+    newBackBtn.addEventListener('touchstart', (e) => {
+        newBackBtn.style.transform = 'scale(0.98)';
+        newBackBtn.style.opacity = '0.9';
+    }, { passive: true });
+
+    newBackBtn.addEventListener('touchend', (e) => {
+        newBackBtn.style.transform = '';
+        newBackBtn.style.opacity = '';
+    }, { passive: true });
+
+    console.log('✅ 返回解析界面按钮事件已设置');
+}
+
+// 返回解析界面函数
+function returnToParseInterface() {
+    console.log('🔄 开始返回解析界面');
+    
+    // 重置状态
+    state.hasDownloaded = false;
+    state.parseSuccessful = false;
+    state.currentVideoUrl = '';
+    state.currentFilename = '';
+    state.isDownloading = false;
+    state.currentDownloadId = null;
+    state.fatalErrorOccurred = false;
+    
+    // 隐藏下载结果
+    if (elements.downloadResult) {
+        elements.downloadResult.style.display = 'none';
+    }
+    
+    // 隐藏进度容器
+    if (elements.progressContainer) {
+        elements.progressContainer.style.display = 'none';
+    }
+    
+    // 隐藏状态消息
+    if (elements.statusMessage) {
+        elements.statusMessage.style.display = 'none';
+    }
+    
+    // 重置按钮状态
+    setButtonState('initial');
+    
+    // 聚焦到输入框
+    if (elements.videoUrl) {
+        elements.videoUrl.focus();
+    }
+    
+    console.log('✅ 已返回解析界面');
+    showMessage('已返回解析界面，可以解析新的视频', 'info');
 }
 
 // 完全重置所有状态和UI
@@ -794,10 +910,29 @@ function fetchWithTimeout(url, options = {}, timeout = 10000) {
             reject(new Error('请求超时'));
         }, timeout);
         
-        fetch(url, {
+        // 检测移动设备并添加适合的请求头
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // 移动端优化的请求头
+        const mobileHeaders = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        };
+        
+        // 合并请求头
+        const enhancedOptions = {
             ...options,
+            headers: {
+                ...mobileHeaders,
+                ...options.headers
+            },
             signal: controller.signal
-        })
+        };
+        
+        fetch(url, enhancedOptions)
         .then(response => {
             clearTimeout(timeoutId);
             resolve(response);
@@ -973,7 +1108,23 @@ function handleProgressUpdate(progressData) {
             updateProgress(0, '下载失败', true);
             updateProgressDetails('失败', '');
             showMessage(`下载失败: ${errorMsg}`, 'error');
-            handleDownloadError(new Error(errorMsg));
+            
+            // 🔥使用后端提供的详细错误信息，包括fatal和error_type
+            const errorInfo = {
+                message: errorMsg,
+                error_type: progressData.error_type || 'unknown_error',
+                fatal: progressData.fatal !== undefined ? progressData.fatal : false,
+                user_friendly: progressData.user_friendly || errorMsg
+            };
+            
+            console.log('🔍 错误详情:', errorInfo);
+            
+            // 创建包含结构化信息的错误对象
+            const structuredError = new Error(errorInfo.user_friendly);
+            structuredError.error_type = errorInfo.error_type;
+            structuredError.fatal = errorInfo.fatal;
+            
+            handleDownloadError(structuredError);
             break;
             
         default:
@@ -1116,18 +1267,75 @@ function handleDownloadError(error) {
     stopProgressPolling();
     state.isDownloading = false;
     
-    const errorMessage = error.message || '解析失败';
+    // 简化错误处理
+    let errorMessage = '解析失败';
+    let errorType = 'unknown_error';
+    let isFatal = false;
+    
+    // 🔥优先检查结构化错误对象
+    if (error && typeof error === 'object') {
+        if (error.error_type !== undefined && error.fatal !== undefined) {
+            errorMessage = error.user_friendly || error.error || error.message || '下载失败';
+            errorType = error.error_type;
+            isFatal = error.fatal;
+            console.log('🎯 使用结构化错误信息:', { errorType, isFatal, errorMessage });
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+    } else if (typeof error === 'string') {
+        errorMessage = error;
+    }
+    
+    // 🔥简化的错误类型识别：只关心是否致命
+    if (errorType === 'unknown_error') {
+        const errorLower = errorMessage.toLowerCase();
+        
+        // 只有这些才是真正致命的
+        if (errorLower.includes('付费内容') || errorLower.includes('payment_required')) {
+            errorType = 'payment_required';
+            isFatal = true;
+        } else if (errorLower.includes('需要登录') || errorLower.includes('auth_required')) {
+            errorType = 'auth_required';
+            isFatal = true;
+        } else if (errorLower.includes('已被删除') || errorLower.includes('私有') || errorLower.includes('不存在')) {
+            errorType = 'access_denied';
+            isFatal = true;
+        } else {
+            // 其他所有错误都可以重试
+            errorType = 'retryable_error';
+            isFatal = false;
+            errorMessage = '下载遇到问题，正在准备重试...';
+        }
+    }
+    
+    console.log(`🔍 错误分析: 类型=${errorType}, 致命=${isFatal}, 消息=${errorMessage}`);
+    
+    // 更新UI
     updateProgress(0, '解析失败', true);
     updateProgressDetails('失败', '');
-    showMessage(`下载失败: ${errorMessage}`, 'error');
-    setButtonState('error');
     
-    // 5秒后重置按钮状态
-    setTimeout(() => {
-        if (!state.isDownloading) {
-            setButtonState('normal');
-        }
-    }, 5000);
+    if (isFatal) {
+        showMessage(`❌ ${errorMessage}`, 'error');
+        setButtonState('fatal');
+        
+        // 致命错误10秒后重置
+        setTimeout(() => {
+            if (!state.isDownloading) {
+                setButtonState('normal');
+            }
+        }, 10000);
+    } else {
+        // 可重试错误
+        showMessage(`⚠️ ${errorMessage}`, 'warning');
+        setButtonState('error');
+        
+        // 可重试错误3秒后重置
+        setTimeout(() => {
+            if (!state.isDownloading) {
+                setButtonState('normal');
+            }
+        }, 3000);
+    }
 }
 
 // ========================================
