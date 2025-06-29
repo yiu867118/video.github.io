@@ -233,15 +233,14 @@ class CompletelyFixedVideoDownloader:
         original_template = output_template
         output_template = os.path.join(download_subdir, "%(title)s.%(ext)s")
         
-        # 🔥彻底修复的B站下载策略 - 专为手机/平板/电脑端完美支持
-        # 每个策略都有独立完整的配置，确保音视频正确合并
+        # 🔥彻底修复B站下载策略 - 统一使用www域名，避免移动端URL冲突
+        # 重点：所有策略都使用桌面版URL和Header，但通过不同的User-Agent模拟不同设备
         if platform == 'bilibili':
             strategies = [
                 {
-                    'name': 'B站手机端专用最高画质+音频合并',
-                    'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[ext=mp4]/best',
+                    'name': 'B站桌面端最高画质+音频合并(推荐)',
+                    'format': 'bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best[ext=mp4]/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
@@ -257,26 +256,47 @@ class CompletelyFixedVideoDownloader:
                         'file_access_retries': 3,
                         'prefer_insecure': False,
                         'http_headers': {
-                            'Referer': 'https://m.bilibili.com/',
-                            'Origin': 'https://m.bilibili.com',
+                            'Referer': 'https://www.bilibili.com/',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Connection': 'keep-alive',
+                        }
+                    }
+                },
+                {
+                    'name': 'B站手机模拟最高画质+音频合并',
+                    'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[ext=mp4]/best',
+                    'options': {
+                        'merge_output_format': 'mp4',
+                        'postprocessors': [{
+                            'key': 'FFmpegVideoConvertor',
+                            'preferedformat': 'mp4',
+                        }],
+                        'geo_bypass': True,
+                        'geo_bypass_country': 'CN',
+                        'nocheckcertificate': True,
+                        'ignoreerrors': False,
+                        'socket_timeout': 180,
+                        'fragment_retries': 10,
+                        'retries': 5,
+                        'file_access_retries': 3,
+                        'prefer_insecure': False,
+                        'http_headers': {
+                            'Referer': 'https://www.bilibili.com/',
                             'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
-                            'Upgrade-Insecure-Requests': '1',
-                            'Sec-Fetch-Dest': 'document',
-                            'Sec-Fetch-Mode': 'navigate',
-                            'Sec-Fetch-Site': 'none',
-                            'Cache-Control': 'max-age=0',
                         }
                     }
                 },
                 {
-                    'name': 'B站平板端专用高清+音频合并',
+                    'name': 'B站iPad模拟高清+音频合并',
                     'format': 'bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=720]+bestaudio/best[ext=mp4]/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
@@ -293,58 +313,18 @@ class CompletelyFixedVideoDownloader:
                         'prefer_insecure': False,
                         'http_headers': {
                             'Referer': 'https://www.bilibili.com/',
-                            'Origin': 'https://www.bilibili.com',
                             'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
-                            'Upgrade-Insecure-Requests': '1',
-                            'Sec-Fetch-Dest': 'document',
-                            'Sec-Fetch-Mode': 'navigate',
-                            'Sec-Fetch-Site': 'none',
                         }
                     }
                 },
                 {
-                    'name': 'B站电脑端专用超高清+音频合并',
-                    'format': 'bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best[ext=mp4]/best',
-                    'options': {
-                        'format_selector': None,
-                        'merge_output_format': 'mp4',
-                        'postprocessors': [{
-                            'key': 'FFmpegVideoConvertor',
-                            'preferedformat': 'mp4',
-                        }],
-                        'geo_bypass': True,
-                        'geo_bypass_country': 'CN',
-                        'nocheckcertificate': True,
-                        'ignoreerrors': False,
-                        'socket_timeout': 180,
-                        'fragment_retries': 10,
-                        'retries': 5,
-                        'file_access_retries': 3,
-                        'prefer_insecure': False,
-                        'http_headers': {
-                            'Referer': 'https://www.bilibili.com/',
-                            'Origin': 'https://www.bilibili.com',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-                            'Accept-Encoding': 'gzip, deflate, br',
-                            'Connection': 'keep-alive',
-                            'Upgrade-Insecure-Requests': '1',
-                            'Sec-Fetch-Dest': 'document',
-                            'Sec-Fetch-Mode': 'navigate',
-                            'Sec-Fetch-Site': 'none',
-                        }
-                    }
-                },
-                {
-                    'name': 'B站万能音视频合并策略',
+                    'name': 'B站通用音视频合并策略',
                     'format': 'bestvideo+bestaudio/best[acodec!=none]/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
@@ -364,35 +344,33 @@ class CompletelyFixedVideoDownloader:
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                             'Accept': '*/*',
                             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-                            'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
                         }
                     }
                 },
                 {
-                    'name': 'B站移动网络优化策略',
-                    'format': 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best[ext=mp4]/best',
+                    'name': 'B站地区限制绕过+音频合并',
+                    'format': 'best[acodec!=none]/bestvideo+bestaudio/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
                             'preferedformat': 'mp4',
                         }],
                         'geo_bypass': True,
-                        'geo_bypass_country': 'CN',
+                        'geo_bypass_country': 'US',
                         'nocheckcertificate': True,
                         'ignoreerrors': False,
                         'socket_timeout': 120,
-                        'fragment_retries': 5,
-                        'retries': 3,
-                        'file_access_retries': 2,
+                        'fragment_retries': 3,
+                        'retries': 2,
+                        'file_access_retries': 1,
                         'prefer_insecure': True,
                         'http_headers': {
-                            'Referer': 'https://m.bilibili.com/',
-                            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+                            'Referer': 'https://www.bilibili.com/',
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                             'Accept': '*/*',
-                            'Accept-Language': 'zh-CN,zh;q=0.9',
+                            'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
                             'Connection': 'keep-alive',
                         }
                     }
@@ -401,7 +379,6 @@ class CompletelyFixedVideoDownloader:
                     'name': 'B站Firefox兼容模式',
                     'format': 'best[acodec!=none][height<=1080]/bestvideo[height<=720]+bestaudio/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
@@ -428,38 +405,28 @@ class CompletelyFixedVideoDownloader:
                     }
                 },
                 {
-                    'name': 'B站地区限制绕过+音频合并',
-                    'format': 'best[acodec!=none]/bestvideo+bestaudio/best',
+                    'name': 'B站简化高质量模式',
+                    'format': 'best[acodec!=none]/best',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
                             'preferedformat': 'mp4',
                         }],
                         'geo_bypass': True,
-                        'geo_bypass_country': 'US',
                         'nocheckcertificate': True,
-                        'ignoreerrors': False,
                         'socket_timeout': 120,
                         'fragment_retries': 3,
                         'retries': 2,
                         'file_access_retries': 1,
                         'prefer_insecure': True,
-                        'http_headers': {
-                            'Referer': 'https://www.bilibili.com/',
-                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                            'Accept': '*/*',
-                            'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
-                            'Connection': 'keep-alive',
-                        }
+                        'ignoreerrors': False,
                     }
                 },
                 {
-                    'name': 'B站最大兼容模式(终极兜底)',
+                    'name': 'B站最大兼容模式(兜底)',
                     'format': 'best/worst',
                     'options': {
-                        'format_selector': None,
                         'merge_output_format': 'mp4',
                         'postprocessors': [{
                             'key': 'FFmpegVideoConvertor',
@@ -661,68 +628,41 @@ class CompletelyFixedVideoDownloader:
         raise Exception(error_analysis.get('user_friendly', '所有下载策略都失败，请检查视频链接'))
     
     def _get_video_info(self, url: str) -> Dict[str, Any]:
-        """获取视频信息，包括标题 - 专为手机/平板端优化"""
+        """获取视频信息，包括标题 - 统一使用桌面版Headers避免冲突"""
         try:
-            # 🔥修复：确保URL格式正确，统一为桌面版但保持兼容性
+            # 🔥修复：确保URL格式正确，统一为桌面版
             original_url = url
             if 'bilibili.com' in url:
-                # 确保使用桌面版URL进行信息获取，但保持移动端兼容
+                # 确保使用桌面版URL，避免移动端URL导致的问题
                 url = url.replace('m.bilibili.com', 'www.bilibili.com')
                 url = url.replace('//bilibili.com', '//www.bilibili.com')
             
-            # 🔥针对手机端优化的多重配置策略
+            # 🔥统一策略：所有配置都使用桌面版URL和Headers，只是User-Agent不同
             configs = [
                 {
-                    'name': '手机端优化配置',
-                    'user_agent': 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-                    'referer': 'https://m.bilibili.com/',
-                    'extra_headers': {
-                        'Origin': 'https://m.bilibili.com',
-                        'Sec-Fetch-Dest': 'document',
-                        'Sec-Fetch-Mode': 'navigate',
-                        'Sec-Fetch-Site': 'none',
-                        'Upgrade-Insecure-Requests': '1',
-                        'Cache-Control': 'max-age=0',
-                    }
-                },
-                {
-                    'name': '平板端优化配置',
-                    'user_agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-                    'referer': 'https://www.bilibili.com/',
-                    'extra_headers': {
-                        'Origin': 'https://www.bilibili.com',
-                        'Sec-Fetch-Dest': 'document',
-                        'Sec-Fetch-Mode': 'navigate',
-                        'Sec-Fetch-Site': 'none',
-                    }
-                },
-                {
-                    'name': '桌面端配置',
+                    'name': '桌面端Chrome配置',
                     'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                    'referer': 'https://www.bilibili.com/',
-                    'extra_headers': {
-                        'Origin': 'https://www.bilibili.com',
-                        'Sec-Fetch-Dest': 'document',
-                        'Sec-Fetch-Mode': 'navigate',
-                        'Sec-Fetch-Site': 'none',
-                        'Upgrade-Insecure-Requests': '1',
-                    }
+                    'referer': 'https://www.bilibili.com/'
                 },
                 {
-                    'name': 'Firefox移动端配置',
-                    'user_agent': 'Mozilla/5.0 (Mobile; rv:121.0) Gecko/121.0 Firefox/121.0',
-                    'referer': 'https://m.bilibili.com/',
-                    'extra_headers': {
-                        'DNT': '1',
-                    }
+                    'name': '手机端Chrome配置(桌面Headers)',
+                    'user_agent': 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+                    'referer': 'https://www.bilibili.com/'
                 },
                 {
-                    'name': '安卓Chrome配置',
-                    'user_agent': 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-                    'referer': 'https://m.bilibili.com/',
-                    'extra_headers': {
-                        'X-Requested-With': 'com.android.chrome',
-                    }
+                    'name': 'iPad Safari配置(桌面Headers)',
+                    'user_agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+                    'referer': 'https://www.bilibili.com/'
+                },
+                {
+                    'name': 'Firefox配置',
+                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+                    'referer': 'https://www.bilibili.com/'
+                },
+                {
+                    'name': 'Safari配置',
+                    'user_agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'referer': 'https://www.bilibili.com/'
                 }
             ]
             
@@ -745,16 +685,15 @@ class CompletelyFixedVideoDownloader:
                     
                     # 检测平台并添加特定配置
                     if 'bilibili.com' in url or 'b23.tv' in url:
+                        # 🔥关键修复：统一使用桌面版Headers，避免移动端URL冲突
                         headers = {
-                            'Referer': config['referer'],
+                            'Referer': config['referer'],  # 始终使用桌面版Referer
                             'User-Agent': config['user_agent'],
                             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
                         }
-                        # 添加额外的头部信息
-                        headers.update(config.get('extra_headers', {}))
                         ydl_opts['http_headers'] = headers
                     
                     logger.info(f"📱 尝试{config['name']}获取视频信息: {url}")
