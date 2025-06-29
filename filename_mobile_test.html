@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件名 & 移动端修复测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #007bff;
+        }
+        
+        .test-section h2 {
+            color: #007bff;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-item {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .test-url {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .expected-filename {
+            color: #28a745;
+            font-weight: bold;
+            background: #d4edda;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .device-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-pending { background: #ffc107; }
+        .status-testing { background: #17a2b8; }
+        .status-success { background: #28a745; }
+        .status-failed { background: #dc3545; }
+        
+        .mobile-hint {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .test-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 文件名 & 移动端修复测试</h1>
+        
+        <!-- 设备信息 -->
+        <div class="device-info">
+            <h3>📱 当前设备信息</h3>
+            <p><strong>设备类型：</strong><span id="deviceType">检测中...</span></p>
+            <p><strong>用户代理：</strong><span id="userAgent" style="font-family: monospace; font-size: 0.9em;"></span></p>
+            <p><strong>屏幕尺寸：</strong><span id="screenSize"></span></p>
+        </div>
+        
+        <!-- 文件名测试 -->
+        <div class="test-section">
+            <h2>📝 文件名测试</h2>
+            <p>测试目标：验证下载的视频文件名是否正确使用原视频标题</p>
+            
+            <div class="test-item">
+                <h4>测试1：中文标题B站视频</h4>
+                <div class="test-url">https://www.bilibili.com/video/BV1xx411c7mu</div>
+                <div class="expected-filename">期望文件名：包含中文标题的原始视频名</div>
+                <a href="/" class="test-btn" target="_blank">🎯 测试下载</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+            
+            <div class="test-item">
+                <h4>测试2：特殊字符标题视频</h4>
+                <div class="test-url">https://www.bilibili.com/video/BV1GJ411x7h7</div>
+                <div class="expected-filename">期望文件名：特殊字符被安全替换但保持可读性</div>
+                <a href="/" class="test-btn" target="_blank">🎯 测试下载</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+            
+            <div class="test-item">
+                <h4>测试3：YouTube中文标题</h4>
+                <div class="test-url">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                <div class="expected-filename">期望文件名：使用原始YouTube标题</div>
+                <a href="/" class="test-btn" target="_blank">🎯 测试下载</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+        </div>
+        
+        <!-- 移动端B站下载测试 -->
+        <div class="test-section">
+            <h2>📱 移动端B站下载测试</h2>
+            <p>测试目标：验证手机和平板能否正常下载Bilibili视频</p>
+            
+            <div class="mobile-hint" id="mobileHint">
+                <strong>💡 提示：</strong>
+                <span id="mobileHintText">请使用手机或平板设备访问此页面进行测试</span>
+            </div>
+            
+            <div class="test-item">
+                <h4>测试1：普通B站视频（移动端）</h4>
+                <div class="test-url">https://www.bilibili.com/video/BV1xx411c7mu</div>
+                <div class="expected-filename">期望结果：移动端能正常下载</div>
+                <a href="/" class="test-btn" target="_blank">🎯 移动端测试</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+            
+            <div class="test-item">
+                <h4>测试2：高画质B站视频（移动端）</h4>
+                <div class="test-url">https://www.bilibili.com/video/BV1GJ411x7h7</div>
+                <div class="expected-filename">期望结果：移动端能下载合适画质版本</div>
+                <a href="/" class="test-btn" target="_blank">🎯 移动端测试</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+            
+            <div class="test-item">
+                <h4>测试3：B站短链接（移动端）</h4>
+                <div class="test-url">https://b23.tv/BV1xx411c7mu</div>
+                <div class="expected-filename">期望结果：短链接正常解析和下载</div>
+                <a href="/" class="test-btn" target="_blank">🎯 移动端测试</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+        </div>
+        
+        <!-- 对比测试 -->
+        <div class="test-section">
+            <h2>⚖️ 修复前后对比</h2>
+            <p>测试目标：验证修复不会影响原有功能</p>
+            
+            <div class="test-item">
+                <h4>YouTube下载对比</h4>
+                <div class="test-url">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+                <div class="expected-filename">期望结果：YouTube下载功能正常不受影响</div>
+                <a href="/" class="test-btn" target="_blank">🎯 对比测试</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+            
+            <div class="test-item">
+                <h4>PC端B站下载对比</h4>
+                <div class="test-url">https://www.bilibili.com/video/BV1xx411c7mu</div>
+                <div class="expected-filename">期望结果：PC端下载功能正常，文件名更正确</div>
+                <a href="/" class="test-btn" target="_blank">🎯 对比测试</a>
+                <span class="status-indicator status-pending"></span>待测试
+            </div>
+        </div>
+        
+        <!-- 测试结果记录 -->
+        <div class="test-section" style="border-left-color: #28a745;">
+            <h2>📊 测试结果记录</h2>
+            <div id="testResults">
+                <p>测试结果将在这里显示...</p>
+                <div style="margin-top: 20px;">
+                    <button class="test-btn" onclick="clearResults()">🗑️ 清空记录</button>
+                    <button class="test-btn" onclick="exportResults()">📤 导出结果</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设备检测
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isTablet = /iPad|Android.*Tablet/i.test(ua);
+            
+            let deviceType = 'PC/桌面端';
+            if (isTablet) {
+                deviceType = '平板设备';
+            } else if (isMobile) {
+                deviceType = '手机设备';
+            }
+            
+            document.getElementById('deviceType').textContent = deviceType;
+            document.getElementById('userAgent').textContent = ua;
+            document.getElementById('screenSize').textContent = `${screen.width}x${screen.height}`;
+            
+            // 更新移动端提示
+            const mobileHint = document.getElementById('mobileHint');
+            const mobileHintText = document.getElementById('mobileHintText');
+            
+            if (isMobile || isTablet) {
+                mobileHint.style.background = '#d4edda';
+                mobileHint.style.borderColor = '#c3e6cb';
+                mobileHintText.textContent = '✅ 检测到移动设备，可以进行移动端下载测试';
+            } else {
+                mobileHintText.textContent = '💡 当前为PC端，建议使用手机或平板访问进行完整测试';
+            }
+        }
+        
+        // 测试结果记录
+        let testResults = [];
+        
+        function recordTest(testName, result, filename = '') {
+            const timestamp = new Date().toLocaleString();
+            testResults.push({
+                timestamp,
+                testName,
+                result,
+                filename,
+                device: document.getElementById('deviceType').textContent
+            });
+            updateResultsDisplay();
+        }
+        
+        function updateResultsDisplay() {
+            const resultsDiv = document.getElementById('testResults');
+            if (testResults.length === 0) {
+                resultsDiv.innerHTML = '<p>暂无测试结果...</p>';
+                return;
+            }
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr style="background: #f8f9fa;"><th style="padding: 10px; border: 1px solid #dee2e6;">时间</th><th style="padding: 10px; border: 1px solid #dee2e6;">测试项</th><th style="padding: 10px; border: 1px solid #dee2e6;">设备</th><th style="padding: 10px; border: 1px solid #dee2e6;">结果</th><th style="padding: 10px; border: 1px solid #dee2e6;">文件名</th></tr>';
+            
+            testResults.reverse().forEach(result => {
+                const statusColor = result.result === '成功' ? '#28a745' : result.result === '失败' ? '#dc3545' : '#ffc107';
+                html += `<tr>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 0.9em;">${result.timestamp}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${result.testName}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${result.device}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; color: ${statusColor}; font-weight: bold;">${result.result}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-family: monospace; font-size: 0.9em;">${result.filename}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            html += '<div style="margin-top: 20px;"><button class="test-btn" onclick="clearResults()">🗑️ 清空记录</button><button class="test-btn" onclick="exportResults()">📤 导出结果</button></div>';
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function clearResults() {
+            testResults = [];
+            updateResultsDisplay();
+        }
+        
+        function exportResults() {
+            const data = JSON.stringify(testResults, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // 页面加载时检测设备
+        document.addEventListener('DOMContentLoaded', detectDevice);
+        
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                location.reload();
+            }
+        });
+        
+        console.log('🔧 文件名 & 移动端修复测试页面已加载');
+        console.log('📱 设备信息:', {
+            userAgent: navigator.userAgent,
+            screenSize: `${screen.width}x${screen.height}`,
+            isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        });
+    </script>
+</body>
+</html>

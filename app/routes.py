@@ -76,11 +76,17 @@ def download():
         
         url = data['url']
         
-        # 检测移动端请求
+        # 检测移动端请求 - 增强检测
         user_agent = request.headers.get('User-Agent', '').lower()
-        is_mobile = any(mobile in user_agent for mobile in ['mobile', 'android', 'iphone', 'ipad', 'ipod'])
+        is_mobile = any(mobile in user_agent for mobile in [
+            'mobile', 'android', 'iphone', 'ipad', 'ipod', 
+            'phone', 'tablet', 'touch', 'mini'
+        ])
         
-        logger.info(f"收到下载请求: {url} (移动端: {is_mobile})")
+        # 检测设备类型
+        device_type = 'mobile' if is_mobile else 'desktop'
+        
+        logger.info(f"收到下载请求: {url} (设备类型: {device_type}, UA: {user_agent[:50]}...)")
         
         # 生成下载ID
         download_id = str(int(time.time() * 1000))
@@ -89,7 +95,8 @@ def download():
         download_progress[download_id] = {
             'status': 'starting',
             'percent': 0,
-            'message': '正在准备下载...'
+            'message': '正在准备下载...',
+            'device_type': device_type
         }
         
         # 创建进度回调函数
@@ -112,11 +119,56 @@ def download():
                 # 创建临时目录
                 temp_dir = tempfile.mkdtemp()
                 
-                # 🔥简化输出模板 - 让下载器自己处理文件名
-                output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
+                # 🔥修复：首先获取视频信息以使用原始标题
+                try:
+                    logger.info("📝 正在获取视频标题信息...")
+                    video_info = get_video_info(url)
+                    video_title = video_info.get('title', 'Unknown_Video')
+                    logger.info(f"✅ 获取到视频标题: {video_title}")
+                    
+                    # 创建基于视频标题的输出模板
+                    # 直接使用清理后的标题，避免yt-dlp重新处理
+                    safe_filename = video_title.replace('/', '_').replace('\\', '_')
+                    output_template = os.path.join(temp_dir, f"{safe_filename}.%(ext)s")
+                    
+                    # 测试文件名是否可以创建
+                    test_path = os.path.join(temp_dir, f"{safe_filename}.mp4")
+                    try:
+                        with open(test_path, 'w', encoding='utf-8') as f:
+                            f.write('')
+                        os.remove(test_path)
+                        logger.info(f"✅ 文件名测试通过: {safe_filename}")
+                    except Exception as e:
+                        logger.warning(f"⚠️ 文件名测试失败，使用默认模板: {e}")
+                        output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
+                        
+                except Exception as e:
+                    logger.warning(f"⚠️ 获取视频信息失败，使用默认模板: {e}")
+                    output_template = os.path.join(temp_dir, "%(title)s.%(ext)s")
+                    video_title = 'Unknown_Video'
+                
+                logger.info(f"📁 使用输出模板: {output_template}")
                 
                 # 调用下载函数
                 file_path = download_video(url, output_template, progress_callback)
+                
+                # 🔥修复：确保返回的文件使用正确的名称
+                if file_path and os.path.exists(file_path):
+                    original_filename = os.path.basename(file_path)
+                    
+                    # 如果下载的文件名不符合预期，重命名它
+                    if video_title != 'Unknown_Video' and not original_filename.startswith(video_title):
+                        desired_filename = f"{video_title}.mp4"
+                        new_file_path = os.path.join(os.path.dirname(file_path), desired_filename)
+                        
+                        try:
+                            if os.path.exists(new_file_path):
+                                os.remove(new_file_path)
+                            os.rename(file_path, new_file_path)
+                            file_path = new_file_path
+                            logger.info(f"🔄 文件重命名: {original_filename} -> {desired_filename}")
+                        except Exception as e:
+                            logger.warning(f"⚠️ 文件重命名失败: {e}")
                 
                 # 下载完成
                 download_progress[download_id]['file_path'] = file_path

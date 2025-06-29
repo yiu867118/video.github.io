@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频下载器修复测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .test-section h3 {
+            color: #495057;
+            margin-top: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .device-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #0d47a1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        
+        .sample-urls {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .sample-urls h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .sample-urls ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .sample-urls li {
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        
+        .quick-test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .quick-test-buttons button {
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 视频下载器修复测试</h1>
+        
+        <div class="device-info">
+            <strong>设备信息:</strong> <span id="deviceInfo"></span><br>
+            <strong>用户代理:</strong> <span id="userAgent"></span>
+        </div>
+        
+        <div class="sample-urls">
+            <h4>📋 测试用URL示例</h4>
+            <ul>
+                <li><strong>YouTube:</strong> https://www.youtube.com/watch?v=dQw4w9WgXcQ</li>
+                <li><strong>Bilibili:</strong> https://www.bilibili.com/video/BV1xx411c7mu</li>
+                <li><strong>Bilibili:</strong> https://www.bilibili.com/video/BV1GJ411x7h7</li>
+            </ul>
+        </div>
+        
+        <!-- 测试1: 视频信息获取 -->
+        <div class="test-section">
+            <h3>🧪 测试1: 视频信息获取</h3>
+            <div class="input-group">
+                <label for="infoUrl">视频链接:</label>
+                <input type="text" id="infoUrl" placeholder="请输入YouTube或Bilibili视频链接">
+            </div>
+            <button onclick="testVideoInfo()">获取视频信息</button>
+            <div class="quick-test-buttons">
+                <button onclick="quickTest('info', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')">测试YouTube</button>
+                <button onclick="quickTest('info', 'https://www.bilibili.com/video/BV1xx411c7mu')">测试B站1</button>
+                <button onclick="quickTest('info', 'https://www.bilibili.com/video/BV1GJ411x7h7')">测试B站2</button>
+            </div>
+            <div id="infoResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 测试2: 实际下载 -->
+        <div class="test-section">
+            <h3>🧪 测试2: 实际下载测试</h3>
+            <div class="input-group">
+                <label for="downloadUrl">视频链接:</label>
+                <input type="text" id="downloadUrl" placeholder="请输入要下载的视频链接">
+            </div>
+            <button onclick="testDownload()" id="downloadBtn">开始下载测试</button>
+            <div class="quick-test-buttons">
+                <button onclick="quickTest('download', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')">下载YouTube</button>
+                <button onclick="quickTest('download', 'https://www.bilibili.com/video/BV1xx411c7mu')">下载B站1</button>
+            </div>
+            
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="downloadResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 测试3: 文件名清理测试 -->
+        <div class="test-section">
+            <h3>🧪 测试3: 文件名清理测试</h3>
+            <div class="input-group">
+                <label for="filenameTest">测试标题:</label>
+                <input type="text" id="filenameTest" placeholder="输入包含特殊字符的标题" value="【测试视频】这是一个<测试>标题：包含特殊字符？！">
+            </div>
+            <button onclick="testFilenameClean()">测试文件名清理</button>
+            <button onclick="testMultipleFilenames()">批量测试</button>
+            <div id="filenameResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 显示设备信息
+        document.getElementById('deviceInfo').textContent = getDeviceInfo();
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        
+        function getDeviceInfo() {
+            const ua = navigator.userAgent;
+            if (/Android/i.test(ua)) return 'Android 移动设备';
+            if (/iPhone/i.test(ua)) return 'iPhone';
+            if (/iPad/i.test(ua)) return 'iPad';
+            if (/Mobile/i.test(ua)) return '移动设备';
+            return '桌面设备';
+        }
+        
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+        
+        function quickTest(type, url) {
+            if (type === 'info') {
+                document.getElementById('infoUrl').value = url;
+                testVideoInfo();
+            } else if (type === 'download') {
+                document.getElementById('downloadUrl').value = url;
+                testDownload();
+            }
+        }
+        
+        async function testVideoInfo() {
+            const url = document.getElementById('infoUrl').value.trim();
+            if (!url) {
+                showResult('infoResult', '请输入视频链接', 'error');
+                return;
+            }
+            
+            showResult('infoResult', '正在获取视频信息...', 'info');
+            
+            try {
+                const response = await fetch('/video-info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const info = `✅ 视频信息获取成功！
+📝 标题: ${result.title}
+⏱️ 时长: ${result.duration} 秒
+🎬 平台: ${result.platform}
+👤 上传者: ${result.uploader || '未知'}
+✅ 可用性: ${result.available ? '可用' : '不可用'}`;
+                    showResult('infoResult', info, 'success');
+                } else {
+                    showResult('infoResult', `❌ 获取失败: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('infoResult', `❌ 请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDownload() {
+            const url = document.getElementById('downloadUrl').value.trim();
+            if (!url) {
+                showResult('downloadResult', '请输入视频链接', 'error');
+                return;
+            }
+            
+            const downloadBtn = document.getElementById('downloadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '下载中...';
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            
+            showResult('downloadResult', '正在启动下载...', 'info');
+            
+            try {
+                // 启动下载
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.download_id) {
+                    // 轮询进度
+                    pollProgress(result.download_id);
+                } else {
+                    throw new Error(result.error || '下载启动失败');
+                }
+            } catch (error) {
+                showResult('downloadResult', `❌ 下载失败: ${error.message}`, 'error');
+                resetDownloadUI();
+            }
+        }
+        
+        async function pollProgress(downloadId) {
+            try {
+                const response = await fetch(`/progress/${downloadId}`);
+                const progress = await response.json();
+                
+                if (response.ok) {
+                    // 更新进度条
+                    const progressFill = document.getElementById('progressFill');
+                    progressFill.style.width = `${progress.percent || 0}%`;
+                    
+                    // 更新状态信息
+                    let statusText = `状态: ${progress.status}
+进度: ${progress.percent || 0}%
+消息: ${progress.message || ''}`;
+                    
+                    if (progress.speed) {
+                        statusText += `
+速度: ${progress.speed}`;
+                    }
+                    
+                    if (progress.downloaded_mb) {
+                        statusText += `
+已下载: ${progress.downloaded_mb.toFixed(1)} MB`;
+                    }
+                    
+                    if (progress.status === 'completed') {
+                        statusText += `
+✅ 下载完成！
+📁 文件名: ${progress.filename || '未知'}`;
+                        
+                        if (progress.download_url) {
+                            statusText += `
+🔗 下载链接: ${progress.download_url}`;
+                        }
+                        
+                        showResult('downloadResult', statusText, 'success');
+                        resetDownloadUI();
+                    } else if (progress.status === 'failed') {
+                        statusText += `
+❌ 下载失败: ${progress.error || '未知错误'}`;
+                        showResult('downloadResult', statusText, 'error');
+                        resetDownloadUI();
+                    } else {
+                        showResult('downloadResult', statusText, 'info');
+                        // 继续轮询
+                        setTimeout(() => pollProgress(downloadId), 2000);
+                    }
+                } else {
+                    throw new Error(progress.error || '获取进度失败');
+                }
+            } catch (error) {
+                showResult('downloadResult', `❌ 进度获取失败: ${error.message}`, 'error');
+                resetDownloadUI();
+            }
+        }
+        
+        function resetDownloadUI() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const progressBar = document.getElementById('progressBar');
+            
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = '开始下载测试';
+            progressBar.style.display = 'none';
+        }
+        
+        function testFilenameClean() {
+            const title = document.getElementById('filenameTest').value.trim();
+            if (!title) {
+                showResult('filenameResult', '请输入测试标题', 'error');
+                return;
+            }
+            
+            // 模拟文件名清理逻辑
+            const cleaned = cleanFilename(title);
+            const result = `原始标题: ${title}
+清理后标题: ${cleaned}
+长度: ${cleaned.length}
+是否安全: ${isFilenameSafe(cleaned) ? '✅ 是' : '❌ 否'}`;
+            
+            showResult('filenameResult', result, 'success');
+        }
+        
+        function testMultipleFilenames() {
+            const testTitles = [
+                '【测试视频】这是一个<测试>标题：包含特殊字符？！',
+                'Test Video with English & Chinese 中文标题',
+                '很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的标题',
+                'Title/with\\illegal|chars*and:more?',
+                '普通标题',
+                ''
+            ];
+            
+            let result = '批量文件名清理测试结果:\n\n';
+            
+            testTitles.forEach((title, index) => {
+                const cleaned = cleanFilename(title);
+                result += `${index + 1}. 原始: "${title}"
+   清理: "${cleaned}"
+   长度: ${cleaned.length}
+   安全: ${isFilenameSafe(cleaned) ? '✅' : '❌'}
+\n`;
+            });
+            
+            showResult('filenameResult', result, 'success');
+        }
+        
+        // 简单的文件名清理函数（模拟后端逻辑）
+        function cleanFilename(title) {
+            if (!title || !title.trim()) {
+                return 'Unknown_Video';
+            }
+            
+            // 替换不安全字符
+            const replacements = {
+                '<': '＜',
+                '>': '＞',
+                ':': '：',
+                '"': "'",
+                '/': '／',
+                '\\': '＼',
+                '|': '｜',
+                '?': '？',
+                '*': '＊',
+                '【': '[',
+                '】': ']',
+                '（': '(',
+                '）': ')',
+            };
+            
+            let cleaned = title;
+            for (const [old, newChar] of Object.entries(replacements)) {
+                cleaned = cleaned.replace(new RegExp(old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newChar);
+            }
+            
+            // 清理首尾空格和点
+            cleaned = cleaned.trim().replace(/^[._-]+|[._-]+$/g, '');
+            
+            // 限制长度
+            if (cleaned.length > 120) {
+                cleaned = cleaned.substring(0, 120);
+                // 尝试在合适位置截断
+                const lastSpace = Math.max(
+                    cleaned.lastIndexOf(' '),
+                    cleaned.lastIndexOf('-'),
+                    cleaned.lastIndexOf('_')
+                );
+                if (lastSpace > 96) {
+                    cleaned = cleaned.substring(0, lastSpace);
+                }
+            }
+            
+            cleaned = cleaned.trim();
+            
+            return cleaned || 'Unknown_Video';
+        }
+        
+        // 检查文件名是否安全
+        function isFilenameSafe(filename) {
+            const unsafeChars = /[<>:"/\\|?*]/;
+            return !unsafeChars.test(filename) && filename.length > 0 && filename.length <= 255;
+        }
+    </script>
+</body>
+</html>

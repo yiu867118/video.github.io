@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B站下载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .download-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+        }
+        .download-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 B站视频下载测试</h1>
+    
+    <div class="test-card">
+        <h3>📹 测试视频下载</h3>
+        <input type="text" class="url-input" id="urlInput" 
+               placeholder="输入B站视频链接 (例如: https://www.bilibili.com/video/BV1fT421a71N)"
+               value="https://www.bilibili.com/video/BV1fT421a71N">
+        
+        <button class="download-btn" id="downloadBtn" onclick="startDownload()">
+            🚀 开始下载
+        </button>
+        
+        <div class="progress-bar" style="display: none;" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <h4>📊 详细日志:</h4>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let currentDownloadId = null;
+        let progressInterval = null;
+
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = message;
+        }
+
+        function updateProgress(percent, message = '') {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (percent > 0) {
+                progressBar.style.display = 'block';
+                progressFill.style.width = percent + '%';
+            } else {
+                progressBar.style.display = 'none';
+            }
+            
+            if (message) {
+                log(`进度: ${percent}% - ${message}`);
+            }
+        }
+
+        async function startDownload() {
+            const url = document.getElementById('urlInput').value.trim();
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            if (!url) {
+                showStatus('请输入视频链接！', 'error');
+                return;
+            }
+
+            // 禁用按钮
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '⏳ 正在下载...';
+            
+            // 清空日志
+            document.getElementById('log').textContent = '';
+            
+            log('🚀 开始下载任务');
+            log(`📎 URL: ${url}`);
+            
+            try {
+                // 发送下载请求
+                showStatus('正在发送下载请求...', 'info');
+                
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(`✅ 获得下载ID: ${data.download_id}`);
+                currentDownloadId = data.download_id;
+
+                // 开始轮询进度
+                showStatus('下载已开始，正在监控进度...', 'info');
+                startProgressPolling();
+
+            } catch (error) {
+                log(`❌ 下载启动失败: ${error.message}`);
+                showStatus(`下载失败: ${error.message}`, 'error');
+                resetDownloadButton();
+            }
+        }
+
+        function startProgressPolling() {
+            if (!currentDownloadId) return;
+
+            progressInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/progress/${currentDownloadId}`);
+                    if (!response.ok) {
+                        throw new Error(`进度查询失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    handleProgressUpdate(data);
+
+                } catch (error) {
+                    log(`❌ 进度查询错误: ${error.message}`);
+                }
+            }, 1000);
+        }
+
+        function handleProgressUpdate(data) {
+            const status = data.status;
+            const percent = data.percent || 0;
+            const message = data.message || '';
+            const error = data.error || '';
+
+            log(`📊 状态: ${status}, 进度: ${percent}%, 消息: ${message}`);
+
+            if (status === 'completed') {
+                // 下载完成
+                updateProgress(100, '下载完成！');
+                showStatus(`✅ 下载成功！文件: ${data.filename || '未知'}`, 'success');
+                
+                if (data.file_size_mb) {
+                    log(`📁 文件大小: ${data.file_size_mb.toFixed(2)}MB`);
+                }
+                if (data.strategy) {
+                    log(`🎯 使用策略: ${data.strategy}`);
+                }
+                
+                stopProgressPolling();
+                resetDownloadButton();
+
+            } else if (status === 'failed' || status === 'error') {
+                // 下载失败
+                updateProgress(0);
+                showStatus(`❌ 下载失败: ${error || message}`, 'error');
+                log(`💥 下载失败: ${error || message}`);
+                
+                stopProgressPolling();
+                resetDownloadButton();
+
+            } else if (status === 'downloading') {
+                // 下载中
+                updateProgress(percent, message);
+                showStatus(`⬇️ 下载中: ${percent.toFixed(1)}%`, 'info');
+
+            } else {
+                // 其他状态
+                updateProgress(percent, message);
+                showStatus(`ℹ️ ${message}`, 'info');
+            }
+        }
+
+        function stopProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function resetDownloadButton() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = '🚀 开始下载';
+            currentDownloadId = null;
+        }
+
+        // 页面加载时的初始化
+        window.addEventListener('load', () => {
+            log('🎬 B站下载测试页面已加载');
+            log('💡 提示: 请输入B站视频链接，然后点击开始下载');
+        });
+
+        // 回车键快捷下载
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                startDownload();
+            }
+        });
+    </script>
+</body>
+</html>
