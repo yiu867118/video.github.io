@@ -801,7 +801,8 @@ function setupDownloadFileButton(downloadUrl, filename) {
     elements.downloadFileBtn.style.userSelect = 'none';
     elements.downloadFileBtn.style.webkitTapHighlightColor = 'transparent';
     
-    const handleFileDownload = (e) => {
+    // 🔥核心修复：三端兼容的下载处理函数
+    const handleFileDownload = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         
@@ -809,27 +810,161 @@ function setupDownloadFileButton(downloadUrl, filename) {
         state.hasDownloaded = true;
         console.log('✅ 用户已点击下载，状态已更新');
         
+        // 禁用按钮防止重复点击
+        elements.downloadFileBtn.disabled = true;
+        elements.downloadFileBtn.style.opacity = '0.7';
+        const originalText = elements.downloadFileBtn.innerHTML;
+        elements.downloadFileBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 启动下载...';
+        
         try {
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = filename || 'video.mp4';
-            link.style.display = 'none';
+            // 检测设备类型
+            const userAgent = navigator.userAgent;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
+            const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+            const isWeChat = /MicroMessenger/i.test(userAgent);
             
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            if (isMobile) {
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
+            console.log(`🔍 设备检测: Mobile=${isMobile}, iOS=${isIOS}, Android=${isAndroid}, Safari=${isSafari}, WeChat=${isWeChat}`);
+            
+            // 🔥策略1：尝试直接下载（适用于PC和大部分移动浏览器）
+            try {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = filename || 'video.mp4';
+                link.style.display = 'none';
+                
+                // 移动端特殊处理
+                if (isMobile) {
+                    // iOS Safari 和微信浏览器需要特殊处理
+                    if (isIOS || isWeChat) {
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        // 移除download属性，让浏览器打开文件
+                        link.removeAttribute('download');
+                    } else if (isAndroid) {
+                        // Android Chrome 支持直接下载
+                        link.target = '_self';
+                    }
+                }
+                
+                document.body.appendChild(link);
+                
+                // 🔥关键：确保点击事件能够触发
+                if (isMobile) {
+                    // 移动端使用用户手势触发
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    link.dispatchEvent(clickEvent);
+                } else {
+                    // PC端直接点击
+                    link.click();
+                }
+                
+                document.body.removeChild(link);
+                
+                // 成功消息
+                if (isIOS || isWeChat) {
+                    showMessage('📱 视频已在新窗口打开，请长按视频选择"保存到相册"或"下载"', 'success');
+                } else {
+                    showMessage(isMobile ? '📱 移动设备下载启动！请检查通知栏' : '💻 文件下载已启动！请检查下载文件夹', 'success');
+                }
+                
+                // 🔥策略2：如果直接下载可能失败，提供备用方案
+                setTimeout(() => {
+                    if (isMobile && !isIOS) {
+                        // Android设备提供额外提示
+                        showMessage('💡 提示：如果下载未开始，请尝试长按下载按钮或检查浏览器设置', 'info');
+                    }
+                }, 2000);
+                
+            } catch (directDownloadError) {
+                console.warn('❌ 直接下载失败，尝试备用方案:', directDownloadError);
+                
+                // 🔥策略3：备用下载方案 - 打开新窗口
+                try {
+                    if (isMobile) {
+                        // 移动端打开新窗口
+                        const newWindow = window.open(downloadUrl, '_blank');
+                        if (newWindow) {
+                            showMessage('📱 已在新窗口打开下载链接，请手动保存文件', 'success');
+                        } else {
+                            throw new Error('无法打开新窗口');
+                        }
+                    } else {
+                        // PC端重定向到下载URL
+                        window.location.href = downloadUrl;
+                        showMessage('💻 正在重定向到下载链接...', 'success');
+                    }
+                } catch (fallbackError) {
+                    console.error('❌ 备用下载方案也失败:', fallbackError);
+                    
+                    // 🔥策略4：最后的兜底方案 - 手动复制链接
+                    try {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(downloadUrl);
+                            showMessage('📋 下载链接已复制到剪贴板，请手动打开浏览器粘贴下载', 'warning');
+                        } else {
+                            // 创建一个文本区域来复制链接
+                            const textArea = document.createElement('textarea');
+                            textArea.value = downloadUrl;
+                            textArea.style.position = 'fixed';
+                            textArea.style.opacity = '0';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            textArea.setSelectionRange(0, 99999);
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                            showMessage('📋 下载链接已复制，请手动粘贴到浏览器下载', 'warning');
+                        }
+                    } catch (clipboardError) {
+                        console.error('❌ 复制到剪贴板失败:', clipboardError);
+                        
+                        // 最终兜底：显示下载链接让用户手动点击
+                        const linkDiv = document.createElement('div');
+                        linkDiv.style.cssText = `
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background: white;
+                            border: 2px solid #007bff;
+                            border-radius: 10px;
+                            padding: 20px;
+                            z-index: 10000;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                            max-width: 90%;
+                            text-align: center;
+                        `;
+                        linkDiv.innerHTML = `
+                            <h3>手动下载</h3>
+                            <p>请点击下方链接下载文件：</p>
+                            <a href="${downloadUrl}" target="_blank" style="color: #007bff; word-break: break-all;">${downloadUrl}</a>
+                            <br><br>
+                            <button onclick="this.parentElement.remove()" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">关闭</button>
+                        `;
+                        document.body.appendChild(linkDiv);
+                        
+                        showMessage('❌ 自动下载失败，请使用手动下载链接', 'error');
+                    }
+                }
             }
             
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage(isMobile ? '📱 移动设备下载启动！' : '💻 文件下载已启动！', 'success');
-            
         } catch (error) {
-            console.error('❌ 文件下载失败:', error);
-            showMessage('下载失败，请重试', 'error');
+            console.error('❌ 文件下载完全失败:', error);
+            showMessage('下载失败，请联系技术支持', 'error');
+        } finally {
+            // 恢复按钮状态
+            setTimeout(() => {
+                if (elements.downloadFileBtn) {
+                    elements.downloadFileBtn.disabled = false;
+                    elements.downloadFileBtn.style.opacity = '1';
+                    elements.downloadFileBtn.innerHTML = originalText;
+                }
+            }, 3000);
         }
     };
     
@@ -847,7 +982,27 @@ function setupDownloadFileButton(downloadUrl, filename) {
         elements.downloadFileBtn.style.opacity = '';
     }, { passive: true });
     
-    console.log('✅ 文件下载按钮事件已设置');
+    // 🔥新增：长按事件用于移动端备用下载
+    let longPressTimer;
+    elements.downloadFileBtn.addEventListener('touchstart', (e) => {
+        longPressTimer = setTimeout(() => {
+            // 长按1.5秒触发备用下载
+            try {
+                window.open(downloadUrl, '_blank');
+                showMessage('📱 已通过长按打开下载链接', 'info');
+            } catch (error) {
+                console.error('长按下载失败:', error);
+            }
+        }, 1500);
+    }, { passive: true });
+    
+    elements.downloadFileBtn.addEventListener('touchend', (e) => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+        }
+    }, { passive: true });
+    
+    console.log('✅ 文件下载按钮事件已设置（三端兼容增强版）');
 }
 
 // 设置返回解析界面按钮
@@ -1072,7 +1227,13 @@ function identifyErrorType(errorMessage) {
 
 function stopProgressPolling() {
     if (state.progressInterval) {
-        clearInterval(state.progressInterval);
+        // 🔥修复：支持clearTimeout和clearInterval
+        try {
+            clearTimeout(state.progressInterval);
+            clearInterval(state.progressInterval);
+        } catch (e) {
+            console.warn('清理轮询定时器时出错:', e);
+        }
         state.progressInterval = null;
         console.log('⏹️ 进度轮询已停止');
     }
@@ -1092,7 +1253,8 @@ function startProgressPolling() {
     
     stopProgressPolling();
     
-    state.progressInterval = setInterval(async () => {
+    // 🔥关键修复：立即进行第一次查询，确保下载任务能立即启动
+    const pollProgress = async () => {
         if (!state.isDownloading || !state.currentDownloadId) {
             console.log('❌ 解析已停止或ID丢失，停止轮询');
             stopProgressPolling();
@@ -1102,16 +1264,32 @@ function startProgressPolling() {
         state.currentPollCount++;
         
         try {
-            console.log(`📊 第${state.currentPollCount}次进度查询`);
+            console.log(`📊 第${state.currentPollCount}次进度查询 (ID: ${state.currentDownloadId})`);
             
             if (state.currentPollCount >= state.maxProgressPolls) {
                 throw new Error('解析超时，请重试');
             }
             
-            const response = await fetchWithTimeout(`/progress/${state.currentDownloadId}`, {}, 8000);
+            // 🔥优化：使用更智能的超时时间
+            const timeout = state.currentPollCount <= 3 ? 15000 : 8000; // 前3次用长超时
+            
+            const response = await fetchWithTimeout(`/progress/${state.currentDownloadId}`, {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Accept': 'application/json'
+                }
+            }, timeout);
             
             if (!response.ok) {
                 if (response.status === 404) {
+                    if (state.currentPollCount <= 5) {
+                        // 前5次404可能是任务还没创建，继续等待
+                        console.log('⏳ 下载任务尚未创建，继续等待...');
+                        state.progressInterval = setTimeout(pollProgress, 1000);
+                        return;
+                    }
                     throw new Error('解析任务不存在或已过期');
                 }
                 throw new Error(`无法获取进度: ${response.status}`);
@@ -1124,17 +1302,62 @@ function startProgressPolling() {
             state.lastProgressTime = Date.now();
             handleProgressUpdate(progressData);
             
-            if (['completed', 'failed'].includes(progressData.status)) {
+            // 🔥修复：只有在明确完成或失败时才停止轮询
+            if (progressData.status === 'completed') {
+                console.log('✅ 任务已完成，停止轮询');
+                stopProgressPolling();
+                return;
+            } else if (progressData.status === 'failed' && progressData.final) {
+                console.log('❌ 任务最终失败，停止轮询');
                 stopProgressPolling();
                 return;
             }
             
+            // 🔥优化轮询间隔：根据进度状态调整
+            let nextInterval;
+            switch (progressData.status) {
+                case 'starting':
+                    nextInterval = 800;  // 启动阶段更频繁检查
+                    break;
+                case 'downloading':
+                    nextInterval = 1500; // 下载阶段正常间隔
+                    break;
+                case 'finished':
+                    nextInterval = 500;  // 完成阶段快速检查
+                    break;
+                default:
+                    nextInterval = 2000; // 其他状态慢一些
+            }
+            
+            // 继续轮询
+            if (state.isDownloading && state.currentDownloadId) {
+                state.progressInterval = setTimeout(pollProgress, nextInterval);
+            }
+            
         } catch (error) {
             console.error('❌ 进度查询失败:', error);
-            stopProgressPolling();
-            handleDownloadError(error);
+            
+            // 🔥修复：智能重试策略
+            const isNetworkError = error.message.includes('fetch') || error.message.includes('timeout');
+            const isEarlyStage = state.currentPollCount <= 10;
+            
+            if (isNetworkError && isEarlyStage) {
+                console.log('🔄 网络错误且为早期阶段，1秒后重试...');
+                state.progressInterval = setTimeout(pollProgress, 1000);
+            } else if (state.currentPollCount <= 20) {
+                console.log('🔄 一般错误，3秒后重试...');
+                state.progressInterval = setTimeout(pollProgress, 3000);
+            } else {
+                console.log('💀 重试次数过多，停止轮询');
+                stopProgressPolling();
+                handleDownloadError(error);
+            }
         }
-    }, 2000);
+    };
+    
+    // 🔥关键：立即开始第一次查询，不等待任何延迟
+    console.log('⚡ 立即开始首次进度查询...');
+    pollProgress();
 }
 
 function handleProgressUpdate(progressData) {
@@ -1182,16 +1405,32 @@ function handleProgressUpdate(progressData) {
             showMessage('下载完成！', 'success');
             setButtonState('completed');
             
+            // 🔥修复：确保下载链接正确生成
             if (download_url) {
                 showDownloadResult(download_url, filename);
+            } else if (state.currentDownloadId) {
+                // 如果没有直接的下载链接，使用下载ID生成链接
+                const generatedUrl = `/download-file/${state.currentDownloadId}`;
+                console.log('🔗 生成下载链接:', generatedUrl);
+                showDownloadResult(generatedUrl, filename);
             } else {
-                console.warn('⚠️ 没有收到下载链接');
-                showMessage('下载完成，但无法获取文件链接', 'warning');
+                console.warn('⚠️ 没有收到下载链接且无下载ID');
+                showMessage('下载完成，但无法获取文件链接，请重试', 'warning');
+                // 不要立即重置，给用户时间看到消息
+                setTimeout(() => {
+                    completeReset();
+                }, 5000);
+                return;
             }
             
+            // 🔥延迟重置，确保用户有足够时间下载
             setTimeout(() => {
-                completeReset();
-            }, 10000);
+                if (!state.hasDownloaded) {
+                    console.log('⚠️ 用户还未下载文件，保持界面');
+                } else {
+                    completeReset();
+                }
+            }, 30000); // 30秒后检查是否需要重置
             break;
             
         case 'failed':

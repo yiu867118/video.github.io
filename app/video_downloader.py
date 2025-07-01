@@ -63,6 +63,10 @@ class ProgressTracker:
         self.last_percent = 0
         self.progress_callback = None
         self.is_completed = False
+        self.last_update_time = time.time()
+        self.total_downloaded = 0
+        self.speed_samples = []
+        self.max_speed_samples = 10
         
     def set_callback(self, callback: Optional[Callable]):
         if callback:
@@ -74,27 +78,58 @@ class ProgressTracker:
             
         try:
             status = d.get('status', 'downloading')
+            current_time = time.time()
             
             if status == 'downloading':
                 downloaded_bytes = d.get('downloaded_bytes', 0)
                 total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
                 
                 if total_bytes > 0:
+                    # 🔥优化进度计算 - 更平滑的进度更新
                     percent = (downloaded_bytes / total_bytes) * 100
+                    # 进度范围：40%-95%，为后处理预留空间
                     percent = max(40, min(95, percent))
                     
-                    if abs(percent - self.last_percent) >= 5:
-                        speed = d.get('speed', 0)
-                        speed_str = f"{speed/1024/1024:.1f} MB/s" if speed else ""
+                    # 🔥优化速度计算 - 使用移动平均来平滑速度显示
+                    time_diff = current_time - self.last_update_time
+                    if time_diff >= 0.5:  # 每0.5秒更新一次，避免过于频繁
+                        bytes_diff = downloaded_bytes - self.total_downloaded
+                        if time_diff > 0 and bytes_diff > 0:
+                            current_speed = bytes_diff / time_diff
+                            self.speed_samples.append(current_speed)
+                            
+                            # 保持最近10个速度样本
+                            if len(self.speed_samples) > self.max_speed_samples:
+                                self.speed_samples.pop(0)
+                            
+                            # 计算平均速度
+                            avg_speed = sum(self.speed_samples) / len(self.speed_samples)
+                            speed_str = f"{avg_speed/1024/1024:.1f} MB/s"
+                        else:
+                            speed_str = d.get('speed', 0)
+                            if isinstance(speed_str, (int, float)) and speed_str > 0:
+                                speed_str = f"{speed_str/1024/1024:.1f} MB/s"
+                            else:
+                                speed_str = "计算中..."
                         
-                        self.progress_callback({
-                            'status': 'downloading',
-                            'percent': percent,
-                            'speed': speed_str,
-                            'downloaded_mb': downloaded_bytes / 1024 / 1024,
-                            'message': f'正在下载... {percent:.1f}%'
-                        })
-                        self.last_percent = percent
+                        # 🔥只有在进度有显著变化时才更新UI (至少2%的变化或超过3秒)
+                        should_update = (
+                            abs(percent - self.last_percent) >= 2 or 
+                            (current_time - self.last_update_time) >= 3
+                        )
+                        
+                        if should_update:
+                            self.progress_callback({
+                                'status': 'downloading',
+                                'percent': percent,
+                                'speed': speed_str,
+                                'downloaded_mb': downloaded_bytes / 1024 / 1024,
+                                'total_mb': total_bytes / 1024 / 1024,
+                                'message': f'正在下载... {percent:.1f}%'
+                            })
+                            self.last_percent = percent
+                            self.last_update_time = current_time
+                            self.total_downloaded = downloaded_bytes
                         
             elif status == 'finished':
                 self.progress_callback({
@@ -106,6 +141,7 @@ class ProgressTracker:
                 
         except Exception as e:
             logger.warning(f"进度更新异常: {e}")
+            # 不要因为进度更新错误而中断下载
 
 class CompletelyFixedVideoDownloader:
     def __init__(self):
@@ -136,7 +172,7 @@ class CompletelyFixedVideoDownloader:
             return False
     
     def _get_base_config(self) -> Dict[str, Any]:
-        """获取基础下载配置 - 优先最高画质+音频"""
+        """获取基础下载配置 - 优先最高画质+音频，针对速度优化"""
         return {
             'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080][acodec!=none]/best',  # 优先最高画质+音频
             'merge_output_format': 'mp4',
@@ -148,19 +184,29 @@ class CompletelyFixedVideoDownloader:
             'no_warnings': True,
             'quiet': True,
             'extract_flat': False,
-            'socket_timeout': 60,
+            # 🔥性能优化配置
+            'socket_timeout': 45,  # 更长的socket超时
             'retries': 3,
-            'fragment_retries': 5,  # 增加片段重试次数
-            # 🔥关键：处理文件名中的特殊字符，但保留原始标题
+            'fragment_retries': 5,
+            'file_access_retries': 3,
+            'concurrent_fragments': 4,  # 并发下载片段数
+            # 🔥网络优化
+            'http_chunk_size': 1048576,  # 1MB chunk size，提升下载速度
+            'buffersize': 16384,  # 16KB buffer
+            # 🔥重要：文件名处理配置
             'restrictfilenames': False,  # 不限制文件名，保留中文等字符
             'windowsfilenames': True,   # Windows文件名兼容
             # 文件名模板配置
             'outtmpl': '%(title)s.%(ext)s',  # 使用视频原始标题作为文件名
-            # 🎯确保音视频合并质量
+            # 🎯确保音视频合并质量和速度
             'postprocessors': [{
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': 'mp4',
             }],
+            # 🔥新增：下载优化选项
+            'keepvideo': False,  # 合并后删除原始文件，节省空间
+            'prefer_ffmpeg': True,  # 优先使用FFmpeg进行处理
+            'ffmpeg_location': None,  # 自动检测FFmpeg位置
         }
     
     def download_video(self, url: str, output_template: str, progress_callback: Optional[Callable] = None) -> str:
@@ -243,12 +289,12 @@ class CompletelyFixedVideoDownloader:
         
         logger.info(f"📁 使用下载目录: {download_subdir}")
         
-        # 🔥最高画质优先策略 - 确保三端兼容且优先最高画质+音频
+        # 🔥最高画质优先策略 - 确保三端兼容且优先最高画质+音频，速度优化
         if platform == 'bilibili':
             strategies = [
                 {
-                    'name': '🎯B站最高画质音视频策略(1080P+)',
-                    'format': 'bestvideo[height<=1080]+bestaudio[acodec!=none]/best[height<=1080][acodec!=none]/best',
+                    'name': '🎯B站最高画质音视频策略(1080P+) - 速度优化',
+                    'format': 'bestvideo[height<=1080][fps<=60]+bestaudio[acodec!=none]/best[height<=1080][acodec!=none]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
@@ -257,6 +303,10 @@ class CompletelyFixedVideoDownloader:
                         'socket_timeout': 45,
                         'retries': 2,
                         'fragment_retries': 3,
+                        # 🔥性能优化
+                        'concurrent_fragments': 4,
+                        'http_chunk_size': 1048576,  # 1MB chunks
+                        'buffersize': 32768,  # 32KB buffer for B站
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                             'Referer': 'https://www.bilibili.com/',
@@ -268,8 +318,8 @@ class CompletelyFixedVideoDownloader:
                     }
                 },
                 {
-                    'name': '📱B站移动端兼容策略(高画质)',
-                    'format': 'best[height<=720][acodec!=none]+bestaudio/best[height<=720]/best',
+                    'name': '📱B站移动端兼容策略(高画质) - 快速版',
+                    'format': 'best[height<=720][acodec!=none][fps<=30]+bestaudio/best[height<=720]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
@@ -277,6 +327,8 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 30,
                         'retries': 2,
+                        'concurrent_fragments': 2,
+                        'http_chunk_size': 524288,  # 512KB chunks for mobile
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
                             'Referer': 'https://www.bilibili.com/',
@@ -286,8 +338,8 @@ class CompletelyFixedVideoDownloader:
                     }
                 },
                 {
-                    'name': '🔧B站音视频ID组合策略(最优质量)',
-                    'format': '30077+30280/30066+30280/100048+30280/100047+30232/30011+30216',
+                    'name': '🔧B站音视频ID组合策略(最优质量) - 优化版',
+                    'format': '30077+30280/30066+30280/100048+30280/100047+30232/30011+30216/30002+30216',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
@@ -295,6 +347,7 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 30,
                         'retries': 1,
+                        'concurrent_fragments': 3,
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
                             'Referer': 'https://www.bilibili.com/',
@@ -302,8 +355,8 @@ class CompletelyFixedVideoDownloader:
                     }
                 },
                 {
-                    'name': '🛡️B站通用兼容策略(中等画质)',
-                    'format': 'best[height<=480]+bestaudio/best[acodec!=none]/best',
+                    'name': '🛡️B站通用兼容策略(中等画质) - 快速版',
+                    'format': 'best[height<=480][acodec!=none]/best[acodec!=none]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
@@ -311,6 +364,7 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 20,
                         'retries': 1,
+                        'concurrent_fragments': 2,
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                             'Referer': 'https://www.bilibili.com/',
@@ -318,7 +372,7 @@ class CompletelyFixedVideoDownloader:
                     }
                 },
                 {
-                    'name': '🚨B站最后兜底策略(确保下载)',
+                    'name': '🚨B站最后兜底策略(确保下载) - 极速版',
                     'format': 'best/worst',
                     'options': {
                         'merge_output_format': 'mp4',
@@ -327,29 +381,32 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 15,
                         'retries': 1,
+                        'concurrent_fragments': 1,
                     }
                 }
             ]
         else:
-            # YouTube等其他平台 - 优先最高画质+音频
+            # YouTube等其他平台 - 优先最高画质+音频，速度优化
             strategies = [
                 {
-                    'name': '🎯YouTube最高画质策略(1080P+音频)',
-                    'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080][acodec!=none]/best',
+                    'name': '🎯YouTube最高画质策略(1080P+音频) - 速度优化',
+                    'format': 'bestvideo[height<=1080][fps<=60]+bestaudio/best[height<=1080][acodec!=none]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'nocheckcertificate': True,
                         'socket_timeout': 45,
                         'retries': 2,
+                        'concurrent_fragments': 4,
+                        'http_chunk_size': 1048576,
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                         }
                     }
                 },
                 {
-                    'name': '📱YouTube移动端策略(720P+音频)',
-                    'format': 'best[height<=720][acodec!=none]/best[ext=mp4]/best',
+                    'name': '📱YouTube移动端策略(720P+音频) - 快速版',
+                    'format': 'best[height<=720][acodec!=none][fps<=30]/best[ext=mp4]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
@@ -357,13 +414,14 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 30,
                         'retries': 1,
+                        'concurrent_fragments': 2,
                         'http_headers': {
                             'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
                         }
                     }
                 },
                 {
-                    'name': '🛡️YouTube通用兼容策略', 
+                    'name': '🛡️YouTube通用兼容策略 - 快速版', 
                     'format': 'best[acodec!=none]/best',
                     'options': {
                         'merge_output_format': 'mp4',
@@ -372,6 +430,7 @@ class CompletelyFixedVideoDownloader:
                         'ignoreerrors': True,
                         'socket_timeout': 20,
                         'retries': 1,
+                        'concurrent_fragments': 1,
                     }
                 }
             ]

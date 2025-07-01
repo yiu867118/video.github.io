@@ -224,77 +224,168 @@ def get_progress(download_id):
 
 @bp.route('/download-file/<download_id>')
 def download_file(download_id):
-    """下载文件 - 移动设备优化版"""
+    """三端兼容的文件下载接口 - 彻底修复版"""
     try:
-        if download_id in download_progress:
-            progress = download_progress[download_id]
-            if 'file_path' in progress and os.path.exists(progress['file_path']):
-                file_path = progress['file_path']
-                filename = os.path.basename(file_path)
-                file_size = os.path.getsize(file_path)
-                
-                logger.info(f"移动设备请求下载文件: {filename} ({file_size / 1024 / 1024:.2f} MB)")
-                
-                # 获取用户代理，判断是否为移动设备
-                user_agent = request.headers.get('User-Agent', '').lower()
-                is_mobile = any(mobile in user_agent for mobile in ['mobile', 'android', 'iphone', 'ipad'])
-                
-                try:
-                    # 移动设备优化的文件传输
-                    response = send_file(
-                        file_path,
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='video/mp4'
-                    )
-                    
-                    # 移动设备优化的响应头
-                    if is_mobile:
-                        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-                        response.headers['Pragma'] = 'no-cache'
-                        response.headers['Expires'] = '0'
-                        response.headers['Content-Length'] = str(file_size)
-                        response.headers['Accept-Ranges'] = 'bytes'
-                        # 确保移动设备能正确识别视频文件
-                        response.headers['Content-Type'] = 'video/mp4'
-                        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-                        logger.info(f"✅ 移动设备文件传输开始: {filename}")
-                    else:
-                        logger.info(f"✅ PC端文件传输开始: {filename}")
-                    
-                    # 延迟清理进度记录，给移动设备更多时间
-                    def delayed_cleanup():
-                        time.sleep(30)  # 30秒后清理
-                        if download_id in download_progress:
-                            try:
-                                # 清理临时文件
-                                if os.path.exists(file_path):
-                                    os.remove(file_path)
-                                    # 尝试清理临时目录
-                                    temp_dir = os.path.dirname(file_path)
-                                    if os.path.exists(temp_dir):
-                                        try:
-                                            os.rmdir(temp_dir)
-                                        except:
-                                            pass
-                                del download_progress[download_id]
-                                logger.info(f"🧹 延迟清理完成: {download_id}")
-                            except Exception as e:
-                                logger.warning(f"清理文件时出错: {e}")
-                    
-                    # 启动延迟清理线程
-                    cleanup_thread = threading.Thread(target=delayed_cleanup)
-                    cleanup_thread.daemon = True
-                    cleanup_thread.start()
-                    
-                    return response
-                    
-                except Exception as e:
-                    logger.error(f"文件传输出错: {e}")
-                    return jsonify({'error': f'文件传输失败: {str(e)}'}), 500
+        if download_id not in download_progress:
+            logger.warning(f"下载ID不存在: {download_id}")
+            return jsonify({'error': '下载ID不存在或已过期'}), 404
+            
+        progress = download_progress[download_id]
+        if 'file_path' not in progress or not os.path.exists(progress['file_path']):
+            logger.warning(f"文件不存在: {download_id}")
+            return jsonify({'error': '文件不存在或已被清理'}), 404
+            
+        file_path = progress['file_path']
+        filename = os.path.basename(file_path)
+        file_size = os.path.getsize(file_path)
         
-        logger.warning(f"文件不存在或下载ID无效: {download_id}")
-        return jsonify({'error': '文件不存在或已过期'}), 404
+        # 获取用户代理，进行详细的设备检测
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = any(mobile in user_agent for mobile in ['mobile', 'android', 'iphone', 'ipad', 'ipod'])
+        is_ios = any(ios in user_agent for ios in ['iphone', 'ipad', 'ipod'])
+        is_android = 'android' in user_agent
+        is_safari = 'safari' in user_agent and 'chrome' not in user_agent
+        is_chrome = 'chrome' in user_agent
+        is_wechat = 'micromessenger' in user_agent
+        
+        device_info = f"Mobile={is_mobile}, iOS={is_ios}, Android={is_android}, Safari={is_safari}, WeChat={is_wechat}"
+        logger.info(f"📱 文件下载请求: {filename} ({file_size / 1024 / 1024:.2f} MB) - {device_info}")
+        
+        try:
+            # 🔥核心修复：根据设备类型采用不同的文件传输策略
+            if is_mobile:
+                # 移动端优化传输
+                response = send_file(
+                    file_path,
+                    as_attachment=True,
+                    download_name=filename,
+                    mimetype='application/octet-stream'  # 通用二进制类型，确保下载而不是播放
+                )
+                
+                # 🔥移动端关键响应头 - 确保浏览器正确处理下载
+                response.headers['Content-Type'] = 'application/octet-stream'
+                response.headers['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'\'{filename}'
+                response.headers['Content-Length'] = str(file_size)
+                response.headers['Accept-Ranges'] = 'bytes'
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
+                
+                # iOS Safari 特殊处理
+                if is_ios:
+                    response.headers['Content-Type'] = 'video/mp4'  # iOS Safari 可能需要正确的视频类型
+                    # 移除强制下载，让Safari以播放方式打开，用户可以选择下载
+                    response.headers['Content-Disposition'] = f'inline; filename="{filename}"'
+                
+                # 微信浏览器特殊处理
+                elif is_wechat:
+                    response.headers['Content-Type'] = 'video/mp4'
+                    response.headers['Content-Disposition'] = f'inline; filename="{filename}"'
+                
+                # Android Chrome 优化
+                elif is_android and is_chrome:
+                    response.headers['Content-Type'] = 'application/octet-stream'
+                    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                    # Android Chrome 需要正确的文件大小
+                    response.headers['Content-Length'] = str(file_size)
+                
+                logger.info(f"✅ 移动端({device_info})文件传输开始: {filename}")
+                
+            else:
+                # PC端标准传输
+                response = send_file(
+                    file_path,
+                    as_attachment=True,
+                    download_name=filename,
+                    mimetype='video/mp4'
+                )
+                
+                # PC端优化响应头
+                response.headers['Content-Type'] = 'video/mp4'
+                response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response.headers['Content-Length'] = str(file_size)
+                response.headers['Accept-Ranges'] = 'bytes'
+                response.headers['Cache-Control'] = 'public, max-age=0'
+                
+                logger.info(f"✅ PC端文件传输开始: {filename}")
+            
+            # 🔥优化：延迟清理，给不同设备足够的下载时间
+            def delayed_cleanup():
+                # 移动端需要更长的清理延迟
+                delay_time = 60 if is_mobile else 30  # 移动端60秒，PC端30秒
+                time.sleep(delay_time)
+                
+                if download_id in download_progress:
+                    try:
+                        # 清理临时文件
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                            logger.info(f"🗑️ 临时文件已删除: {filename}")
+                            
+                        # 尝试清理临时目录
+                        temp_dir = os.path.dirname(file_path)
+                        if os.path.exists(temp_dir) and temp_dir != tempfile.gettempdir():
+                            try:
+                                os.rmdir(temp_dir)
+                                logger.info(f"🗑️ 临时目录已删除: {temp_dir}")
+                            except OSError:
+                                logger.info(f"⚠️ 临时目录非空，跳过删除: {temp_dir}")
+                                
+                        # 清理进度记录
+                        del download_progress[download_id]
+                        logger.info(f"🧹 延迟清理完成: {download_id} (延迟{delay_time}秒)")
+                        
+                    except Exception as e:
+                        logger.warning(f"清理文件时出错: {e}")
+            
+            # 启动延迟清理线程
+            cleanup_thread = threading.Thread(target=delayed_cleanup)
+            cleanup_thread.daemon = True
+            cleanup_thread.start()
+            
+            # 🔥新增：文件传输完成后的回调日志
+            def log_transfer_complete():
+                try:
+                    logger.info(f"📤 文件传输完成: {filename} -> {device_info}")
+                except:
+                    pass
+            
+            # 为响应添加完成回调
+            response.call_on_close(log_transfer_complete)
+            
+            return response
+            
+        except Exception as file_error:
+            logger.error(f"文件传输出错: {file_error}")
+            # 🔥备用方案：如果send_file失败，尝试流式传输
+            try:
+                def generate_file_stream():
+                    with open(file_path, 'rb') as f:
+                        chunk_size = 8192 if is_mobile else 65536  # 移动端使用较小的块大小
+                        while True:
+                            chunk = f.read(chunk_size)
+                            if not chunk:
+                                break
+                            yield chunk
+                
+                from flask import Response
+                response = Response(
+                    generate_file_stream(),
+                    headers={
+                        'Content-Type': 'application/octet-stream' if is_mobile else 'video/mp4',
+                        'Content-Disposition': f'attachment; filename="{filename}"',
+                        'Content-Length': str(file_size),
+                        'Accept-Ranges': 'bytes',
+                        'Cache-Control': 'no-cache' if is_mobile else 'public, max-age=0'
+                    }
+                )
+                
+                logger.info(f"🔄 使用流式传输备用方案: {filename}")
+                return response
+                
+            except Exception as stream_error:
+                logger.error(f"流式传输也失败: {stream_error}")
+                return jsonify({'error': f'文件传输失败: {str(stream_error)}'}), 500
         
     except Exception as e:
         logger.error(f"下载文件接口出错: {e}")
