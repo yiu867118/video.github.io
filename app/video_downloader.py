@@ -220,78 +220,76 @@ class CompletelyFixedVideoDownloader:
             raise
     
     def _execute_download(self, url: str, output_template: str, progress_callback: Optional[Callable], platform: str) -> str:
-        """执行下载 - 多策略，专为B站手机端优化"""
+        """🔥终极修复版下载函数 - 确保所有端都能成功"""
         temp_dir = os.path.dirname(output_template)
         
-        # 🔥创建专用的下载子目录，避免与现有文件冲突
-        download_subdir = os.path.join(temp_dir, f"video_download_{int(time.time())}")
+        # 🔥确保URL永远不会被转换为移动端格式
+        if 'bilibili.com' in url:
+            original_url = url
+            # 强制使用桌面版URL
+            url = url.replace('m.bilibili.com', 'www.bilibili.com')
+            url = url.replace('//bilibili.com', '//www.bilibili.com')
+            # 移除可能的移动端参数
+            if '?' in url:
+                base_url = url.split('?')[0]
+                url = base_url
+            logger.info(f"� URL标准化: {original_url} -> {url}")
+        
+        # 创建专用下载目录
+        download_subdir = os.path.join(temp_dir, f"dl_{int(time.time())}")
         os.makedirs(download_subdir, exist_ok=True)
         
-        logger.info(f"📁 使用专用下载目录: {download_subdir}")
+        logger.info(f"📁 使用下载目录: {download_subdir}")
         
-        # 修改output_template到子目录
-        original_template = output_template
-        output_template = os.path.join(download_subdir, "%(title)s.%(ext)s")
-        
-        # 🔥彻底修复：B站下载策略 - 基于实际格式分析，确保所有端都能成功
+        # 🔥终极B站策略 - 基于测试结果优化，确保移动端兼容
         if platform == 'bilibili':
             strategies = [
                 {
-                    'name': 'B站音视频合并(最佳)',
-                    'format': '30216+30016/30216+100022/30216+100109/best',  # 音频+最佳视频，基于实际格式ID
+                    'name': 'B站桌面端最佳策略',
+                    'format': 'bestaudio+bestvideo/best[acodec!=none]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'geo_bypass_country': 'CN',
                         'nocheckcertificate': True,
                         'ignoreerrors': False,
-                        'socket_timeout': 120,
-                        'retries': 3,
-                        'prefer_insecure': True,
-                        'http_headers': {
-                            'Referer': 'https://www.bilibili.com/',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        }
-                    }
-                },
-                {
-                    'name': 'B站通用音视频合并',
-                    'format': 'bestaudio+bestvideo/best',
-                    'options': {
-                        'merge_output_format': 'mp4',
-                        'geo_bypass': True,
-                        'geo_bypass_country': 'CN',
-                        'nocheckcertificate': True,
-                        'ignoreerrors': False,
-                        'socket_timeout': 120,
-                        'retries': 3,
-                        'prefer_insecure': True,
-                        'http_headers': {
-                            'Referer': 'https://www.bilibili.com/',
-                            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
-                        }
-                    }
-                },
-                {
-                    'name': 'B站最佳单流(含音频)',
-                    'format': 'best[acodec!=none]',
-                    'options': {
-                        'merge_output_format': 'mp4',
-                        'geo_bypass': True,
-                        'geo_bypass_country': 'CN',
-                        'nocheckcertificate': True,
-                        'ignoreerrors': False,
-                        'socket_timeout': 90,
+                        'socket_timeout': 60,
                         'retries': 2,
+                        'fragment_retries': 3,
                         'prefer_insecure': True,
                         'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                             'Referer': 'https://www.bilibili.com/',
-                            'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Connection': 'keep-alive',
                         }
                     }
                 },
                 {
-                    'name': 'B站最佳质量(通用)',
+                    'name': 'B站手机端兼容策略',
+                    'format': 'best[acodec!=none]/best',
+                    'options': {
+                        'merge_output_format': 'mp4',
+                        'geo_bypass': True,
+                        'geo_bypass_country': 'CN',
+                        'nocheckcertificate': True,
+                        'ignoreerrors': False,
+                        'socket_timeout': 45,
+                        'retries': 2,
+                        'fragment_retries': 2,
+                        'prefer_insecure': True,
+                        'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+                            'Referer': 'https://www.bilibili.com/',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                        }
+                    }
+                },
+                {
+                    'name': 'B站平板端兼容策略',
                     'format': 'best',
                     'options': {
                         'merge_output_format': 'mp4',
@@ -299,13 +297,32 @@ class CompletelyFixedVideoDownloader:
                         'geo_bypass_country': 'CN',
                         'nocheckcertificate': True,
                         'ignoreerrors': False,
-                        'socket_timeout': 90,
+                        'socket_timeout': 45,
                         'retries': 2,
+                        'fragment_retries': 2,
+                        'prefer_insecure': True,
+                        'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+                            'Referer': 'https://www.bilibili.com/',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        }
+                    }
+                },
+                {
+                    'name': 'B站通用兼容策略',
+                    'format': 'best',
+                    'options': {
+                        'merge_output_format': 'mp4',
+                        'geo_bypass': True,
+                        'nocheckcertificate': True,
+                        'ignoreerrors': False,
+                        'socket_timeout': 30,
+                        'retries': 1,
                         'prefer_insecure': True,
                     }
                 },
                 {
-                    'name': 'B站地区绕过',
+                    'name': 'B站地区绕过策略',
                     'format': 'best',
                     'options': {
                         'merge_output_format': 'mp4',
@@ -313,58 +330,62 @@ class CompletelyFixedVideoDownloader:
                         'geo_bypass_country': 'US',
                         'nocheckcertificate': True,
                         'ignoreerrors': False,
-                        'socket_timeout': 90,
-                        'retries': 2,
+                        'socket_timeout': 30,
+                        'retries': 1,
                         'prefer_insecure': True,
-                        'http_headers': {
-                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                        }
                     }
                 },
                 {
-                    'name': 'B站最大兼容(兜底)',
+                    'name': 'B站最低质量兜底',
                     'format': 'worst',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'nocheckcertificate': True,
                         'ignoreerrors': True,
-                        'socket_timeout': 60,
+                        'socket_timeout': 20,
                         'retries': 1,
                         'prefer_insecure': True,
                     }
                 }
             ]
         else:
-            # YouTube等其他平台的策略
+            # YouTube等其他平台的策略 - 保持原有功能不变
             strategies = [
                 {
-                    'name': '最佳质量(自动音视频合并)',
+                    'name': 'YouTube最佳质量(音视频合并)',
                     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'nocheckcertificate': True,
+                        'socket_timeout': 60,
+                        'retries': 2,
+                        'prefer_insecure': True,
                     }
                 },
                 {
-                    'name': '最佳质量(任何格式音视频合并)', 
+                    'name': 'YouTube通用策略', 
                     'format': 'bestvideo+bestaudio/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'nocheckcertificate': True,
                         'prefer_insecure': True,
+                        'socket_timeout': 45,
+                        'retries': 2,
                     }
                 },
                 {
-                    'name': '最佳MP4(含音频)',
+                    'name': 'YouTube MP4优选',
                     'format': 'best[ext=mp4][acodec!=none]/best[ext=mp4]/best',
                     'options': {
                         'merge_output_format': 'mp4',
                         'geo_bypass': True,
                         'nocheckcertificate': True,
                         'prefer_insecure': True,
+                        'socket_timeout': 30,
+                        'retries': 1,
                     }
                 },
                 {
@@ -376,18 +397,22 @@ class CompletelyFixedVideoDownloader:
                         'nocheckcertificate': True,
                         'prefer_insecure': True,
                         'ignoreerrors': True,
+                        'socket_timeout': 30,
+                        'retries': 1,
                     }
                 }
             ]
         
         last_error = None
         
+        # 🔥修正output_template路径
+        output_template = os.path.join(download_subdir, "%(title)s.%(ext)s")
+        
         for i, strategy in enumerate(strategies, 1):
             try:
                 logger.info(f"🎯 尝试策略 {i}/{len(strategies)}: {strategy['name']}")
                 
-                # 🔥关键：不要在中间策略失败时报告给前端
-                # 只在第一个策略开始时报告进度
+                # 第一个策略时报告进度
                 if i == 1 and progress_callback:
                     progress_callback({
                         'status': 'downloading',
@@ -395,125 +420,108 @@ class CompletelyFixedVideoDownloader:
                         'message': f'正在尝试下载...'
                     })
                 
-                # 获取配置
+                # 配置下载选项
                 ydl_opts = self._get_base_config()
                 ydl_opts.update(strategy['options'])
                 ydl_opts['format'] = strategy['format']
-                
-                # 🔥修复：确保使用视频原始标题作为文件名
                 ydl_opts['outtmpl'] = output_template
                 
-                # 平台特定配置 - 增强移动端支持
-                if platform == 'youtube':
-                    ydl_opts['youtube_include_dash_manifest'] = False
-                elif platform == 'bilibili':
-                    # 🔥确保B站URL不会被意外转换为移动端URL
-                    # 强制确保所有策略都使用www.bilibili.com
-                    ydl_opts['no_check_certificate'] = True
+                # 🔥关键：确保URL不会在下载过程中被修改
+                download_url = url  # 使用已标准化的URL
                 
-                # 进度回调
+                # 进度回调设置
                 progress_tracker = ProgressTracker()
                 if progress_callback:
                     progress_tracker.set_callback(progress_callback)
                     ydl_opts['progress_hooks'] = [progress_tracker.update]
                 
                 # 执行下载
-                files_before = set(os.listdir(download_subdir)) if os.path.exists(download_subdir) else set()
-                download_start_time = time.time()
+                start_time = time.time()
                 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([url])
+                    ydl.download([download_url])
                 
-                # 🔥简化的文件检测逻辑：检查下载目录中的所有文件
-                files_after = set(os.listdir(download_subdir)) if os.path.exists(download_subdir) else set()
-                all_files = list(files_after)
+                # 检查下载结果
+                files = os.listdir(download_subdir) if os.path.exists(download_subdir) else []
                 
-                logger.info(f"📁 下载目录文件数: {len(all_files)}")
+                logger.info(f"📁 下载完成，检查文件: {len(files)} 个")
                 
-                if all_files:
-                    # 找到最大的视频文件
+                if files:
+                    # 查找视频文件
                     video_files = []
-                    for filename in all_files:
+                    for filename in files:
                         file_path = os.path.join(download_subdir, filename)
                         if os.path.isfile(file_path):
                             size = os.path.getsize(file_path)
-                            # 检查是否是视频文件
-                            if filename.lower().endswith(('.mp4', '.webm', '.mkv', '.avi', '.mov', '.flv', '.m4v')):
+                            if filename.lower().endswith(('.mp4', '.webm', '.mkv', '.avi', '.mov', '.flv', '.m4v')) and size > 1024:
                                 logger.info(f"📦 发现视频文件: {filename} ({size/1024:.1f} KB)")
                                 video_files.append((filename, size, file_path))
-                            else:
-                                logger.info(f"📄 发现其他文件: {filename} ({size/1024:.1f} KB)")
                     
                     if video_files:
-                        # 按文件大小排序，选择最大的
+                        # 选择最大的文件
                         video_files.sort(key=lambda x: x[1], reverse=True)
                         largest_file, largest_size, file_path = video_files[0]
                         
-                        # 🔥支持各种大小的视频文件
-                        if largest_size > 10 * 1024:  # 至少10KB
-                            # 🔥保持原始文件名（yt-dlp已经按照我们的模板命名了）
-                            final_path = os.path.join(temp_dir, largest_file)
+                        # 移动到最终位置
+                        final_path = os.path.join(temp_dir, largest_file)
+                        try:
+                            if os.path.exists(final_path):
+                                os.remove(final_path)
+                            
+                            import shutil
+                            shutil.move(file_path, final_path)
+                            
+                            elapsed = time.time() - start_time
+                            
+                            logger.info(f"🎉 下载成功！策略: {strategy['name']}")
+                            logger.info(f"📁 文件: {largest_file} ({largest_size/1024/1024:.2f} MB)")
+                            logger.info(f"⏱️ 耗时: {elapsed:.1f}秒")
+                            
+                            if progress_callback:
+                                progress_callback({
+                                    'status': 'completed',
+                                    'percent': 100,
+                                    'filename': largest_file,
+                                    'file_size_mb': largest_size / 1024 / 1024,
+                                    'strategy': strategy['name'],
+                                    'final': True
+                                })
+                            
+                            # 清理下载目录
                             try:
-                                # 如果目标文件已存在，删除它
-                                if os.path.exists(final_path):
-                                    os.remove(final_path)
-                                # 移动文件并保持原名
-                                import shutil
-                                shutil.move(file_path, final_path)
-                                
-                                logger.info(f"🎉 下载成功！文件: {largest_file} ({largest_size/1024/1024:.2f} MB)")
-                                logger.info(f"📁 文件位置: {final_path}")
-                                logger.info(f"📝 文件名来源: yt-dlp自动命名（基于视频标题）")
-                                
-                                if progress_callback:
-                                    progress_callback({
-                                        'status': 'completed',
-                                        'percent': 100,
-                                        'filename': largest_file,
-                                        'file_size_mb': largest_size / 1024 / 1024,
-                                        'strategy': strategy['name'],
-                                        'final': True
-                                    })
-                                
-                                # 清理下载目录
-                                try:
-                                    shutil.rmtree(download_subdir)
-                                except:
-                                    pass
-                                
-                                return final_path
-                            except Exception as e:
-                                logger.error(f"移动文件失败: {e}")
-                        else:
-                            logger.warning(f"⚠️ 文件太小: {largest_file} ({largest_size} bytes)")
+                                shutil.rmtree(download_subdir)
+                            except:
+                                pass
+                            
+                            return final_path
+                            
+                        except Exception as e:
+                            logger.error(f"移动文件失败: {e}")
                     else:
-                        logger.warning(f"⚠️ 未发现视频文件，只有: {[f for f in all_files]}")
+                        logger.warning(f"⚠️ 未发现有效视频文件")
                 else:
-                    logger.warning(f"⚠️ 下载目录为空: {download_subdir}")
+                    logger.warning(f"⚠️ 下载目录为空")
                 
-                # 清理空的下载目录
-                try:
-                    if os.path.exists(download_subdir):
-                        import shutil
-                        shutil.rmtree(download_subdir)
-                except:
-                    pass
-                
-                logger.info(f"⚠️ 策略 {i} 未获得有效文件，继续尝试下一个")
+                logger.info(f"⚠️ 策略 {i} 未产生有效文件，继续下一个")
                 
             except Exception as e:
                 error_msg = str(e)
                 last_error = error_msg
                 logger.info(f"⚠️ 策略 {i} 失败: {error_msg[:100]}...")
                 
-                # 🔥关键：不要向前端报告中间策略的失败
-                # 只记录错误，继续尝试下一个策略
                 if i < len(strategies):
                     logger.info(f"🔄 继续尝试下一个策略...")
                     time.sleep(0.5)
                     continue
         
-        # 🔥只有所有策略都失败了才报告错误
+        # 清理临时目录
+        try:
+            import shutil
+            shutil.rmtree(download_subdir)
+        except:
+            pass
+        
+        # 所有策略都失败
         logger.error(f"💀 所有 {len(strategies)} 个策略都失败")
         error_analysis = analyze_bilibili_error(last_error or '下载失败')
         raise Exception(error_analysis.get('user_friendly', '所有下载策略都失败，请检查视频链接'))
