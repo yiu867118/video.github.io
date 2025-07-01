@@ -1,0 +1,48 @@
+{
+  "test_time": "2025-06-29 14:19:15",
+  "total_tests": 4,
+  "success_count": 2,
+  "success_rate": 50.0,
+  "results": [
+    {
+      "test_name": "B站短视频(桌面)",
+      "url": "https://www.bilibili.com/video/BV1GJ411x7h7",
+      "success": false,
+      "error": "该视频可能有地区限制或已被删除，正在尝试其他方式下载...",
+      "file_path": null,
+      "file_size_mb": 0,
+      "duration": 0,
+      "strategy": null
+    },
+    {
+      "test_name": "B站短视频(移动)",
+      "url": "https://m.bilibili.com/video/BV1GJ411x7h7",
+      "success": false,
+      "error": "该视频可能有地区限制或已被删除，正在尝试其他方式下载...",
+      "file_path": null,
+      "file_size_mb": 0,
+      "duration": 0,
+      "strategy": null
+    },
+    {
+      "test_name": "B站普通视频",
+      "url": "https://www.bilibili.com/video/BV1xx411c7mD",
+      "success": true,
+      "error": null,
+      "file_path": "C:\\Users\\V\\AppData\\Local\\Temp\\bilibili_test_1751174120_pficyb_h\\字幕君交流场所.mp4",
+      "file_size_mb": 83.99120616912842,
+      "duration": 48.58786058425903,
+      "strategy": null
+    },
+    {
+      "test_name": "B站UP主视频",
+      "url": "https://www.bilibili.com/video/BV1uv411q7Mv",
+      "success": true,
+      "error": null,
+      "file_path": "C:\\Users\\V\\AppData\\Local\\Temp\\bilibili_test_1751174172_c4akx3h0\\爆肝９８小时！在MC中还原糖调小镇.mp4",
+      "file_size_mb": 77.6026086807251,
+      "duration": 183.68319702148438,
+      "strategy": null
+    }
+  ]
+}
